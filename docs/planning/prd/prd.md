@@ -166,7 +166,7 @@ A user asks about a pharmaceutical drug that is not in the Ayurveda category.
 - **NFR-3.3:** No cookies collecting personal data — session cookies (anonymous ID) only
 
 ### NFR-4: Reliability (Demo Day)
-- **NFR-4.1:** System SHALL be runnable locally via Docker Compose without external dependencies (for demo resilience)
+- **NFR-4.1:** System SHALL be runnable locally via a Python virtual environment with provided run scripts without complex dependencies (for demo resilience)
 - **NFR-4.2:** System SHALL degrade gracefully on LLM API failure (return "Service temporarily unavailable" — not crash)
 
 ### NFR-5: Maintainability
@@ -231,7 +231,7 @@ Explicitly excluded to prevent scope creep:
 | M0 — Foundation | Repo setup, corpus ingestion pipeline, manifest schema, CI skeleton |
 | M1 — Retrieval Core | Classifier + Retriever + Confidence Gate working end-to-end on test corpus |
 | M2 — Full Pipeline | Answer Generator + ABS/TKDL checker + Frontend connected |
-| M3 — Demo Ready | Golden test set passing, Docker compose working, all NFRs validated |
+| M3 — Demo Ready | Golden test set passing, local dev setup working, all NFRs validated |
 
 ---
 
