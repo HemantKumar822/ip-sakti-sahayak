@@ -198,12 +198,12 @@ sprints:
       - All 3 story ACs pass
 
 summary:
-  total_epics: 4
-  total_stories: 15
+  total_epics: 6
+  total_issues: 35
   p0_stories: 4
   p1_stories: 11
   estimated_weeks: 4
-  team_size: "5-6"
+  team_size: 6
   github_branch_strategy: "main (protected) ← develop ← feature/<issue-number>-<short-name>"
   readiness_gate: PASS
   open_risks:

@@ -99,7 +99,7 @@ Existing tools are either general-purpose legal search engines (no Ayurveda doma
 - **Vector DB:** ChromaDB (local for dev) → Qdrant (hosted for demo)
 - **LLM:** Gemini 1.5 Flash via Google AI API (free tier sufficient for demo volume)
 - **Frontend:** Streamlit (speed) or Next.js (polish) — TBD in Architecture
-- **Deployment:** Docker container, Render free tier or local demo
+- **Deployment:** Local Python virtual environment (.venv) with run scripts (Render free tier possible)
 - **Corpus storage:** JSON manifest + raw text files in `/corpus/` directory, version-controlled
 
 ## Phase 2 Preview (not building now, but architecture must allow)

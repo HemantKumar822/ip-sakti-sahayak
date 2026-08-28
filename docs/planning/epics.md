@@ -44,7 +44,7 @@ stepsCompleted:
 - NFR-1: Classifier accuracy ≥90%; citation accuracy ≥80%; zero hallucinated citations
 - NFR-2: End-to-end response ≤10s; vector search ≤2s
 - NFR-3: DPDP Act 2023 compliance; official government data sources only; no personal-data cookies
-- NFR-4: Runnable locally via Docker Compose; graceful LLM API failure handling
+- NFR-4: Runnable locally via Python venv; graceful LLM API failure handling
 - NFR-5: Corpus update without code changes; all configurable values via env vars
 
 ### Additional Architecture Requirements
@@ -54,7 +54,7 @@ stepsCompleted:
 - `VectorStore` protocol (interface) must exist so ChromaDB → Qdrant swap is isolated (AD-5)
 - Structured Pydantic output schemas for all LLM calls — no free-form parsing (AD-8)
 - `corpus/manifest.json` committed to git; ingestion HARD-FAILS on missing metadata (AD-7)
-- Docker Compose with `api` + `frontend` services, named ChromaDB volume, corpus mounted (AD-12)
+- Standard Python venv with `api` + `frontend` run scripts, local ChromaDB persist directory (AD-12)
 - Embedding model pre-loaded at server startup (FastAPI `lifespan` event) (AD-4)
 
 ---
@@ -74,7 +74,7 @@ stepsCompleted:
 | FR-9 (all) | Epic 3 | Privacy/logging layer |
 | NFR-1 | Epic 4 | Accuracy validation / golden test set |
 | NFR-2 | Epic 4 | Performance testing |
-| NFR-3,4,5 | Epic 4 | Docker, env config, compliance audit |
+| NFR-3,4,5 | Epic 4 | Local Dev, env config, compliance audit |
 
 ---
 
@@ -96,7 +96,7 @@ The system generates a grounded, cited answer (or clean abstention) and presents
 **Architecture:** AD-6, AD-8, AD-10, AD-11
 
 ### Epic 4: Demo Readiness and Validation
-The system passes the golden test set, runs end-to-end in Docker Compose, meets all NFRs, and is demonstrably hallucination-free.  
+The system passes the golden test set, runs end-to-end via local run scripts, meets all NFRs, and is demonstrably hallucination-free.  
 **FRs covered:** NFR-1, NFR-2, NFR-3, NFR-4, NFR-5
 
 ---
@@ -116,7 +116,7 @@ So that every team member can clone and run the project identically.
 **Acceptance Criteria:**
 
 **Given** a developer clones the repository  
-**When** they copy `.env.example` to `.env` and run `docker-compose up`  
+**When** they copy `.env.example` to `.env`, install requirements in a venv, and run `bash run_api.sh`  
 **Then** both the API service and frontend service start without errors
 
 **And** `config.py` is the only file that reads environment variables — all other modules import from it  
@@ -434,7 +434,7 @@ So that I can use the system without knowing anything about APIs.
 
 ## Epic 4: Demo Readiness and Validation
 
-**Goal:** The system passes the golden test set (no hallucinations, correct abstention, ≥2 citations per answer), runs end-to-end in Docker Compose offline, and satisfies all NFRs before demo day.
+**Goal:** The system passes the golden test set (no hallucinations, correct abstention, ≥2 citations per answer), runs end-to-end locally offline, and satisfies all NFRs before demo day.
 
 ---
 
@@ -456,19 +456,18 @@ So that we can measure classifier accuracy, citation accuracy, and hallucination
 
 ---
 
-### Story 4.2: Performance and Docker Compose Validation
+### Story 4.2: Performance and Local Demo Validation
 
-As the team,  
-I want to verify that the system meets response time requirements and runs fully offline in Docker,  
-So that we are resilient on demo day regardless of network conditions.
+**As a** team member  
+I want to verify that the system meets response time requirements and runs fully offline via local run scripts,  
+So that we have no technical difficulties during the live SIH demo.
 
-**Acceptance Criteria:**
-
-**Given** `docker-compose up` is run on the demo machine with the corpus pre-populated  
-**When** all services start  
-**Then** both `api` (port 8000) and `frontend` (port 8501) are accessible and respond correctly  
-**And** the ChromaDB volume persists between container restarts (corpus does not need to be re-ingested after `docker-compose restart`)  
-**And** the `corpus/` directory is mounted as a bind mount — not baked into the Docker image
+**Acceptance Criteria**  
+**Given** the local run scripts are executed on the demo machine with the corpus pre-populated  
+**When** a user submits a query  
+**Then** the response must be returned within 10 seconds (P1)  
+**And** the ChromaDB data persists between script restarts (corpus does not need to be re-ingested)  
+**And** the API and frontend both boot successfully without complex dependencies
 
 **Given** 5 consecutive queries are submitted via the API  
 **When** response times are measured  

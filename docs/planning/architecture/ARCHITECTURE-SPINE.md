@@ -107,10 +107,10 @@ Every request follows a fixed, ordered sequence of single-responsibility stages.
 
 ---
 
-### AD-12: Docker Compose as the Deployment Unit
-**Binds:** The complete application (API + frontend + ChromaDB volume) is runnable via `docker-compose up`  
-**Prevents:** Separate manual startup scripts, dependence on any cloud service for demo  
-**Rule:** `docker-compose.yml` defines two services: `api` (FastAPI) and `frontend` (Streamlit). ChromaDB persists via a named volume. The corpus directory is mounted as a volume (not baked into the image) so it can be updated without rebuilding.
+### AD-12: Python venv as the Deployment Unit
+**Binds:** The complete application (API + frontend + ChromaDB volume) is runnable locally via a standard Python virtual environment and run scripts.  
+**Why:** The hackathon team is beginner-friendly. Relying on Docker introduces overhead. Clear setup documentation (`CONTRIBUTING.md`) and `.sh`/`.bat` run scripts ensure a portable and fast demo experience.
+**Rule:** Dev setup is strictly via `python -m venv .venv`. Run scripts `run_api.sh` and `run_frontend.sh` (and Windows equivalents) manage service startup.
 
 ---
 
@@ -182,8 +182,10 @@ OFFLINE BATCH (runs before demo / on corpus update):
 
 ```
 ip-sakti-sahayak/
+├── DESIGN.md                      # Notion Design System tokens & rules
 ├── README.md
-├── docker-compose.yml
+├── run_api.sh
+├── run_frontend.sh
 ├── .env.example                   # All configurable env vars documented
 ├── .env                           # Git-ignored
 │
