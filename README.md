@@ -6,7 +6,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.31+-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io)
 [![ChromaDB](https://img.shields.io/badge/ChromaDB-Local_Vector_DB-FF5722.svg)](#)
-[![Gemini](https://img.shields.io/badge/LLM-Gemini_1.5_Flash-8E75B2.svg?logo=google&logoColor=white)](#)
+[![LLM](https://img.shields.io/badge/LLM-Any_Model-8E75B2.svg)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **An AI-powered Intellectual Property advisory system for Traditional Knowledge, Ayurveda, and Biological Resources. Built for India. 🇮🇳 (SIH 2026 | PS-26045)**
@@ -61,7 +61,7 @@ graph TD
     end
 
     R <--> V[(ChromaDB)]:::db
-    C <--> LLM[Gemini 1.5 Flash]:::llm
+    C <--> LLM[Large Language Model]:::llm
     AG <--> LLM
     
     AG -->|Citations + Text| A
@@ -72,7 +72,7 @@ graph TD
 |---|---|---|
 | **Backend** | `FastAPI` | High-performance, async-first orchestration |
 | **Vector DB** | `ChromaDB` | Fast semantic search (local, no cloud dependency) |
-| **LLM Engine** | `Gemini 1.5` | Fast, structured generation via Google AI API |
+| **LLM Engine** | `Any LLM` | Fast, structured generation via your preferred provider |
 | **Embeddings** | `BAAI/bge-small` | Converts legal text chunks into searchable vectors |
 | **Frontend** | `Streamlit` | Rapid UI iteration mapped to `DESIGN.md` |
 
@@ -103,7 +103,7 @@ pip install -r requirements-dev.txt
 ```bash
 cp .env.example .env
 ```
-Open `.env` and add your `GEMINI_API_KEY`. (Get one for free at Google AI Studio).
+Open `.env` and add your LLM provider's API key.
 
 ### 3. Run the System
 You need two terminal windows (both with the `.venv` activated):
