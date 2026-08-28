@@ -1,11 +1,23 @@
 # 🏛️ IP-SAKTI Sahayak
 
-> **SIH 2026 | PS-26045**  
-> An AI-powered Intellectual Property advisory system for Traditional Knowledge, Ayurveda, and Biological Resources. Built for India. 🇮🇳
+<div align="center">
 
-IP-SAKTI Sahayak provides inventors, researchers, and MSMEs with accurate, citation-backed answers to complex IP questions. Unlike general-purpose LLMs, this system relies on a **strict RAG architecture** (Retrieval-Augmented Generation) constrained to an official, curated corpus of Indian law — guaranteeing zero hallucinations.
+[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg?logo=python&logoColor=white)](https://www.python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.31+-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io)
+[![ChromaDB](https://img.shields.io/badge/ChromaDB-Local_Vector_DB-FF5722.svg)](#)
+[![Gemini](https://img.shields.io/badge/LLM-Gemini_1.5_Flash-8E75B2.svg?logo=google&logoColor=white)](#)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+**An AI-powered Intellectual Property advisory system for Traditional Knowledge, Ayurveda, and Biological Resources. Built for India. 🇮🇳 (SIH 2026 | PS-26045)**
+
+[Features](#-key-features) • [Architecture](#-architecture) • [Design System](#-notion-inspired-design) • [Quickstart](#-quickstart-local-development) • [Epics](#-project-structure--execution)
+
+</div>
 
 ---
+
+IP-SAKTI Sahayak provides inventors, researchers, and MSMEs with accurate, citation-backed answers to complex IP questions. Unlike general-purpose LLMs, this system relies on a **strict RAG architecture** (Retrieval-Augmented Generation) constrained to an official, curated corpus of Indian law — guaranteeing zero hallucinations.
 
 ## ✨ Key Features
 
@@ -13,26 +25,56 @@ IP-SAKTI Sahayak provides inventors, researchers, and MSMEs with accurate, citat
 - **🧬 ABS Detection**: Automatically flags queries involving biological resources that require Access and Benefit Sharing (ABS) compliance under the Biological Diversity Act 2023.
 - **💭 Honest Abstention**: If the answer isn't in the corpus, the system confidently says "I don't know" instead of guessing.
 - **🔒 Privacy by Design (DPDP Act)**: Strips PII (Personal Identifiable Information) from all queries before logging. No user data is stored.
-- **🎨 Notion-Inspired UI**: A calm, clean, minimal user interface designed for readability and professional use.
 
----
+## 🎨 Notion-Inspired Design
 
-## 🏗️ Architecture Stack
+This project adopts a **Notion-inspired Design Philosophy** to ensure the interface feels like a calm, paper-soft document rather than a clinical dashboard. 
+> See our full design specification in [`DESIGN.md`](./DESIGN.md).
+
+- **Colors:** A warm `#f6f5f4` canvas over pure white, using `Notion Blue` (`#0075de`) exclusively for primary actions.
+- **Typography:** `NotionInter` (or tuned `Inter`) with tight tracking for confident, heavy headers.
+- **Restraint:** A disciplined, monochromatic structural chrome punctuated by a playful multi-color sticker palette used strictly for decoration (categories, icons).
+
+## 🏗️ Architecture
 
 We rely on a deterministic, testable pipeline rather than "LLM magic".
 
+```mermaid
+graph TD
+    %% Styling based on Notion Design tokens
+    classDef user fill:#213183,color:#ffffff,stroke:none,rx:12px;
+    classDef frontend fill:#f6f5f4,stroke:#e6e6e6,color:#000000,rx:12px;
+    classDef api fill:#ffffff,stroke:#0075de,stroke-width:2px,color:#000000,rx:12px;
+    classDef llm fill:#d6b6f6,stroke:none,color:#391c57,rx:12px;
+    classDef db fill:#ff64c8,stroke:none,color:#ffffff,rx:12px;
+    classDef internal fill:#ffffff,stroke:#e6e6e6,color:#000000,rx:8px;
+
+    U[User]:::user -->|Query| F(Streamlit Frontend):::frontend
+    F -->|REST /query| A(FastAPI Backend):::api
+
+    subgraph API [Query Pipeline]
+        A --> P[PII Stripper]:::internal
+        P --> C[Classifier]:::internal
+        C --> R[Retriever]:::internal
+        R --> G[Confidence Gate]:::internal
+        G --> AG[Answer Generator]:::internal
+    end
+
+    R <--> V[(ChromaDB)]:::db
+    C <--> LLM[Gemini 1.5 Flash]:::llm
+    AG <--> LLM
+    
+    AG -->|Citations + Text| A
+    A -->|Response| F
+```
+
 | Component | Technology | Purpose |
 |---|---|---|
-| **API Backend** | `FastAPI` (Python) | High-performance, async-first query orchestration |
-| **Vector DB** | `ChromaDB` | Fast semantic search (running locally, no cloud dependency) |
-| **LLM Engine** | `Gemini 1.5 Flash` | Fast, structured generation via Google AI API |
-| **Embeddings** | `BAAI/bge-small-en-v1.5` | Converts legal text chunks into searchable vectors |
-| **Frontend** | `Streamlit` | Rapid UI iteration with custom Notion-style CSS |
-
-**The Pipeline Flow:**
-`Query → PII Strip → Classify → Route → Retrieve + ABS Check → Confidence Gate (Abstain/Generate) → Generate Answer + Citations`
-
----
+| **Backend** | `FastAPI` | High-performance, async-first orchestration |
+| **Vector DB** | `ChromaDB` | Fast semantic search (local, no cloud dependency) |
+| **LLM Engine** | `Gemini 1.5` | Fast, structured generation via Google AI API |
+| **Embeddings** | `BAAI/bge-small` | Converts legal text chunks into searchable vectors |
+| **Frontend** | `Streamlit` | Rapid UI iteration mapped to `DESIGN.md` |
 
 ## 🚀 Quickstart (Local Development)
 
@@ -59,7 +101,6 @@ pip install -r requirements-dev.txt
 
 ### 2. Configure Secrets
 ```bash
-# Copy the template config
 cp .env.example .env
 ```
 Open `.env` and add your `GEMINI_API_KEY`. (Get one for free at Google AI Studio).
@@ -81,28 +122,19 @@ bash run_frontend.sh
 ```
 *UI runs on `http://localhost:8501`*
 
----
-
 ## 🗺️ Project Structure & Execution
 
 We have decomposed the project into **6 Epics** and **35 modular GitHub Issues**. Every issue has clear acceptance criteria and is ready to be picked up by the team.
 
-1. **Epic 0: Dev Setup & CI/CD** (Issues #19-23) — Local environments, GitHub Actions, code linting.
-2. **Epic 1: Legal Corpus** (Issues #1-6, 32-33) — Downloading laws (India Code, IP India), manifest validation, PDF chunking, ChromaDB ingestion.
-3. **Epic 2: Query Pipeline** (Issues #7-11, 34) — FastAPI skeleton, category classification, ABS checker, confidence gate.
-4. **Epic 3: Answer & Privacy** (Issues #12-14) — Citation-grounded answer generation, PII stripping.
-5. **Epic 4: Demo Readiness** (Issues #15-18, 35) — Streamlit integration, golden test set QA, compliance audit.
-6. **Epic 5: UX/UI (Notion Design)** (Issues #24-31) — Custom CSS variables, clean input fields, response cards, accordion citations.
-
-### GitHub Workflow
-- `main` branch is protected.
-- All development happens in feature branches: `feature/<issue-number>-<short-name>`.
-- Open a Pull Request (PR) to `develop`.
-- CI/CD will automatically run linting (`ruff`, `black`) and tests (`pytest`).
-- Merge after 1 approval.
+- 🧰 **Epic 0: Dev Setup & CI/CD** (Issues #19-23) — Environments, Actions, linting.
+- 📚 **Epic 1: Legal Corpus** (Issues #1-6, 32-33) — Official ingestion, chunking, ChromaDB.
+- 🧠 **Epic 2: Query Pipeline** (Issues #7-11, 34) — Classification, ABS checker, confidence gate.
+- 📝 **Epic 3: Answer & Privacy** (Issues #12-14) — Citation grounding, PII stripping.
+- 🎯 **Epic 4: Demo Readiness** (Issues #15-18, 35) — Golden test sets, compliance audits.
+- 🎨 **Epic 5: UX/UI Design** (Issues #24-31) — Implementation of `DESIGN.md`.
 
 ---
 
-## 👥 The Team
-
-Built for SIH 2026. Designed for impact.
+<div align="center">
+  <p>Built with 🩵 for <strong>SIH 2026</strong>. Designed for impact.</p>
+</div>

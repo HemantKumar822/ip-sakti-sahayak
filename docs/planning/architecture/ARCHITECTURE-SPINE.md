@@ -182,6 +182,7 @@ OFFLINE BATCH (runs before demo / on corpus update):
 
 ```
 ip-sakti-sahayak/
+├── DESIGN.md                      # Notion Design System tokens & rules
 ├── README.md
 ├── run_api.sh
 ├── run_frontend.sh

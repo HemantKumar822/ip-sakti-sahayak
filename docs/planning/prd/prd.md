@@ -170,8 +170,12 @@ A user asks about a pharmaceutical drug that is not in the Ayurveda category.
 - **NFR-4.2:** System SHALL degrade gracefully on LLM API failure (return "Service temporarily unavailable" — not crash)
 
 ### NFR-5: Maintainability
-- **NFR-5.1:** Corpus update (adding a new document) SHALL NOT require code changes — only running the ingestion script
-- **NFR-5.2:** Confidence threshold, K (top-K chunks), and LLM model name SHALL all be configurable via environment variables
+- **NFR-5.1:** Vector corpus (ChromaDB) MUST be updatable without changing application code
+- **NFR-5.2:** All LLM prompts, API keys, and model parameters MUST be externalized into environment variables (`.env`)
+
+### NFR-6: Design System
+- **NFR-6.1:** System MUST adhere strictly to the Notion-inspired design tokens, typography, and spacing defined in `DESIGN.md`
+- **NFR-6.2:** All frontend UI components MUST use the multi-color sticker palette only for decoration and `Notion Blue` strictly for actions.
 
 ---
 
