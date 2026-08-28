@@ -26,14 +26,7 @@ IP-SAKTI Sahayak provides inventors, researchers, and MSMEs with accurate, citat
 - **💭 Honest Abstention**: If the answer isn't in the corpus, the system confidently says "I don't know" instead of guessing.
 - **🔒 Privacy by Design (DPDP Act)**: Strips PII (Personal Identifiable Information) from all queries before logging. No user data is stored.
 
-## 🎨 Notion-Inspired Design
 
-This project adopts a **Notion-inspired Design Philosophy** to ensure the interface feels like a calm, paper-soft document rather than a clinical dashboard. 
-> See our full design specification in [`DESIGN.md`](./DESIGN.md).
-
-- **Colors:** A warm `#f6f5f4` canvas over pure white, using `Notion Blue` (`#0075de`) exclusively for primary actions.
-- **Typography:** `NotionInter` (or tuned `Inter`) with tight tracking for confident, heavy headers.
-- **Restraint:** A disciplined, monochromatic structural chrome punctuated by a playful multi-color sticker palette used strictly for decoration (categories, icons).
 
 ## 🏗️ Architecture
 
@@ -41,7 +34,7 @@ We rely on a deterministic, testable pipeline rather than "LLM magic".
 
 ```mermaid
 graph TD
-    %% Styling based on Notion Design tokens
+    %% Styling based on design system tokens
     classDef user fill:#213183,color:#ffffff,stroke:none,rx:12px;
     classDef frontend fill:#f6f5f4,stroke:#e6e6e6,color:#000000,rx:12px;
     classDef api fill:#ffffff,stroke:#0075de,stroke-width:2px,color:#000000,rx:12px;
