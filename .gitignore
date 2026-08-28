@@ -1,0 +1,17 @@
+.env
+corpus/embeddings/
+corpus/raw/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+node_modules/
+.pytest_cache/
+.mypy_cache/
+htmlcov/
+.coverage

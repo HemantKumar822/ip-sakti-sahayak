@@ -1,0 +1,212 @@
+# IP-SAKTI Sahayak — Sprint Status
+# Generated: 2026-08-28
+# Project: SIH26 | PS-26045
+# Gate: PASS
+
+project: IP-SAKTI Sahayak
+sprint_period: "2026-08-29 to 2026-09-25 (4 sprints × 1 week)"
+gate: PASS
+generated: 2026-08-28
+
+sprints:
+  - id: sprint-1
+    name: "Corpus Foundation"
+    dates: "2026-08-29 — 2026-09-04"
+    goal: "Runnable ingestion pipeline, ChromaDB populated, retriever returning chunks"
+    stories:
+      - id: "1.1"
+        title: "Project Skeleton and Environment Setup"
+        status: todo
+        component: infra
+        labels: ["component:infra", "type:feature", "priority:p1"]
+        owner: ""
+        notes: "Must be Story 1 — everything else depends on docker-compose, config.py, Pydantic models"
+      - id: "1.2"
+        title: "Corpus Manifest Validator"
+        status: todo
+        component: corpus
+        labels: ["component:corpus", "type:feature", "priority:p1"]
+        owner: ""
+        notes: "Hard-fail on missing fields. Prerequisite for all ingestion stories."
+      - id: "1.3"
+        title: "India Code Corpus Fetcher"
+        status: todo
+        component: corpus
+        labels: ["component:corpus", "type:feature", "priority:p1"]
+        owner: ""
+        notes: "Fetches Patents Act, Biological Diversity Act, D&C Act Schedule E"
+      - id: "1.4"
+        title: "PDF Parser and Text Chunker"
+        status: todo
+        component: corpus
+        labels: ["component:corpus", "type:feature", "priority:p1"]
+        owner: ""
+        notes: "300-600 token chunks, preserves section headings"
+      - id: "1.5"
+        title: "Embedding Computation and ChromaDB Storage"
+        status: todo
+        component: corpus
+        labels: ["component:corpus", "type:feature", "priority:p1"]
+        owner: ""
+        notes: "sentence-transformers BAAI/bge-small-en-v1.5, loads once per run"
+      - id: "1.6"
+        title: "Retriever Module"
+        status: todo
+        component: corpus
+        labels: ["component:corpus", "type:feature", "priority:p1"]
+        owner: ""
+        notes: "VectorStore protocol + ChromaStore implementation. Top-K with metadata."
+    risks:
+      - "TKDL programmatic access may be blocked — fallback to publicly available PDF excerpts"
+      - "India Code scraping may require HTML parsing — allocate extra time for fetcher"
+    definition_of_done: |
+      - `docker-compose up` starts without errors
+      - ChromaDB collection is non-empty after running `python ingestion/ingest.py`
+      - `src/pipeline/retriever.py` returns top-5 chunks for a test query
+      - All 6 story ACs pass
+
+  - id: sprint-2
+    name: "Query Processing Pipeline"
+    dates: "2026-09-05 — 2026-09-11"
+    goal: "Full deterministic pipeline working end-to-end: classify → route → retrieve → ABS-check → confidence-gate"
+    dependencies: ["sprint-1 DONE"]
+    stories:
+      - id: "2.1"
+        title: "FastAPI Server Skeleton and Query Endpoint"
+        status: todo
+        component: api
+        labels: ["component:api", "type:feature", "priority:p1"]
+        owner: ""
+        notes: "Lifespan event pre-loads embedding model. /health endpoint included."
+      - id: "2.2"
+        title: "Product Category Classifier"
+        status: todo
+        component: pipeline
+        labels: ["component:pipeline", "type:feature", "priority:p1"]
+        owner: ""
+        notes: "Gemini structured output. ClassifierOutput Pydantic schema. One LLM call per query."
+      - id: "2.3"
+        title: "Jurisdiction Router"
+        status: todo
+        component: pipeline
+        labels: ["component:pipeline", "type:feature", "priority:p1"]
+        owner: ""
+        notes: "India-only MVP. Flag international references. No external API calls."
+      - id: "2.4"
+        title: "ABS / TKDL Prior Art Checker"
+        status: todo
+        component: pipeline
+        labels: ["component:pipeline", "type:feature", "priority:p1"]
+        owner: ""
+        notes: "Parallel to main retrieval. Retrieval-based (not keyword list). Cites manifest."
+      - id: "2.5"
+        title: "Confidence Gate"
+        status: todo
+        component: pipeline
+        labels: ["component:pipeline", "type:feature", "priority:p0"]
+        owner: ""
+        notes: "P0 — abstention is the core anti-hallucination gate. Pure function, no side effects."
+    risks:
+      - "Gemini API free tier rate limits — use model name env var so we can switch to flash-8b"
+      - "Classifier prompt tuning may take multiple iterations — reserve 1 day"
+    definition_of_done: |
+      - `POST /api/v1/query` returns a structured response (stub answer or real)
+      - Classifier correctly categorizes 4/5 manually tested queries
+      - Confidence gate returns abstain for a deliberately out-of-corpus query
+      - ABS flag triggered for an Ashwagandha query
+      - All 5 story ACs pass
+
+  - id: sprint-3
+    name: "Answer Delivery and UI"
+    dates: "2026-09-12 — 2026-09-18"
+    goal: "Complete user-facing system: generated answer with citations, abstention message, Streamlit UI, privacy logging"
+    dependencies: ["sprint-2 DONE"]
+    stories:
+      - id: "3.1"
+        title: "Answer Generator"
+        status: todo
+        component: pipeline
+        labels: ["component:pipeline", "type:feature", "priority:p0"]
+        owner: ""
+        notes: "P0 — retrieval-only constraint enforced in prompt. Fallback to abstention on schema error."
+      - id: "3.2"
+        title: "Privacy / PII Strip and Query Logger"
+        status: todo
+        component: privacy
+        labels: ["component:privacy", "type:feature", "priority:p1"]
+        owner: ""
+        notes: "DPDP compliance. PII strip before log. Structured JSON to stdout."
+      - id: "3.3"
+        title: "Full Pipeline Integration (API Route)"
+        status: todo
+        component: api
+        labels: ["component:api", "type:feature", "priority:p1"]
+        owner: ""
+        notes: "Wires all pipeline stages. Measures response_time_ms. 503 on Gemini failure."
+      - id: "3.4"
+        title: "Streamlit Web Interface"
+        status: todo
+        component: frontend
+        labels: ["component:frontend", "type:feature", "priority:p1"]
+        owner: ""
+        notes: "No personal data fields. UUID session ID. Disclaimer always visible."
+    risks:
+      - "Streamlit ↔ FastAPI integration (HTTP, not direct import) — test early in 3.3"
+      - "Disclaimer style must be visually distinct — UX review needed before Story 3.4 ships"
+    definition_of_done: |
+      - Full pipeline produces a cited answer for a live Classical Ayurveda test query
+      - PII strip confirmed via unit test
+      - Streamlit UI shows answer, citations, ABS flag, disclaimer, response time
+      - Abstention message shown for out-of-corpus query in UI
+      - All 4 story ACs pass
+
+  - id: sprint-4
+    name: "Demo Readiness and Validation"
+    dates: "2026-09-19 — 2026-09-25"
+    goal: "Golden test set passing, Docker Compose offline demo working, all NFRs validated, hallucination count = 0"
+    dependencies: ["sprint-3 DONE"]
+    stories:
+      - id: "4.1"
+        title: "Golden Test Set and Accuracy Validation"
+        status: todo
+        component: testing
+        labels: ["component:testing", "type:validation", "priority:p0"]
+        owner: ""
+        notes: "P0 — 20 queries, 0 hallucinated citations. Must run before demo freeze."
+      - id: "4.2"
+        title: "Performance and Docker Compose Validation"
+        status: todo
+        component: infra
+        labels: ["component:infra", "type:validation", "priority:p1"]
+        owner: ""
+        notes: "All queries <10s, ChromaDB volume persists, corpus bind-mounted not baked."
+      - id: "4.3"
+        title: "Compliance and Configuration Audit"
+        status: todo
+        component: testing
+        labels: ["component:testing", "type:validation", "priority:p0"]
+        owner: ""
+        notes: "P0 — grep for hardcoded values, PII test, disclaimer string exact match."
+    risks:
+      - "Accuracy < 90% on golden set — may require classifier prompt iteration"
+      - "Response time > 10s on demo machine — embedding pre-load is the fix, already in 2.1"
+    definition_of_done: |
+      - 20/20 golden queries produce correct category (≥18/20) + 0 hallucinated citations
+      - `docker-compose up` on a clean machine produces a working demo
+      - All env vars documented in .env.example
+      - Compliance audit: grep returns 0 hardcoded values in src/
+      - All 3 story ACs pass
+
+summary:
+  total_epics: 4
+  total_stories: 15
+  p0_stories: 4
+  p1_stories: 11
+  estimated_weeks: 4
+  team_size: "5-6"
+  github_branch_strategy: "main (protected) ← develop ← feature/<issue-number>-<short-name>"
+  readiness_gate: PASS
+  open_risks:
+    - "TKDL programmatic access — fallback documented in Sprint 1 risk"
+    - "Gemini free tier rate limits on demo day — fallback model configured in env"
+    - "Accuracy may need classifier prompt tuning — Sprint 4 buffer exists"
