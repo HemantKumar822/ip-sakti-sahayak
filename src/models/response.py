@@ -1,9 +1,11 @@
 from pydantic import BaseModel
 
+
 class Citation(BaseModel):
     document_id: str
     snippet: str
     relevance_score: float
+
 
 class QueryResponse(BaseModel):
     answer: str
