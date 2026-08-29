@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
+from typing import List, Any
 
 class VectorStore(ABC):
     @abstractmethod
@@ -8,11 +8,10 @@ class VectorStore(ABC):
         pass
 
     @abstractmethod
-    def search(self, query: str, n_results: int = 5) -> List[Dict[str, Any]]:
+    def search(self, query: str, n_results: int = 5) -> List[dict[str, Any]]:
         """Search for similar documents in the vector store."""
-        pass
+
 
     @abstractmethod
     def count(self) -> int:
         """Return the number of documents in the vector store."""
-        pass
