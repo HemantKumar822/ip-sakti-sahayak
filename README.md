@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg?logo=python&logoColor=white)](https://www.python.org)
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg?logo=python&logoColor=white)](https://www.python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.31+-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io)
 [![ChromaDB](https://img.shields.io/badge/ChromaDB-Local_Vector_DB-FF5722.svg)](#)
@@ -73,13 +73,26 @@ graph TD
 
 We designed the development environment to be beginner-friendly. **No Docker is required.** Everything runs in a standard Python virtual environment.
 
-### 1. Setup the Environment
-```bash
-# Clone the repository
-git clone https://github.com/HemantKumar822/ip-sakti-sahayak.git
-cd ip-sakti-sahayak
+### 1. Automated Setup (Recommended)
 
-# Create and activate a Python virtual environment
+Run the automated setup script from the root directory. It creates `.venv`, installs all dependencies, and creates your `.env` file:
+
+**Windows:**
+```cmd
+scripts\setup.bat
+```
+
+**Mac / Linux:**
+```bash
+chmod +x scripts/*.sh *.sh
+./scripts/setup.sh
+```
+
+<details>
+<summary>Manual Setup Steps (Alternative)</summary>
+
+```bash
+# 1. Create and activate a Python virtual environment (Python 3.11+)
 python -m venv .venv
 
 # Activate on Mac/Linux:
@@ -87,33 +100,38 @@ source .venv/bin/activate
 # Activate on Windows:
 .venv\Scripts\activate
 
-# Install dependencies
+# 2. Install dependencies
+pip install --upgrade pip
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
-```
 
-### 2. Configure Secrets
-```bash
+# 3. Configure environment file
 cp .env.example .env
 ```
-Open `.env` and add your LLM provider's API key.
+</details>
+
+### 2. Configure Secrets
+Open the `.env` file and add your LLM API key (`GEMINI_API_KEY`).
 
 ### 3. Run the System
-You need two terminal windows (both with the `.venv` activated):
+The helper scripts automatically activate the `.venv` and load `.env` for you:
 
 **Terminal 1 (Backend API):**
-```bash
-bash run_api.sh
-# Windows: run_api.bat
-```
-*API runs on `http://localhost:8000`*
+- **Windows:** `run_api.bat`
+- **Mac / Linux:** `./run_api.sh`
+- *API runs on `http://localhost:8000` (docs at `http://localhost:8000/docs`)*
 
 **Terminal 2 (Frontend UI):**
-```bash
-bash run_frontend.sh
-# Windows: run_frontend.bat
-```
-*UI runs on `http://localhost:8501`*
+- **Windows:** `run_frontend.bat`
+- **Mac / Linux:** `./run_frontend.sh`
+- *UI runs on `http://localhost:8501`*
+
+### 4. Running Tests & Linting
+- **Run Tests:** `run_tests.bat` (Windows) or `./run_tests.sh` (Mac/Linux)
+- **Check Linting:** `python -m ruff check src/ tests/`
+- **Format Code:** `python -m black src/ tests/`
+
+> 📖 For full contribution guidelines, GitFlow branching rules, and troubleshooting common errors, see **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
 ## 🗺️ Project Structure & Execution
 
