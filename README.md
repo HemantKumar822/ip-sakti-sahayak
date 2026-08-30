@@ -76,12 +76,8 @@ We designed the development environment to be beginner-friendly. **No Docker is 
 ### 1. Clone the Repository & Checkout `develop`
 
 ```bash
-# Clone the repository
-git clone https://github.com/HemantKumar822/ip-sakti-sahayak.git
-cd ip-sakti-sahayak
-
-# Checkout the shared development branch
-git checkout develop
+# Clone directly into your project directory:
+git clone -b develop https://github.com/HemantKumar822/ip-sakti-sahayak.git .
 ```
 
 ### 2. Setup the Environment (1-Command Automated)
