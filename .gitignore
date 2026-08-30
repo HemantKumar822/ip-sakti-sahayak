@@ -23,4 +23,5 @@ htmlcov/
 .opencode/
 _bmad/
 *.snapshot.md
-
+scratch/
+.ruff_cache/
