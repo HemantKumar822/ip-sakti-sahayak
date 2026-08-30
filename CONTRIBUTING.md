@@ -11,9 +11,11 @@ We use a standard Python virtual environment (`.venv`). Follow these steps to se
 - Git installed.
 
 ### 2. Clone the Repository & Checkout `develop`
+> [!IMPORTANT]
+> Ensure your current directory is **completely empty** before running this command. If there are hidden files, Git will throw an error `fatal: destination path '.' already exists and is not an empty directory.`
+
 ```bash
-git clone -b develop https://github.com/HemantKumar822/ip-sakti-sahayak.git
-cd ip-sakti-sahayak
+git clone -b develop https://github.com/HemantKumar822/ip-sakti-sahayak.git .
 ```
 
 ### 3. Initialization (One-Time Setup)

@@ -75,9 +75,11 @@ We designed the development environment to be beginner-friendly. **No Docker is 
 
 ### 1. Clone the Repository & Checkout `develop`
 
+> [!IMPORTANT]
+> Ensure your current directory is **completely empty** before running this command. If there are hidden files, Git will throw an error `fatal: destination path '.' already exists and is not an empty directory.`
+
 ```bash
-git clone -b develop https://github.com/HemantKumar822/ip-sakti-sahayak.git
-cd ip-sakti-sahayak
+git clone -b develop https://github.com/HemantKumar822/ip-sakti-sahayak.git .
 ```
 
 ### 2. Setup the Environment (1-Command Automated)
