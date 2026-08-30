@@ -73,9 +73,16 @@ graph TD
 
 We designed the development environment to be beginner-friendly. **No Docker is required.** Everything runs in a standard Python virtual environment.
 
-### 1. Automated Setup (Recommended)
+### 1. Clone the Repository & Checkout `develop`
 
-Run the automated setup script from the root directory. It creates `.venv`, installs all dependencies, and creates your `.env` file:
+```bash
+# Clone directly into your project directory:
+git clone -b develop https://github.com/HemantKumar822/ip-sakti-sahayak.git .
+```
+
+### 2. Setup the Environment (1-Command Automated)
+
+Run the setup script from the root directory. It automatically creates `.venv`, installs all dependencies, and creates your `.env` file:
 
 **Windows:**
 ```cmd
@@ -110,23 +117,23 @@ cp .env.example .env
 ```
 </details>
 
-### 2. Configure Secrets
+### 3. Configure Secrets
 Open the `.env` file and add your LLM API key (`GEMINI_API_KEY`).
 
-### 3. Run the System
+### 4. Run the System
 The helper scripts automatically activate the `.venv` and load `.env` for you:
 
 **Terminal 1 (Backend API):**
 - **Windows:** `run_api.bat`
 - **Mac / Linux:** `./run_api.sh`
-- *API runs on `http://localhost:8000` (docs at `http://localhost:8000/docs`)*
+- *API runs on `http://localhost:8000` (interactive docs at `http://localhost:8000/docs`)*
 
 **Terminal 2 (Frontend UI):**
 - **Windows:** `run_frontend.bat`
 - **Mac / Linux:** `./run_frontend.sh`
 - *UI runs on `http://localhost:8501`*
 
-### 4. Running Tests & Linting
+### 5. Running Tests & Linting
 - **Run Tests:** `run_tests.bat` (Windows) or `./run_tests.sh` (Mac/Linux)
 - **Check Linting:** `python -m ruff check src/ tests/`
 - **Format Code:** `python -m black src/ tests/`
@@ -135,8 +142,15 @@ The helper scripts automatically activate the `.venv` and load `.env` for you:
 
 ## 🗺️ Project Structure & Execution
 
-We have decomposed the project into **6 Epics** and **35 modular GitHub Issues**. Every issue has clear acceptance criteria and is ready to be picked up by the team.
+We have decomposed the project into **6 Epics** and **35 modular GitHub Issues**. Every issue has clear acceptance criteria and is ready to be picked up by the team. All BMAD planning artifacts are synced in [`_bmad-output/`](_bmad-output/):
 
+- 📋 **Product Brief:** [`_bmad-output/planning-artifacts/product-brief/brief.md`](_bmad-output/planning-artifacts/product-brief/brief.md)
+- 📄 **PRD:** [`_bmad-output/planning-artifacts/prd/prd.md`](_bmad-output/planning-artifacts/prd/prd.md)
+- 🏛️ **Architecture:** [`_bmad-output/planning-artifacts/architecture/architecture.md`](_bmad-output/planning-artifacts/architecture/architecture.md)
+- 📑 **Epics & Stories:** [`_bmad-output/planning-artifacts/epics.md`](_bmad-output/planning-artifacts/epics.md)
+- 📊 **Sprint Status:** [`_bmad-output/implementation-artifacts/sprint-status.yaml`](_bmad-output/implementation-artifacts/sprint-status.yaml)
+
+### Epic Breakdown
 - 🧰 **Epic 0: Dev Setup & CI/CD** (Issues #19-23) — Environments, Actions, linting.
 - 📚 **Epic 1: Legal Corpus** (Issues #1-6, 32-33) — Official ingestion, chunking, ChromaDB.
 - 🧠 **Epic 2: Query Pipeline** (Issues #7-11, 34) — Classification, ABS checker, confidence gate.
