@@ -20,95 +20,95 @@ Every request follows a fixed, ordered sequence of single-responsibility stages.
 ## Architecture Decisions (AD)
 
 ### AD-1: Fixed Pipeline, No Agentic Routing
-**Binds:** All pipeline stages are executed in a fixed, coded sequence — Classify → Route → Retrieve → Confidence-Gate → Generate/Abstain  
-**Prevents:** Any runtime LLM tool-calling, dynamic stage-skipping, or agentic decision-making over the pipeline path  
-**Rule:** No stage may conditionally call another stage out of sequence. Branch points (YES/NO at confidence gate, abstain/generate) are hard-coded — not LLM decisions.  
+**Binds:** All pipeline stages are executed in a fixed, coded sequence — Classify → Route → Retrieve → Confidence-Gate → Generate/Abstain
+**Prevents:** Any runtime LLM tool-calling, dynamic stage-skipping, or agentic decision-making over the pipeline path
+**Rule:** No stage may conditionally call another stage out of sequence. Branch points (YES/NO at confidence gate, abstain/generate) are hard-coded — not LLM decisions.
 **[ADOPTED]** — confirmed by PRD + PS-26045 explicit staging
 
 ---
 
 ### AD-2: Python as the Sole Backend Language
-**Binds:** All pipeline stages, ingestion scripts, and API server are Python  
-**Prevents:** Node.js, Go, or other runtimes for backend logic (frontend may differ)  
-**Rule:** `src/` directory contains only Python. No mixed-runtime backend.  
+**Binds:** All pipeline stages, ingestion scripts, and API server are Python
+**Prevents:** Node.js, Go, or other runtimes for backend logic (frontend may differ)
+**Rule:** `src/` directory contains only Python. No mixed-runtime backend.
 **Rationale:** Team comfort, ML ecosystem (sentence-transformers, langchain-core, chromadb all native Python), SIH demo pragmatism
 
 ---
 
 ### AD-3: FastAPI as the HTTP API Layer
-**Binds:** The HTTP server exposing the pipeline is a FastAPI application  
-**Prevents:** Flask, Django, Express for the query endpoint  
-**Rule:** Single route: `POST /api/v1/query` — returns structured JSON response schema (defined in FR-6.8)  
+**Binds:** The HTTP server exposing the pipeline is a FastAPI application
+**Prevents:** Flask, Django, Express for the query endpoint
+**Rule:** Single route: `POST /api/v1/query` — returns structured JSON response schema (defined in FR-6.8)
 **Rationale:** Async-native, auto-generates OpenAPI schema, type-safe with Pydantic — fits the structured output requirement
 
 ---
 
 ### AD-4: sentence-transformers for Embeddings (Local, Free)
-**Binds:** Embeddings are computed using `sentence-transformers` library with model `BAAI/bge-small-en-v1.5` (or equivalent small, fast model)  
-**Prevents:** Using OpenAI / Google embedding APIs in the ingestion or retrieval path  
-**Rule:** No external API call during embedding. Embeddings are computed locally during ingestion and at query time. This keeps the system runnable offline (critical for demo resilience).  
+**Binds:** Embeddings are computed using `sentence-transformers` library with model `BAAI/bge-small-en-v1.5` (or equivalent small, fast model)
+**Prevents:** Using OpenAI / Google embedding APIs in the ingestion or retrieval path
+**Rule:** No external API call during embedding. Embeddings are computed locally during ingestion and at query time. This keeps the system runnable offline (critical for demo resilience).
 **Deferred:** Phase 2 may swap in a larger embedding model — the swap point is the model name in config, not code changes.
 
 ---
 
 ### AD-5: ChromaDB as Vector Database (Local for MVP)
-**Binds:** Vector similarity search uses ChromaDB (persistent local store, file-based)  
-**Prevents:** FAISS (no metadata support), Pinecone (paid, external), Qdrant (external for demo day)  
-**Rule:** ChromaDB collection name is configurable via env var. Collection stores: embedding vector + manifest metadata (source_url, doc_id, doc_type, date_retrieved, chunk_id).  
+**Binds:** Vector similarity search uses ChromaDB (persistent local store, file-based)
+**Prevents:** FAISS (no metadata support), Pinecone (paid, external), Qdrant (external for demo day)
+**Rule:** ChromaDB collection name is configurable via env var. Collection stores: embedding vector + manifest metadata (source_url, doc_id, doc_type, date_retrieved, chunk_id).
 **Deferred:** Qdrant for hosted post-demo deployment. The abstraction layer (retriever module) uses a `VectorStore` protocol — swapping implementations requires only a new concrete class, no pipeline changes.
 
 ---
 
 ### AD-6: Gemini 1.5 Flash as the Generation LLM
-**Binds:** All LLM generation calls (classifier + answer generator) use Google Gemini 1.5 Flash via `google-generativeai` SDK  
-**Prevents:** OpenAI GPT-4, Anthropic Claude, local Ollama models as primary  
-**Rule:** Model name, temperature, and max_output_tokens are environment variables — not hardcoded.  
-**Rationale:** Google AI API free tier sufficient for demo volume; aligns with SIH's government-tech context; Gemini has strong structured output support (required for FR-6.8).  
+**Binds:** All LLM generation calls (classifier + answer generator) use Google Gemini 1.5 Flash via `google-generativeai` SDK
+**Prevents:** OpenAI GPT-4, Anthropic Claude, local Ollama models as primary
+**Rule:** Model name, temperature, and max_output_tokens are environment variables — not hardcoded.
+**Rationale:** Google AI API free tier sufficient for demo volume; aligns with SIH's government-tech context; Gemini has strong structured output support (required for FR-6.8).
 **[ASSUMPTION]** — if Gemini free tier rate limits trigger during demo, fallback is `gemini-1.5-flash-8b`. Flag this as a risk in demo prep.
 
 ---
 
 ### AD-7: Corpus Manifest as the Single Source of Truth for Data Lineage
-**Binds:** `corpus/manifest.json` is the authoritative record of every ingested document. Every vector DB entry MUST have a corresponding manifest entry.  
-**Prevents:** Ingesting documents without metadata, storing embeddings without provenance, any "raw" document in the vector DB without a manifest record  
-**Rule:** `ingestion/ingest.py` fails hard (raises, does not warn) if a document is missing: `source_url`, `date_retrieved`, `document_type`, `version_or_amendment_date`, `doc_id`. The manifest is committed to git. Re-ingestion of an updated document creates a new `doc_id` and preserves the old entry.  
+**Binds:** `corpus/manifest.json` is the authoritative record of every ingested document. Every vector DB entry MUST have a corresponding manifest entry.
+**Prevents:** Ingesting documents without metadata, storing embeddings without provenance, any "raw" document in the vector DB without a manifest record
+**Rule:** `ingestion/ingest.py` fails hard (raises, does not warn) if a document is missing: `source_url`, `date_retrieved`, `document_type`, `version_or_amendment_date`, `doc_id`. The manifest is committed to git. Re-ingestion of an updated document creates a new `doc_id` and preserves the old entry.
 **[ADOPTED]** — defined in FR-7.2, FR-7.3
 
 ---
 
 ### AD-8: Structured Output Schema for All LLM Calls
-**Binds:** Every LLM call in the pipeline MUST use a structured output schema (Pydantic model passed to Gemini's `response_schema` parameter)  
-**Prevents:** Free-form string parsing of LLM output, regex extraction of citations from prose  
+**Binds:** Every LLM call in the pipeline MUST use a structured output schema (Pydantic model passed to Gemini's `response_schema` parameter)
+**Prevents:** Free-form string parsing of LLM output, regex extraction of citations from prose
 **Rule:** Classifier output schema: `{category: str, confidence: float, reason: str}`. Generator output schema: `{answer: str, citations: list[Citation], abs_flag: bool, disclaimer: str}`. If Gemini returns a schema violation, the pipeline treats it as a confidence-gate failure and abstains.
 
 ---
 
 ### AD-9: Confidence Threshold is Configuration, Not Code
-**Binds:** The similarity confidence threshold (below which the system abstains) is read from the environment variable `CONFIDENCE_THRESHOLD` (default: `0.65`)  
-**Prevents:** Hardcoded float literals in pipeline code  
+**Binds:** The similarity confidence threshold (below which the system abstains) is read from the environment variable `CONFIDENCE_THRESHOLD` (default: `0.65`)
+**Prevents:** Hardcoded float literals in pipeline code
 **Rule:** All configurable values (threshold, K, model name, chroma collection name, corpus path) live in `config.py` which reads from environment. `config.py` is the only place that reads env vars.
 
 ---
 
 ### AD-10: No Personal Data in Any Storage Layer
-**Binds:** Query logs, session state, and vector DB metadata contain ZERO personally identifiable information  
-**Prevents:** Logging user names, emails, phone numbers, Aadhaar-format numbers, or any DPDP-covered personal data  
-**Rule:** Before any query text is logged, it passes through `privacy/pii_strip.py` which applies regex filters. Session IDs are UUID v4 generated server-side — never correlated with identity.  
+**Binds:** Query logs, session state, and vector DB metadata contain ZERO personally identifiable information
+**Prevents:** Logging user names, emails, phone numbers, Aadhaar-format numbers, or any DPDP-covered personal data
+**Rule:** Before any query text is logged, it passes through `privacy/pii_strip.py` which applies regex filters. Session IDs are UUID v4 generated server-side — never correlated with identity.
 **[ADOPTED]** — DPDP Act 2023 compliance requirement
 
 ---
 
 ### AD-11: Frontend — Streamlit (MVP)
-**Binds:** The web UI is a Streamlit application  
-**Prevents:** React/Next.js, Vue, or raw HTML for MVP  
-**Rule:** Frontend communicates with the FastAPI backend via HTTP (not direct Python import) — even though Streamlit can import Python directly, keeping the boundary clean allows Phase 2 to replace Streamlit without touching the API.  
-**Rationale:** Fastest path to a working UI for a mixed-skill team; Streamlit handles state, layout, and hot-reload. The API boundary is the architectural invariant; Streamlit is the replaceable leaf.  
+**Binds:** The web UI is a Streamlit application
+**Prevents:** React/Next.js, Vue, or raw HTML for MVP
+**Rule:** Frontend communicates with the FastAPI backend via HTTP (not direct Python import) — even though Streamlit can import Python directly, keeping the boundary clean allows Phase 2 to replace Streamlit without touching the API.
+**Rationale:** Fastest path to a working UI for a mixed-skill team; Streamlit handles state, layout, and hot-reload. The API boundary is the architectural invariant; Streamlit is the replaceable leaf.
 **Deferred:** Phase 2 frontend can be Next.js. The FastAPI API spec is the contract — frontend is a detail.
 
 ---
 
 ### AD-12: Python venv as the Deployment Unit
-**Binds:** The complete application (API + frontend + ChromaDB volume) is runnable locally via a standard Python virtual environment and run scripts.  
+**Binds:** The complete application (API + frontend + ChromaDB volume) is runnable locally via a standard Python virtual environment and run scripts.
 **Why:** The hackathon team is beginner-friendly. Relying on Docker introduces overhead. Clear setup documentation (`CONTRIBUTING.md`) and `.sh`/`.bat` run scripts ensure a portable and fast demo experience.
 **Rule:** Dev setup is strictly via `python -m venv .venv`. Run scripts `run_api.sh` and `run_frontend.sh` (and Windows equivalents) manage service startup.
 

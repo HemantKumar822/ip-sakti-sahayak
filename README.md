@@ -56,7 +56,7 @@ graph TD
     R <--> V[(ChromaDB)]:::db
     C <--> LLM[Large Language Model]:::llm
     AG <--> LLM
-    
+
     AG -->|Citations + Text| A
     A -->|Response| F
 ```

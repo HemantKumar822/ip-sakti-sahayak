@@ -13,9 +13,9 @@ team: "SIH26"
 
 ## 1. Overview
 
-**Product:** IP-SAKTI Sahayak (Intelligent Patent and Scholarly Knowledge for Ayurveda and Traditional Indian Knowledge)  
-**Problem Statement:** SIH 2026 PS-26045 — AI-powered IPR guidance system for Ayurveda innovations  
-**Compliance Frame:** 100% DPDP-compliant, India Code sourced, no PII, no personal data collection, disclaimer-mandatory  
+**Product:** IP-SAKTI Sahayak (Intelligent Patent and Scholarly Knowledge for Ayurveda and Traditional Indian Knowledge)
+**Problem Statement:** SIH 2026 PS-26045 — AI-powered IPR guidance system for Ayurveda innovations
+**Compliance Frame:** 100% DPDP-compliant, India Code sourced, no PII, no personal data collection, disclaimer-mandatory
 
 ### Vision Statement
 
@@ -27,20 +27,20 @@ IP-SAKTI Sahayak is a free, accessible, web-based AI guidance tool that helps Ay
 
 ### Primary Users
 
-**UJ-1: The Ayurveda Startup Founder (Ananya)**  
-Ananya runs a small MSME that manufactures a proprietary Ayurveda formulation. She wants to know if she can patent it. She types: *"Can I patent my proprietary herbal oil blend for joint pain?"*  
+**UJ-1: The Ayurveda Startup Founder (Ananya)**
+Ananya runs a small MSME that manufactures a proprietary Ayurveda formulation. She wants to know if she can patent it. She types: *"Can I patent my proprietary herbal oil blend for joint pain?"*
 → System classifies as "Proprietary Ayurveda," routes to Patents Act + Biological Diversity Act corpus, retrieves Section 3(p) and ABS requirement information, and responds with citations + disclaimer. She learns she needs an ABS clearance before filing.
 
-**UJ-2: The Traditional Practitioner (Rajan)**  
-Rajan is a vaidya whose family has used a classical formulation for generations. He asks: *"Is my family's Ashwagandha preparation patentable?"*  
+**UJ-2: The Traditional Practitioner (Rajan)**
+Rajan is a vaidya whose family has used a classical formulation for generations. He asks: *"Is my family's Ashwagandha preparation patentable?"*
 → System classifies as "Classical Ayurveda," retrieves relevant TKDL prior art context and Section 3(p) bar, informs him that traditional knowledge is specifically excluded from patent protection, cites TKDL and Patents Act Section 3(p).
 
-**UJ-3: The Student Researcher (Priya)**  
-Priya is researching regulatory requirements for a college project. She asks a question about product registration categories.  
+**UJ-3: The Student Researcher (Priya)**
+Priya is researching regulatory requirements for a college project. She asks a question about product registration categories.
 → System classifies, retrieves Drugs and Cosmetics Act Schedule E details, responds with a structured, cited answer.
 
-**UJ-4: The Out-of-Scope Query (Any user)**  
-A user asks about a pharmaceutical drug that is not in the Ayurveda category.  
+**UJ-4: The Out-of-Scope Query (Any user)**
+A user asks about a pharmaceutical drug that is not in the Ayurveda category.
 → System detects out-of-scope (not in current corpus + category mismatch), returns clean abstention message: "This query is outside the current scope of IP-SAKTI Sahayak. Please consult a qualified IP attorney or contact a government IP facilitator."
 
 ### Secondary Users
