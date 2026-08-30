@@ -54,6 +54,22 @@ To run the automated test suite with coverage reporting:
 - **Windows:** `run_tests.bat`
 - **Mac/Linux:** `./run_tests.sh`
 
+### 6. Code Formatting & Linting
+Our GitHub Actions CI checks strictly enforce `ruff` and `black` on every Pull Request.
+Before committing and pushing your code, run:
+
+```bash
+# Auto-fix linting & import issues:
+python -m ruff check --fix src/ tests/
+
+# Auto-format all files to PEP 8 standards:
+python -m black src/ tests/
+
+# Verify that all checks pass:
+python -m ruff check src/ tests/
+python -m black --check src/ tests/
+```
+
 ---
 
 ## Common Errors & Fixes
@@ -74,6 +90,10 @@ To run the automated test suite with coverage reporting:
 - **Cause:** (Mac/Linux only) The script doesn't have execute permissions.
 - **Fix:** Run `chmod +x *.sh scripts/*.sh`
 
+### ❌ `Lint / lint (pull_request) failed on GitHub`
+- **Cause:** Unsorted imports, missing blank lines (PEP 8), or deprecated typing annotations (`typing.List` vs `list`).
+- **Fix:** Run `python -m ruff check --fix src/ tests/` and `python -m black src/ tests/` locally, commit, and push.
+
 ---
 
 ## Git Workflow
@@ -82,10 +102,17 @@ We use a feature-branch workflow.
 
 1. **Never commit directly to `main` or `develop`.**
 2. Always create a branch for your issue:
-   `git checkout -b feature/19-local-dev-setup`
-3. Make your changes and commit often.
-4. Push your branch:
-   `git push origin feature/19-local-dev-setup`
-5. Open a **Pull Request (PR)** on GitHub targeting the `develop` branch.
-6. In your PR description, write `Closes #19` (using your actual issue number) so GitHub automatically links and closes the issue when merged.
-7. Wait for at least **1 approving review** from a teammate before merging.
+   `git checkout -b feature/<issue-number>-<short-description>`
+3. Make your changes and write unit tests.
+4. Run tests and linters locally:
+   ```bash
+   run_tests.bat # or ./run_tests.sh
+   python -m ruff check src/ tests/
+   python -m black --check src/ tests/
+   ```
+5. Commit and push your branch:
+   `git push origin feature/<issue-number>-<short-description>`
+6. Open a **Pull Request (PR)** on GitHub targeting the `develop` branch.
+7. In your PR description, write `Closes #<issue-number>` so GitHub links and closes the issue when merged.
+8. Wait for CI checks (Lint & Tests) to pass and at least **1 approving review** from a teammate before merging.
+
