@@ -15,6 +15,7 @@ node_modules/
 .mypy_cache/
 htmlcov/
 .coverage
+coverage.xml
 
 # Tool-specific agent configs (BMAD installation files)
 .agent/

@@ -57,10 +57,19 @@ You need to run the API and the Frontend in two separate terminal windows. You d
 
 *(The Streamlit UI will open automatically at `http://localhost:8501`)*
 
-### 5. Running Tests
+### 5. Running Tests & Coverage
 To run the automated test suite with coverage reporting:
 - **Windows:** `run_tests.bat`
 - **Mac/Linux:** `./run_tests.sh`
+
+Or run directly with `pytest`:
+```bash
+# Run tests with terminal coverage summary (enforces >=70% threshold):
+pytest tests/ --cov=src --cov-report=term-missing
+
+# Generate detailed HTML coverage report (opens htmlcov/index.html):
+pytest --cov=src --cov-report=html
+```
 
 ### 6. Code Formatting & Linting
 Our GitHub Actions CI checks strictly enforce `ruff` and `black` on every Pull Request.
@@ -76,6 +85,17 @@ python -m black src/ tests/
 # Verify that all checks pass:
 python -m ruff check src/ tests/
 python -m black --check src/ tests/
+```
+
+### 7. Pre-commit Hooks Setup
+We use `pre-commit` to automatically run code formatters, linters, secret detection, and syntax checks before each commit.
+```bash
+# Install and register pre-commit hooks:
+pip install pre-commit
+pre-commit install
+
+# Manually run all hooks across the codebase:
+pre-commit run --all-files
 ```
 
 ---
@@ -123,4 +143,3 @@ We use a feature-branch workflow.
 6. Open a **Pull Request (PR)** on GitHub targeting the `develop` branch.
 7. In your PR description, write `Closes #<issue-number>` so GitHub links and closes the issue when merged.
 8. Wait for CI checks (Lint & Tests) to pass and at least **1 approving review** from a teammate before merging.
-
