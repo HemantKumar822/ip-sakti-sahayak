@@ -15,3 +15,12 @@ node_modules/
 .mypy_cache/
 htmlcov/
 .coverage
+
+# Tool-specific agent configs (BMAD installation files)
+.agent/
+.agents/
+.github/agents/
+.opencode/
+_bmad/
+*.snapshot.md
+

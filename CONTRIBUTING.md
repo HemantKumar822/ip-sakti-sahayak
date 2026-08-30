@@ -10,7 +10,14 @@ We use a standard Python virtual environment (`.venv`). Follow these steps to se
 - **Python 3.11 or higher** installed and added to your system `PATH`.
 - Git installed.
 
-### 2. Initialization (One-Time Setup)
+### 2. Clone the Repository & Checkout `develop`
+```bash
+git clone https://github.com/HemantKumar822/ip-sakti-sahayak.git
+cd ip-sakti-sahayak
+git checkout develop
+```
+
+### 3. Initialization (One-Time Setup)
 
 #### Windows
 Run the setup batch script from the root of the repository:
