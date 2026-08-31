@@ -41,5 +41,8 @@ class Config:
     APP_PORT: int = API_PORT
     APP_HOST: str = API_HOST
 
+    # Jurisdiction routing configuration
+    DEFAULT_JURISDICTION: str = os.getenv("DEFAULT_JURISDICTION", "India")
+
 
 config = Config()
