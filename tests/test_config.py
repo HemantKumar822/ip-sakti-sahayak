@@ -15,3 +15,4 @@ def test_config_instance():
     assert config.CORPUS_RAW_DIR == "./corpus/raw"
     assert config.CORPUS_MANIFEST_PATH == "./corpus/manifest.json"
     assert config.DEFAULT_JURISDICTION == "India"
+    assert config.ABS_THRESHOLD == 0.55
