@@ -1,10 +1,10 @@
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "--cov=src --cov-report=term-missing --cov-report=html:htmlcov --cov-report=xml --cov-fail-under=70"
+addopts = "--cov=src --cov=ingestion --cov-report=term-missing --cov-report=html:htmlcov --cov-report=xml --cov-fail-under=70"
 
 [tool.coverage.run]
-source = ["src"]
+source = ["src", "ingestion"]
 omit = [
     "src/frontend/*",
 ]
