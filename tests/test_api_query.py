@@ -43,6 +43,6 @@ def test_query_endpoint_empty_payload():
 
 def test_lifespan_startup_and_shutdown():
     with TestClient(app) as test_client:
-        assert test_client.app.state.is_ready is True
+        assert app.state.is_ready is True
         res = test_client.get("/health")
         assert res.status_code == 200
