@@ -7,6 +7,9 @@ load_dotenv()
 
 class Config:
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+    GEMINI_TEMPERATURE: float = float(os.getenv("GEMINI_TEMPERATURE", "0.1"))
+    GEMINI_MAX_OUTPUT_TOKENS: int = int(os.getenv("GEMINI_MAX_OUTPUT_TOKENS", "2048"))
 
     # Embedding configuration
     EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
@@ -36,6 +39,13 @@ class Config:
     RETRIEVAL_TOP_K: int = int(os.getenv("RETRIEVAL_TOP_K", "5"))
     ABS_THRESHOLD: float = float(os.getenv("ABS_THRESHOLD", "0.55"))
 
+    # Privacy configuration
+    PII_STRIP_ENABLED: bool = os.getenv("PII_STRIP_ENABLED", "true").lower() in (
+        "true",
+        "1",
+        "yes",
+    )
+
     # Server configuration (supports API_PORT/APP_PORT and API_HOST/APP_HOST)
     API_PORT: int = int(os.getenv("API_PORT", os.getenv("APP_PORT", "8000")))
     API_HOST: str = os.getenv("API_HOST", os.getenv("APP_HOST", "0.0.0.0"))
@@ -44,6 +54,16 @@ class Config:
 
     # Jurisdiction routing configuration
     DEFAULT_JURISDICTION: str = os.getenv("DEFAULT_JURISDICTION", "India")
+
+    # Standard Advisory Messages and Disclaimers
+    DISCLAIMER_TEXT: str = os.getenv(
+        "DISCLAIMER_TEXT",
+        "This information is provided for general awareness and does not constitute legal advice. Consult a qualified IP attorney for decisions specific to your situation.",
+    )
+    ABSTENTION_MESSAGE: str = os.getenv(
+        "ABSTENTION_MESSAGE",
+        "The system cannot provide a confident advisory based on available legal corpus. Please consult an IP professional.",
+    )
 
 
 config = Config()

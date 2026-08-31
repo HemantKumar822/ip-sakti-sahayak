@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
 
+from src.config import config
+
 
 class Citation(BaseModel):
     doc_id: str = Field(..., description="Unique identifier for the cited document")
@@ -55,7 +57,7 @@ class QueryResponse(BaseModel):
         description="Explanation provided when system abstains from answering",
     )
     disclaimer: str = Field(
-        default="This is for awareness only. Not legal advice.",
+        default=config.DISCLAIMER_TEXT,
         description="Standard legal disclaimer",
     )
     response_time_ms: int = Field(
