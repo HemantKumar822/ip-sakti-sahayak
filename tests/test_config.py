@@ -16,3 +16,13 @@ def test_config_instance():
     assert config.CORPUS_MANIFEST_PATH == "./corpus/manifest.json"
     assert config.DEFAULT_JURISDICTION == "India"
     assert config.ABS_THRESHOLD == 0.55
+    assert config.GEMINI_MODEL in (
+        "gemini-1.5-flash",
+        "gemini-2.5-flash",
+        "gemini-3.5-flash",
+    )
+    assert config.GEMINI_TEMPERATURE == 0.1
+    assert config.GEMINI_MAX_OUTPUT_TOKENS == 2048
+    assert config.PII_STRIP_ENABLED is True
+    assert "general awareness" in config.DISCLAIMER_TEXT
+    assert "IP professional" in config.ABSTENTION_MESSAGE

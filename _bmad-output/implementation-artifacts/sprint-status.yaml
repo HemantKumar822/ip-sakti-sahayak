@@ -16,45 +16,45 @@ sprints:
     stories:
       - id: "1.1"
         title: "Project Skeleton and Environment Setup"
-        status: todo
+        status: done
         component: infra
         labels: ["component:infra", "type:feature", "priority:p1"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "Must be Story 1 — everything else depends on docker-compose, config.py, Pydantic models"
       - id: "1.2"
         title: "Corpus Manifest Validator"
-        status: todo
+        status: done
         component: corpus
         labels: ["component:corpus", "type:feature", "priority:p1"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "Hard-fail on missing fields. Prerequisite for all ingestion stories."
       - id: "1.3"
         title: "India Code Corpus Fetcher"
-        status: todo
+        status: done
         component: corpus
         labels: ["component:corpus", "type:feature", "priority:p1"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "Fetches Patents Act, Biological Diversity Act, D&C Act Schedule E"
       - id: "1.4"
         title: "PDF Parser and Text Chunker"
-        status: todo
+        status: done
         component: corpus
         labels: ["component:corpus", "type:feature", "priority:p1"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "300-600 token chunks, preserves section headings"
       - id: "1.5"
         title: "Embedding Computation and ChromaDB Storage"
-        status: todo
+        status: done
         component: corpus
         labels: ["component:corpus", "type:feature", "priority:p1"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "sentence-transformers BAAI/bge-small-en-v1.5, loads once per run"
       - id: "1.6"
         title: "Retriever Module"
-        status: todo
+        status: done
         component: corpus
         labels: ["component:corpus", "type:feature", "priority:p1"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "VectorStore protocol + ChromaStore implementation. Top-K with metadata."
     risks:
       - "TKDL programmatic access may be blocked — fallback to publicly available PDF excerpts"
@@ -73,38 +73,38 @@ sprints:
     stories:
       - id: "2.1"
         title: "FastAPI Server Skeleton and Query Endpoint"
-        status: todo
+        status: done
         component: api
         labels: ["component:api", "type:feature", "priority:p1"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "Lifespan event pre-loads embedding model. /health endpoint included."
       - id: "2.2"
         title: "Product Category Classifier"
-        status: todo
+        status: done
         component: pipeline
         labels: ["component:pipeline", "type:feature", "priority:p1"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "Gemini structured output. ClassifierOutput Pydantic schema. One LLM call per query."
       - id: "2.3"
         title: "Jurisdiction Router"
-        status: todo
+        status: done
         component: pipeline
         labels: ["component:pipeline", "type:feature", "priority:p1"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "India-only MVP. Flag international references. No external API calls."
       - id: "2.4"
         title: "ABS / TKDL Prior Art Checker"
-        status: todo
+        status: done
         component: pipeline
         labels: ["component:pipeline", "type:feature", "priority:p1"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "Parallel to main retrieval. Retrieval-based (not keyword list). Cites manifest."
       - id: "2.5"
         title: "Confidence Gate"
-        status: todo
+        status: done
         component: pipeline
         labels: ["component:pipeline", "type:feature", "priority:p0"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "P0 — abstention is the core anti-hallucination gate. Pure function, no side effects."
     risks:
       - "Gemini API free tier rate limits — use model name env var so we can switch to flash-8b"
@@ -124,31 +124,31 @@ sprints:
     stories:
       - id: "3.1"
         title: "Answer Generator"
-        status: todo
+        status: done
         component: pipeline
         labels: ["component:pipeline", "type:feature", "priority:p0"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "P0 — retrieval-only constraint enforced in prompt. Fallback to abstention on schema error."
       - id: "3.2"
         title: "Privacy / PII Strip and Query Logger"
-        status: todo
+        status: done
         component: privacy
         labels: ["component:privacy", "type:feature", "priority:p1"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "DPDP compliance. PII strip before log. Structured JSON to stdout."
       - id: "3.3"
         title: "Full Pipeline Integration (API Route)"
-        status: todo
+        status: done
         component: api
         labels: ["component:api", "type:feature", "priority:p1"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "Wires all pipeline stages. Measures response_time_ms. 503 on Gemini failure."
       - id: "3.4"
         title: "Streamlit Web Interface"
-        status: todo
+        status: in-progress
         component: frontend
         labels: ["component:frontend", "type:feature", "priority:p1"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "No personal data fields. UUID session ID. Disclaimer always visible."
     risks:
       - "Streamlit ↔ FastAPI integration (HTTP, not direct import) — test early in 3.3"
