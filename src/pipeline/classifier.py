@@ -32,7 +32,8 @@ class Classifier:
     def __init__(self):
         """Initializes the Classifier and configures the Gemini API."""
         genai.configure(api_key=config.GEMINI_API_KEY)
-        self.model = genai.GenerativeModel("gemini-1.5-flash")
+        model_name = getattr(config, "GEMINI_MODEL", "gemini-1.5-flash")
+        self.model = genai.GenerativeModel(model_name)
 
     def classify(self, query: str) -> ClassifierOutput:
         """
