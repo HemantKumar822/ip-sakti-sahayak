@@ -5,6 +5,7 @@ on:
     types: [closed]
     branches:
       - develop
+      - main
 
 permissions:
   issues: write
@@ -52,7 +53,7 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: issueNumber,
-                  body: `Resolved by PR #${prNumber} (\`${prTitle}\`) merged into \`develop\`.`
+                  body: `Resolved by PR #${prNumber} (\`${prTitle}\`) merged into \`${pr.base.ref}\`.`
                 });
 
                 // Close the issue
