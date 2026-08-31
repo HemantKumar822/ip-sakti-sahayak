@@ -14,3 +14,4 @@ def test_config_instance():
     assert config.RETRIEVAL_TOP_K == 5
     assert config.CORPUS_RAW_DIR == "./corpus/raw"
     assert config.CORPUS_MANIFEST_PATH == "./corpus/manifest.json"
+    assert config.DEFAULT_JURISDICTION == "India"
