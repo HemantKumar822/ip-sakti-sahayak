@@ -21,6 +21,9 @@ if css_path.exists():
 
 # API Configuration
 API_HOST = os.getenv("API_HOST", "127.0.0.1")
+if API_HOST == "0.0.0.0":
+    # Windows cannot route HTTP requests to 0.0.0.0, use localhost loopback
+    API_HOST = "127.0.0.1"
 API_PORT = os.getenv("API_PORT", "8000")
 API_URL = f"http://{API_HOST}:{API_PORT}"
 
@@ -65,7 +68,7 @@ with st.sidebar:
     if api_online:
         st.success("🟢 Backend API Connected")
     else:
-        st.warning("🟠 Backend API Offline (Run `run_api.bat`)")
+        st.warning("🟠 Backend API Offline (Run `./run_api.sh`)")
     st.caption(f"Session ID: `{st.session_state.session_id[:8]}...`")
     st.markdown("---")
     st.markdown(
@@ -103,7 +106,7 @@ if submit_button:
         st.warning("Please enter a question before submitting.")
     elif not api_online:
         st.error(
-            f"Cannot connect to Backend API at {API_URL}. Please ensure `run_api.bat` is running."
+            f"Cannot connect to Backend API at {API_URL}. Please ensure the API server (`./run_api.sh`) is running."
         )
     else:
         with st.spinner("Analyzing legal corpus and validating citations..."):
