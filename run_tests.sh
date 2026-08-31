@@ -1,4 +1,8 @@
 #!/bin/bash
 source .venv/bin/activate
-export $(cat .env | xargs)
+if [ -f .env ]; then
+    set -a
+    source .env 2>/dev/null || true
+    set +a
+fi
 pytest --cov=src tests/
