@@ -34,6 +34,7 @@ class Config:
     # Pipeline thresholds
     CONFIDENCE_THRESHOLD: float = float(os.getenv("CONFIDENCE_THRESHOLD", "0.65"))
     RETRIEVAL_TOP_K: int = int(os.getenv("RETRIEVAL_TOP_K", "5"))
+    ABS_THRESHOLD: float = float(os.getenv("ABS_THRESHOLD", "0.55"))
 
     # Server configuration (supports API_PORT/APP_PORT and API_HOST/APP_HOST)
     API_PORT: int = int(os.getenv("API_PORT", os.getenv("APP_PORT", "8000")))
