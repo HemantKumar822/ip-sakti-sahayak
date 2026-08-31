@@ -18,11 +18,13 @@ class MockGenerateContentResponse:
 
 def test_classifier_proprietary(classifier):
     mock_response = MockGenerateContentResponse(
-        json.dumps({
-            "category": "Proprietary Ayurveda",
-            "confidence": 0.9,
-            "reason": "Chyawanprash is a well-known proprietary formulation."
-        })
+        json.dumps(
+            {
+                "category": "Proprietary Ayurveda",
+                "confidence": 0.9,
+                "reason": "Chyawanprash is a well-known proprietary formulation.",
+            }
+        )
     )
     with patch.object(classifier.model, "generate_content", return_value=mock_response):
         result = classifier.classify("What is the IP protection for Chyawanprash?")
@@ -33,11 +35,13 @@ def test_classifier_proprietary(classifier):
 
 def test_classifier_classical(classifier):
     mock_response = MockGenerateContentResponse(
-        json.dumps({
-            "category": "Classical Ayurveda",
-            "confidence": 0.95,
-            "reason": "Triphala is a traditional formula."
-        })
+        json.dumps(
+            {
+                "category": "Classical Ayurveda",
+                "confidence": 0.95,
+                "reason": "Triphala is a traditional formula.",
+            }
+        )
     )
     with patch.object(classifier.model, "generate_content", return_value=mock_response):
         result = classifier.classify("How is Triphala traditionally made?")
@@ -48,11 +52,13 @@ def test_classifier_classical(classifier):
 
 def test_classifier_unclassifiable(classifier):
     mock_response = MockGenerateContentResponse(
-        json.dumps({
-            "category": "Unclassifiable",
-            "confidence": 0.95,
-            "reason": "Not related to Ayurveda."
-        })
+        json.dumps(
+            {
+                "category": "Unclassifiable",
+                "confidence": 0.95,
+                "reason": "Not related to Ayurveda.",
+            }
+        )
     )
     with patch.object(classifier.model, "generate_content", return_value=mock_response):
         result = classifier.classify("What is the best programming language?")
@@ -62,7 +68,9 @@ def test_classifier_unclassifiable(classifier):
 
 
 def test_classifier_api_failure(classifier):
-    with patch.object(classifier.model, "generate_content", side_effect=Exception("API Timeout")):
+    with patch.object(
+        classifier.model, "generate_content", side_effect=Exception("API Timeout")
+    ):
         result = classifier.classify("Does this error out gracefully?")
         assert isinstance(result, ClassifierOutput)
         assert result.category == "Unclassifiable"

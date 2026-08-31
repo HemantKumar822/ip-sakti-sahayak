@@ -37,10 +37,10 @@ class Classifier:
     def classify(self, query: str) -> ClassifierOutput:
         """
         Classifies a user query into an Ayurveda product category.
-        
+
         Args:
             query (str): The user's question.
-            
+
         Returns:
             ClassifierOutput: A structured response with category, confidence, and reason.
         """
