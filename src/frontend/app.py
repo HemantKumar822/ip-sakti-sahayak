@@ -141,7 +141,7 @@ if submit_button:
                     if status == "abstained":
                         abstain_text = data.get(
                             "abstention_message",
-                            "Insufficient information in the current legal corpus to answer reliably. Please consult a qualified IP attorney.",
+                            "We don't have enough information in our corpus to answer this accurately. Please consult a qualified IP attorney.",
                         )
                         st.markdown(
                             f"""
@@ -153,14 +153,24 @@ if submit_button:
                             unsafe_allow_html=True,
                         )
                     else:
+                        category = data.get("category", "")
                         answer_text = data.get("answer", "No answer text returned.")
                         jurisdiction = data.get("jurisdiction", "India (MVP)")
                         response_time = data.get("response_time_ms", 0)
 
+                        category_badge_html = (
+                            f'<span class="category-badge">🏷️ {category}</span>'
+                            if category
+                            else ""
+                        )
+
                         st.markdown(
                             f"""
                             <div class="card">
-                                <div class="card-title">Advisory Guidance</div>
+                                <div class="card-header-row">
+                                    <div class="card-title">Advisory Guidance</div>
+                                    {category_badge_html}
+                                </div>
                                 <div class="card-body">{answer_text}</div>
                                 <div class="card-meta">
                                     <span>Jurisdiction: <strong>{jurisdiction}</strong></span> &nbsp;•&nbsp;
@@ -175,7 +185,7 @@ if submit_button:
                     citations = data.get("citations", [])
                     if citations:
                         with st.expander(
-                            f"📚 Legal Sources & Citations ({len(citations)})",
+                            f"📄 Citations ({len(citations)})",
                             expanded=True,
                         ):
                             for idx, cit in enumerate(citations, 1):

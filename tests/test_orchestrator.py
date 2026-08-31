@@ -1,3 +1,4 @@
+import asyncio
 from unittest.mock import MagicMock, patch
 
 from src.config import config
@@ -81,9 +82,11 @@ def test_orchestrator_generate_answered_success():
         answer_generator=mock_gen,
     )
 
-    response = orchestrator.run_pipeline(
-        query_text="Can I patent a classical Triphala formulation in India?",
-        session_id="session-123",
+    response = asyncio.run(
+        orchestrator.run_pipeline(
+            query_text="Can I patent a classical Triphala formulation in India?",
+            session_id="session-123",
+        )
     )
 
     assert response.status == "answered"
@@ -145,9 +148,11 @@ def test_orchestrator_abstain_on_low_confidence():
         answer_generator=mock_gen,
     )
 
-    response = orchestrator.run_pipeline(
-        query_text="What is the patent status of quantum computing semiconductor?",
-        session_id="session-456",
+    response = asyncio.run(
+        orchestrator.run_pipeline(
+            query_text="What is the patent status of quantum computing semiconductor?",
+            session_id="session-456",
+        )
     )
 
     assert response.status == "abstained"
@@ -195,8 +200,11 @@ def test_run_pipeline_wrapper_function():
             ),
         ),
     ):
-        res = run_pipeline(
-            query="Can I patent Ashwagandha extract?", session_id="test-session"
+        res = asyncio.run(
+            run_pipeline(
+                query="Can I patent Ashwagandha extract?", session_id="test-session"
+            )
         )
         assert res.status == "abstained"
         assert res.category == "Herbal Formulations"
+        assert res.disclaimer == config.DISCLAIMER_TEXT

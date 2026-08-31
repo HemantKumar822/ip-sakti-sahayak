@@ -74,8 +74,26 @@ def test_app_py_syntax_and_css_loading():
     # Verify Python syntax validity
     ast.parse(app_content)
 
-    # Verify CSS loading logic
+    # Verify CSS loading logic and key UI text
     assert "styles.css" in app_content
     assert "IP-SAKTI Sahayak" in app_content
     assert "Ask your Ayurveda IP question" in app_content
     assert "India 🇮🇳" in app_content
+    assert "category-badge" in app_content
+    assert "callout-abs" in app_content
+    assert "callout-abstain" in app_content
+    assert "session_id" in app_content
+
+    # Verify no personal data collection fields exist
+    assert "email" not in app_content.lower()
+    assert "phone" not in app_content.lower()
+    assert "full_name" not in app_content.lower()
+
+
+def test_styles_css_contains_category_badge_and_card_header():
+    css_path = Path("src/frontend/styles.css")
+    css_content = css_path.read_text(encoding="utf-8")
+    assert ".category-badge" in css_content
+    assert ".card-header-row" in css_content
+    assert ".callout-abs" in css_content
+    assert ".callout-abstain" in css_content

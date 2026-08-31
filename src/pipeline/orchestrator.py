@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import time
 
@@ -34,14 +35,14 @@ class PipelineOrchestrator:
         self.confidence_gate = confidence_gate or ConfidenceGate()
         self.answer_generator = answer_generator or AnswerGenerator()
 
-    def run_pipeline(self, query_text: str, session_id: str) -> QueryResponse:
-        """Execute the full pipeline for an incoming user query.
+    async def run_pipeline(self, query_text: str, session_id: str) -> QueryResponse:
+        """Execute the full pipeline asynchronously for an incoming user query.
 
         Execution flow:
         1. PII Stripping (DPDP Act compliance)
         2. Category Classification
         3. Jurisdiction Routing
-        4. Vector Retrieval & ABS/TKDL Prior Art Check
+        4. Vector Retrieval & ABS/TKDL Prior Art Check (Parallelized via asyncio.gather)
         5. Anti-Hallucination Confidence Gate
         6. Citation-Grounded Answer Generation vs Abstention
         7. Structured Privacy Audit Logging
@@ -57,7 +58,7 @@ class PipelineOrchestrator:
         """
         start_time = time.perf_counter()
 
-        logger.info("Executing RAG pipeline for session %s", session_id)
+        logger.info("Executing async RAG pipeline for session %s", session_id)
 
         # 1. PII Stripping
         cleaned_query = (
@@ -67,23 +68,26 @@ class PipelineOrchestrator:
         )
 
         # 2. Classification
-        category_out = self.classifier.classify(cleaned_query)
+        category_out = await asyncio.to_thread(self.classifier.classify, cleaned_query)
 
         # 3. Jurisdiction Routing
         routed_out = self.jurisdiction_router.route(
             cleaned_query, classifier_output=category_out
         )
 
-        # 4. Retrieval & ABS / TKDL Prior Art Check
-        retrieved_chunks = self.retriever.retrieve(cleaned_query)
-        abs_out = self.abs_checker.check(cleaned_query)
+        # 4. Retrieval & ABS / TKDL Prior Art Check (Parallel execution)
+        retrieved_chunks, abs_out = await asyncio.gather(
+            asyncio.to_thread(self.retriever.retrieve, cleaned_query),
+            asyncio.to_thread(self.abs_checker.check, cleaned_query),
+        )
 
         # 5. Confidence Gate (Anti-Hallucination)
         gate_out = self.confidence_gate.evaluate(retrieved_chunks)
 
         # 6. Answer Generation vs Abstention
         if gate_out.decision == "generate":
-            gen_out = self.answer_generator.generate(
+            gen_out = await asyncio.to_thread(
+                self.answer_generator.generate,
                 query=cleaned_query,
                 chunks=gate_out.chunks,
                 product_category=category_out.category,
@@ -129,7 +133,8 @@ class PipelineOrchestrator:
                 retrieved_doc_ids.append(doc_id)
 
         # 7. Privacy Audit Logging (runs with stripped query)
-        log_query(
+        await asyncio.to_thread(
+            log_query,
             session_id=session_id,
             query_text=query_text,
             category=category_out.category,
@@ -155,15 +160,23 @@ class PipelineOrchestrator:
         )
 
 
-def run_pipeline(query: str, session_id: str) -> QueryResponse:
-    """Convenience functional wrapper for executing the RAG pipeline.
+async def run_pipeline(
+    query_text: str | None = None,
+    session_id: str = "",
+    query: str | None = None,
+) -> QueryResponse:
+    """Convenience functional wrapper for executing the RAG pipeline asynchronously.
 
     Args:
-        query: Query string submitted by the user.
+        query_text: Primary query text parameter.
         session_id: Session identifier.
+        query: Alternative query string parameter for backwards compatibility.
 
     Returns:
         QueryResponse object.
     """
+    target_query = query_text if query_text is not None else (query or "")
     orchestrator = PipelineOrchestrator()
-    return orchestrator.run_pipeline(query_text=query, session_id=session_id)
+    return await orchestrator.run_pipeline(
+        query_text=target_query, session_id=session_id
+    )

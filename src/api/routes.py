@@ -26,7 +26,7 @@ async def health_check() -> dict[str, str]:
 async def process_query(request: QueryRequest) -> QueryResponse:
     """Process an intellectual property query through the RAG pipeline."""
     try:
-        return orchestrator.run_pipeline(
+        return await orchestrator.run_pipeline(
             query_text=request.query_text,
             session_id=request.session_id,
         )
