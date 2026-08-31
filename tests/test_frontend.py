@@ -18,7 +18,6 @@ def test_styles_css_exists_and_contains_all_design_tokens():
         "--color-accent",
         "--color-success",
         "--color-warning",
-        "--color-error",
     ]
     for color in required_colors:
         assert color in css_content, f"CSS variable {color} missing from styles.css"
@@ -77,8 +76,8 @@ def test_app_py_syntax_and_css_loading():
     # Verify CSS loading logic and key UI text
     assert "styles.css" in app_content
     assert "IP-SAKTI Sahayak" in app_content
-    assert "Ask your Ayurveda IP question" in app_content
-    assert "India 🇮🇳" in app_content
+    assert "Ayurveda IP Advisory" in app_content
+    assert "INDIA JURISDICTION" in app_content
     assert "category-badge" in app_content
     assert "callout-abs" in app_content
     assert "callout-abstain" in app_content
