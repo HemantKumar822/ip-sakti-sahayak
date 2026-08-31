@@ -17,6 +17,7 @@ from src.pipeline.confidence_gate import (
     evaluate_confidence,
 )
 from src.pipeline.jurisdiction_router import JurisdictionRouter, RouterOutput
+from src.pipeline.orchestrator import PipelineOrchestrator, run_pipeline
 from src.pipeline.retriever import Retriever
 
 __all__ = [
@@ -31,7 +32,9 @@ __all__ = [
     "GeneratorOutput",
     "JurisdictionRouter",
     "PipelineCitation",
+    "PipelineOrchestrator",
     "Retriever",
     "RouterOutput",
     "evaluate_confidence",
+    "run_pipeline",
 ]

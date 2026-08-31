@@ -4,10 +4,7 @@ from fastapi.testclient import TestClient
 
 from src.config import config
 from src.main import app
-from src.pipeline.abs_tkdl_checker import ABSCheckerOutput
-from src.pipeline.answer_generator import Citation as GenCitation
-from src.pipeline.answer_generator import GeneratorOutput
-from src.pipeline.classifier import ClassifierOutput
+from src.models.response import Citation, QueryResponse
 
 client = TestClient(app)
 
@@ -18,35 +15,13 @@ def test_query_endpoint_answered_success():
         "session_id": "abc-123",
     }
 
-    mock_classifier = ClassifierOutput(
+    mock_response = QueryResponse(
+        status="answered",
         category="Classical Ayurveda",
-        confidence=0.95,
-        reason="Triphala is a classical recipe.",
-    )
-
-    mock_chunks = [
-        {
-            "doc_id": "patents-act-1970",
-            "section": "Section 3(p)",
-            "document_type": "statute",
-            "source_url": "https://indiacode.nic.in",
-            "date_retrieved": "2026-08-31",
-            "content": "Section 3(p) excludes traditional knowledge.",
-            "similarity_score": 0.88,
-        }
-    ]
-
-    mock_abs_out = ABSCheckerOutput(
-        abs_flag=False,
-        abs_detail=None,
-        citations=[],
-        similarity_score=0.2,
-    )
-
-    mock_gen_out = GeneratorOutput(
+        jurisdiction="India",
         answer="Under Section 3(p) of the Patents Act [1], classical formulations cannot be patented.",
         citations=[
-            GenCitation(
+            Citation(
                 doc_id="patents-act-1970",
                 source_url="https://indiacode.nic.in",
                 doc_type="statute",
@@ -55,24 +30,22 @@ def test_query_endpoint_answered_success():
             )
         ],
         abs_flag=False,
+        abs_detail=None,
+        confidence_score=0.88,
+        abstention_message=None,
         disclaimer=config.DISCLAIMER_TEXT,
+        response_time_ms=150,
     )
 
-    with (
-        patch(
-            "src.pipeline.classifier.Classifier.classify", return_value=mock_classifier
-        ),
-        patch("src.pipeline.retriever.Retriever.retrieve", return_value=mock_chunks),
-        patch(
-            "src.pipeline.abs_tkdl_checker.ABSChecker.check", return_value=mock_abs_out
-        ),
-        patch(
-            "src.pipeline.answer_generator.AnswerGenerator.generate",
-            return_value=mock_gen_out,
-        ),
-    ):
+    with patch(
+        "src.api.routes.orchestrator.run_pipeline", return_value=mock_response
+    ) as mock_run:
         response = client.post("/api/v1/query", json=payload)
         assert response.status_code == 200
+        mock_run.assert_called_once_with(
+            query_text="Can I patent a classical Triphala formulation in India?",
+            session_id="abc-123",
+        )
 
         data = response.json()
         assert data["status"] == "answered"
@@ -82,8 +55,7 @@ def test_query_endpoint_answered_success():
         assert data["abs_flag"] is False
         assert data["abstention_message"] is None
         assert data["disclaimer"] == config.DISCLAIMER_TEXT
-        assert isinstance(data["response_time_ms"], int)
-        assert data["response_time_ms"] >= 0
+        assert data["response_time_ms"] == 150
 
 
 def test_query_endpoint_abstained_low_confidence():
@@ -92,18 +64,21 @@ def test_query_endpoint_abstained_low_confidence():
         "session_id": "abc-456",
     }
 
-    mock_classifier = ClassifierOutput(
+    mock_response = QueryResponse(
+        status="abstained",
         category="Unclassifiable",
-        confidence=0.1,
-        reason="Not Ayurveda.",
+        jurisdiction="India",
+        answer=None,
+        citations=[],
+        abs_flag=False,
+        abs_detail=None,
+        confidence_score=0.1,
+        abstention_message=config.ABSTENTION_MESSAGE,
+        disclaimer=config.DISCLAIMER_TEXT,
+        response_time_ms=50,
     )
 
-    with (
-        patch(
-            "src.pipeline.classifier.Classifier.classify", return_value=mock_classifier
-        ),
-        patch("src.pipeline.retriever.Retriever.retrieve", return_value=[]),
-    ):
+    with patch("src.api.routes.orchestrator.run_pipeline", return_value=mock_response):
         response = client.post("/api/v1/query", json=payload)
         assert response.status_code == 200
 
@@ -111,7 +86,7 @@ def test_query_endpoint_abstained_low_confidence():
         assert data["status"] == "abstained"
         assert data["answer"] is None
         assert data["citations"] == []
-        assert data["abstention_message"] is not None
+        assert data["abstention_message"] == config.ABSTENTION_MESSAGE
         assert data["disclaimer"] == config.DISCLAIMER_TEXT
 
 
@@ -122,7 +97,7 @@ def test_query_endpoint_service_error_503():
     }
 
     with patch(
-        "src.pipeline.classifier.Classifier.classify",
+        "src.api.routes.orchestrator.run_pipeline",
         side_effect=RuntimeError("Fatal pipeline crash"),
     ):
         response = client.post("/api/v1/query", json=payload)
