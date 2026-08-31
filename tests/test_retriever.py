@@ -2,9 +2,8 @@ import uuid
 from typing import Any
 from unittest.mock import MagicMock
 
-import numpy as np
-
 import chromadb
+import numpy as np
 import pytest
 from chromadb import EmbeddingFunction
 from chromadb.api.types import Documents, Embeddings
