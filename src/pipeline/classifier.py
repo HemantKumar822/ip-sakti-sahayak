@@ -54,7 +54,7 @@ class Classifier:
                 ),
             )
             return ClassifierOutput.model_validate_json(response.text)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Classifier API or parsing failed: {e}")
             return ClassifierOutput(
                 category="Unclassifiable",
