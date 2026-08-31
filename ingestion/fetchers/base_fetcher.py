@@ -28,6 +28,17 @@ class BaseFetcher(ABC):
         logger.info("Saved raw text for '%s' to %s", doc_id, file_path)
         return str(file_path)
 
+    def save_raw_binary(
+        self, doc_id: str, content: bytes, extension: str = ".pdf"
+    ) -> str:
+        """Saves raw binary content to corpus/raw/<doc_id><extension>."""
+        self.raw_dir.mkdir(parents=True, exist_ok=True)
+        ext = extension if extension.startswith(".") else f".{extension}"
+        file_path = self.raw_dir / f"{doc_id}{ext}"
+        file_path.write_bytes(content)
+        logger.info("Saved raw binary for '%s' to %s", doc_id, file_path)
+        return str(file_path)
+
     def update_manifest(self, metadata: dict[str, Any]) -> None:
         """
         Validates metadata and updates corpus/manifest.json.
