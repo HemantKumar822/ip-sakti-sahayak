@@ -8,3 +8,4 @@ def test_config_instance():
     assert config.VECTOR_DB_COLLECTION_NAME == "ip_sakti_docs"
     assert config.CORPUS_RAW_DIR == "./corpus/raw"
     assert config.CORPUS_MANIFEST_PATH == "./corpus/manifest.json"
+    assert config.DEFAULT_JURISDICTION == "India"

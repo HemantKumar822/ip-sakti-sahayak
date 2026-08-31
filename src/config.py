@@ -13,6 +13,7 @@ class Config:
     CORPUS_RAW_DIR = os.getenv("CORPUS_RAW_DIR", "./corpus/raw")
     APP_PORT = int(os.getenv("APP_PORT", "8000"))
     APP_HOST = os.getenv("APP_HOST", "0.0.0.0")
+    DEFAULT_JURISDICTION = os.getenv("DEFAULT_JURISDICTION", "India")
 
 
 config = Config()
