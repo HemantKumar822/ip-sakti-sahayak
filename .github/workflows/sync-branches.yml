@@ -1,0 +1,45 @@
+name: Auto-Sync Main and Develop
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Sync Branches
+    # Avoid infinite recursion if the bot pushes
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync develop -> main
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          git checkout main
+          git pull origin main
+          git merge origin/develop --no-edit -m "ci: auto-sync develop to main [skip ci]"
+          git push origin main
+
+      - name: Sync main -> develop
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git checkout develop
+          git pull origin develop
+          git merge origin/main --no-edit -m "ci: auto-sync main to develop [skip ci]"
+          git push origin develop
