@@ -1,1 +1,29 @@
-[]
+[
+  {
+    "doc_id": "tkdl-overview",
+    "source_url": "https://www.tkdl.res.in/tkdl/langdefault/common/Abouttkdl.asp",
+    "document_type": "policy",
+    "date_retrieved": "2026-08-31",
+    "version_or_amendment_date": "2023-01-01",
+    "title": "Traditional Knowledge Digital Library (TKDL) - Overview and Framework",
+    "chunk_count": 1
+  },
+  {
+    "doc_id": "tkdl-neem-turmeric-prior-art",
+    "source_url": "https://www.csir.res.in/tkdl-success-stories-neem-turmeric",
+    "document_type": "policy",
+    "date_retrieved": "2026-08-31",
+    "version_or_amendment_date": "2023-01-01",
+    "title": "TKDL Case Studies: Revocation of Neem and Turmeric Patent Claims",
+    "chunk_count": 1
+  },
+  {
+    "doc_id": "tkdl-ashwagandha-formulations",
+    "source_url": "https://www.tkdl.res.in/tkdl/langdefault/ayurveda/ashwagandha.asp",
+    "document_type": "policy",
+    "date_retrieved": "2026-08-31",
+    "version_or_amendment_date": "2023-01-01",
+    "title": "Traditional Knowledge Classification and Protection of Withania somnifera (Ashwagandha)",
+    "chunk_count": 1
+  }
+]
