@@ -5,3 +5,6 @@ chromadb
 pydantic
 python-dotenv
 google-generativeai
+pypdf
+tiktoken
+requests
