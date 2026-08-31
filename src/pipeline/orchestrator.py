@@ -1,0 +1,169 @@
+import logging
+import time
+
+from src.config import config
+from src.models.response import Citation, QueryResponse
+from src.pipeline.abs_tkdl_checker import ABSChecker
+from src.pipeline.answer_generator import AnswerGenerator
+from src.pipeline.classifier import Classifier
+from src.pipeline.confidence_gate import ConfidenceGate
+from src.pipeline.jurisdiction_router import JurisdictionRouter
+from src.pipeline.retriever import Retriever
+from src.privacy.pii_strip import log_query, strip_pii
+
+logger = logging.getLogger("ip_sakti.pipeline.orchestrator")
+
+
+class PipelineOrchestrator:
+    """Orchestrates the end-to-end execution of the IP Sakti Sahayak RAG pipeline."""
+
+    def __init__(
+        self,
+        classifier: Classifier | None = None,
+        jurisdiction_router: JurisdictionRouter | None = None,
+        retriever: Retriever | None = None,
+        abs_checker: ABSChecker | None = None,
+        confidence_gate: ConfidenceGate | None = None,
+        answer_generator: AnswerGenerator | None = None,
+    ) -> None:
+        """Initialize pipeline components with optional dependency injection."""
+        self.classifier = classifier or Classifier()
+        self.jurisdiction_router = jurisdiction_router or JurisdictionRouter()
+        self.retriever = retriever or Retriever()
+        self.abs_checker = abs_checker or ABSChecker()
+        self.confidence_gate = confidence_gate or ConfidenceGate()
+        self.answer_generator = answer_generator or AnswerGenerator()
+
+    def run_pipeline(self, query_text: str, session_id: str) -> QueryResponse:
+        """Execute the full pipeline for an incoming user query.
+
+        Execution flow:
+        1. PII Stripping (DPDP Act compliance)
+        2. Category Classification
+        3. Jurisdiction Routing
+        4. Vector Retrieval & ABS/TKDL Prior Art Check
+        5. Anti-Hallucination Confidence Gate
+        6. Citation-Grounded Answer Generation vs Abstention
+        7. Structured Privacy Audit Logging
+        8. Response Assembly & Latency Calculation
+
+        Args:
+            query_text: Raw query text submitted by the user.
+            session_id: Anonymous session identifier.
+
+        Returns:
+            QueryResponse containing the final answer or abstention, citations,
+            and verification metadata.
+        """
+        start_time = time.perf_counter()
+
+        logger.info("Executing RAG pipeline for session %s", session_id)
+
+        # 1. PII Stripping
+        cleaned_query = (
+            strip_pii(query_text)
+            if getattr(config, "PII_STRIP_ENABLED", True)
+            else query_text
+        )
+
+        # 2. Classification
+        category_out = self.classifier.classify(cleaned_query)
+
+        # 3. Jurisdiction Routing
+        routed_out = self.jurisdiction_router.route(
+            cleaned_query, classifier_output=category_out
+        )
+
+        # 4. Retrieval & ABS / TKDL Prior Art Check
+        retrieved_chunks = self.retriever.retrieve(cleaned_query)
+        abs_out = self.abs_checker.check(cleaned_query)
+
+        # 5. Confidence Gate (Anti-Hallucination)
+        gate_out = self.confidence_gate.evaluate(retrieved_chunks)
+
+        # 6. Answer Generation vs Abstention
+        if gate_out.decision == "generate":
+            gen_out = self.answer_generator.generate(
+                query=cleaned_query,
+                chunks=gate_out.chunks,
+                product_category=category_out.category,
+                abs_flag=abs_out.abs_flag,
+            )
+
+            # Map generator citations to API response citation models
+            response_citations = [
+                Citation(
+                    doc_id=c.doc_id,
+                    source_url=c.source_url,
+                    doc_type=c.doc_type,
+                    section=c.section,
+                    date_retrieved=c.date_retrieved,
+                )
+                for c in gen_out.citations
+            ]
+
+            status = (
+                "answered"
+                if response_citations
+                or (gen_out.answer and gen_out.answer != config.ABSTENTION_MESSAGE)
+                else "abstained"
+            )
+            final_answer = gen_out.answer if status == "answered" else None
+            abstention_msg = (
+                None
+                if status == "answered"
+                else (gen_out.answer or config.ABSTENTION_MESSAGE)
+            )
+        else:
+            status = "abstained"
+            final_answer = None
+            response_citations = []
+            abstention_msg = config.ABSTENTION_MESSAGE
+
+        # Extract retrieved document IDs for audit logging
+        retrieved_doc_ids = []
+        for chunk in retrieved_chunks:
+            meta = chunk.get("metadata", {})
+            doc_id = chunk.get("doc_id") or meta.get("doc_id")
+            if doc_id and doc_id not in retrieved_doc_ids:
+                retrieved_doc_ids.append(doc_id)
+
+        # 7. Privacy Audit Logging (runs with stripped query)
+        log_query(
+            session_id=session_id,
+            query_text=query_text,
+            category=category_out.category,
+            retrieved_doc_ids=retrieved_doc_ids,
+            confidence_score=gate_out.max_score,
+            decision=gate_out.decision,
+        )
+
+        elapsed_ms = max(int((time.perf_counter() - start_time) * 1000), 0)
+
+        return QueryResponse(
+            status=status,
+            category=category_out.category,
+            jurisdiction=routed_out.jurisdiction,
+            answer=final_answer,
+            citations=response_citations,
+            abs_flag=abs_out.abs_flag,
+            abs_detail=abs_out.abs_detail,
+            confidence_score=gate_out.max_score,
+            abstention_message=abstention_msg,
+            disclaimer=config.DISCLAIMER_TEXT,
+            response_time_ms=elapsed_ms,
+        )
+
+
+def run_pipeline(query: str, session_id: str) -> QueryResponse:
+    """Convenience functional wrapper for executing the RAG pipeline.
+
+    Args:
+        query: Query string submitted by the user.
+        session_id: Session identifier.
+
+    Returns:
+        QueryResponse object.
+    """
+    orchestrator = PipelineOrchestrator()
+    return orchestrator.run_pipeline(query_text=query, session_id=session_id)
