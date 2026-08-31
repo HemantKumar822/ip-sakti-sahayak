@@ -8,3 +8,5 @@ google-generativeai
 pypdf
 tiktoken
 requests
+sentence-transformers
+
