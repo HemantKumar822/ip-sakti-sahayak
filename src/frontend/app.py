@@ -31,12 +31,12 @@ if "session_id" not in st.session_state:
 if "is_loading" not in st.session_state:
     st.session_state.is_loading = False
 
-# Top Bar
+# Notion-style Top Bar
 st.markdown(
     """
     <div class="top-bar">
         <span class="top-bar-title">🏛️ IP-SAKTI Sahayak</span>
-        <span class="top-bar-badge">INDIA JURISDICTION</span>
+        <span class="top-bar-badge">India 🇮🇳</span>
     </div>
     """,
     unsafe_allow_html=True,
@@ -45,8 +45,8 @@ st.markdown(
 # Main Page Heading
 st.markdown(
     """
-    <div class="page-title">Ayurveda IP Advisory</div>
-    <div class="page-subtitle">A citation-grounded advisory tool for evaluating prior art, patentability, and compliance under India's Patents Act and Biological Diversity Act.</div>
+    <div class="page-title">Ask your Ayurveda IP question</div>
+    <div class="page-subtitle">Citation-grounded Intellectual Property advisory for Traditional Knowledge & Biological Resources</div>
     """,
     unsafe_allow_html=True,
 )
@@ -75,24 +75,24 @@ with st.sidebar:
         "- 🔒 Privacy by Design (DPDP Act)"
     )
 
-# Query Input Form
+# Query Input Form (Notion-style input + Action button)
 with st.form(key="query_form", clear_on_submit=False):
     query_input = st.text_area(
-        label="Describe the formulation or patent concept",
-        placeholder="Describe the Ayurvedic formulation or patent concept (e.g. Can I patent a formulation containing Ashwagandha and Turmeric?)",
-        height=110,
+        label="Ask your Ayurveda IP question",
+        placeholder="e.g. Can I patent an Ayurveda formulation containing Ashwagandha?",
+        height=90,
         disabled=st.session_state.is_loading,
     )
 
-    col_note, col_btn = st.columns([4, 1.2])
+    col_note, col_btn = st.columns([4, 1])
     with col_note:
         st.markdown(
-            '<div class="jurisdiction-note"><span style="font-size: 16px;">🔐</span> All analysis is strictly confidential and anonymized.</div>',
+            '<div class="jurisdiction-note">This system only covers India jurisdiction (MVP).</div>',
             unsafe_allow_html=True,
         )
     with col_btn:
         submit_button = st.form_submit_button(
-            label="Generate Advisory",
+            label="Ask →",
             disabled=st.session_state.is_loading,
             use_container_width=True,
         )
@@ -100,13 +100,13 @@ with st.form(key="query_form", clear_on_submit=False):
 # Form Submission Processing
 if submit_button:
     if not query_input.strip():
-        st.warning("Please enter a question or concept before generating the advisory.")
+        st.warning("Please enter a question before submitting.")
     elif not api_online:
         st.error(
-            f"Cannot connect to Backend API at {API_URL}. Please ensure the API server is running."
+            f"Cannot connect to Backend API at {API_URL}. Please ensure `run_api.bat` is running."
         )
     else:
-        with st.spinner("Analyzing TKDL corpus and evaluating statutory compliance..."):
+        with st.spinner("Analyzing legal corpus and validating citations..."):
             payload = {
                 "query_text": query_input.strip(),
                 "session_id": st.session_state.session_id,
@@ -125,12 +125,12 @@ if submit_button:
                     if data.get("abs_flag"):
                         abs_msg = data.get(
                             "abs_detail",
-                            "This formulation involves Indian biological resources. Compliance under the Biological Diversity Act 2002 (ABS mechanisms) applies.",
+                            "This query involves biological resources. ABS compliance under the Biological Diversity Act 2002 may apply.",
                         )
                         st.markdown(
                             f"""
                             <div class="callout-abs">
-                                <strong>🧬 Access and Benefit Sharing (ABS) Alert</strong>
+                                <strong>🧬 Access and Benefit Sharing (ABS) Alert</strong><br/>
                                 {abs_msg}
                             </div>
                             """,
@@ -141,12 +141,12 @@ if submit_button:
                     if status == "abstained":
                         abstain_text = data.get(
                             "abstention_message",
-                            "The provided concept falls outside the indexed corpus of traditional knowledge and statutory definitions. We cannot confidently evaluate its patentability. Please consult a qualified patent attorney.",
+                            "We don't have enough information in our corpus to answer this accurately. Please consult a qualified IP attorney.",
                         )
                         st.markdown(
                             f"""
                             <div class="callout-abstain">
-                                <strong>⚠️ Advisory Abstained</strong>
+                                <strong>⚠️ Honest Abstention Notice</strong><br/>
                                 {abstain_text}
                             </div>
                             """,
@@ -154,12 +154,12 @@ if submit_button:
                         )
                     else:
                         category = data.get("category", "")
-                        answer_text = data.get("answer", "No advisory generated.")
+                        answer_text = data.get("answer", "No answer text returned.")
                         jurisdiction = data.get("jurisdiction", "India (MVP)")
                         response_time = data.get("response_time_ms", 0)
 
                         category_badge_html = (
-                            f'<span class="category-badge">{category}</span>'
+                            f'<span class="category-badge">🏷️ {category}</span>'
                             if category
                             else ""
                         )
@@ -168,13 +168,13 @@ if submit_button:
                             f"""
                             <div class="card">
                                 <div class="card-header-row">
-                                    <h2 class="card-title">Advisory Brief</h2>
+                                    <div class="card-title">Advisory Guidance</div>
                                     {category_badge_html}
                                 </div>
                                 <div class="card-body">{answer_text}</div>
                                 <div class="card-meta">
-                                    <span>Jurisdiction: <strong>{jurisdiction}</strong></span>
-                                    <span>Latency: <strong>{response_time}ms</strong></span>
+                                    <span>Jurisdiction: <strong>{jurisdiction}</strong></span> &nbsp;•&nbsp;
+                                    <span>Response time: <strong>{response_time} ms</strong></span>
                                 </div>
                             </div>
                             """,
@@ -185,7 +185,7 @@ if submit_button:
                     citations = data.get("citations", [])
                     if citations:
                         with st.expander(
-                            f"📑 Source Citations ({len(citations)})",
+                            f"📄 Citations ({len(citations)})",
                             expanded=True,
                         ):
                             for idx, cit in enumerate(citations, 1):
@@ -201,7 +201,7 @@ if submit_button:
                                     st.caption(f'> "{snippet}"')
                                 if source_url:
                                     st.markdown(
-                                        f"[View Official Record ↗]({source_url})"
+                                        f"[View Official Source ↗]({source_url})"
                                     )
                                 st.divider()
                 else:
@@ -213,9 +213,8 @@ if submit_button:
 st.markdown(
     """
     <div class="disclaimer-footer">
-        <strong>Legal Disclaimer</strong><br>
-        IP-SAKTI Sahayak is an automated informational tool. 
-        It is provided for general awareness only and does not constitute formal legal advice or clearance.
+        ⚖️ <strong>Legal Disclaimer:</strong> IP-SAKTI Sahayak is an automated informational tool developed for SIH 2026.
+        It is provided for general awareness only and does not constitute formal legal advice.
     </div>
     """,
     unsafe_allow_html=True,
