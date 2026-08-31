@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 from fastapi.testclient import TestClient
 
@@ -38,7 +38,9 @@ def test_query_endpoint_answered_success():
     )
 
     with patch(
-        "src.api.routes.orchestrator.run_pipeline", return_value=mock_response
+        "src.api.routes.orchestrator.run_pipeline",
+        new_callable=AsyncMock,
+        return_value=mock_response,
     ) as mock_run:
         response = client.post("/api/v1/query", json=payload)
         assert response.status_code == 200
@@ -78,7 +80,11 @@ def test_query_endpoint_abstained_low_confidence():
         response_time_ms=50,
     )
 
-    with patch("src.api.routes.orchestrator.run_pipeline", return_value=mock_response):
+    with patch(
+        "src.api.routes.orchestrator.run_pipeline",
+        new_callable=AsyncMock,
+        return_value=mock_response,
+    ):
         response = client.post("/api/v1/query", json=payload)
         assert response.status_code == 200
 
@@ -98,6 +104,7 @@ def test_query_endpoint_service_error_503():
 
     with patch(
         "src.api.routes.orchestrator.run_pipeline",
+        new_callable=AsyncMock,
         side_effect=RuntimeError("Fatal pipeline crash"),
     ):
         response = client.post("/api/v1/query", json=payload)
