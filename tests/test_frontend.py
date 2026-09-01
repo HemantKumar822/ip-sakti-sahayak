@@ -207,3 +207,54 @@ def test_abs_detail_source_formatting():
     clean_msg2, src_html2 = format_abs_detail(sample_without_source)
     assert clean_msg2 == "Ashwagandha is a biological resource."
     assert src_html2 == ""
+
+
+def test_styles_css_contains_skeleton_and_error_callout_styles():
+    css_path = Path("src/frontend/styles.css")
+    css_content = css_path.read_text(encoding="utf-8")
+
+    # Issue #29 Skeleton Screen styles
+    assert "@keyframes shimmer" in css_content
+    assert ".skeleton" in css_content
+    assert ".skeleton-card" in css_content
+    assert "animation: shimmer 1.5s infinite" in css_content
+
+    # Issue #30 Abstention Card styles
+    assert "#F7F6F3" in css_content
+    assert ".callout-abstain-header" in css_content
+    assert ".callout-abstain-icon" in css_content
+    assert ".callout-abstain-title" in css_content
+    assert ".callout-abstain-body" in css_content
+    assert ".callout-abstain-suggestions" in css_content
+
+    # Issue #30 Error Card styles
+    assert ".callout-error" in css_content
+    assert "#FEE2E2" in css_content
+    assert "#FCA5A5" in css_content
+    assert "#991B1B" in css_content
+    assert "#7F1D1D" in css_content
+    assert ".callout-error-header" in css_content
+    assert ".callout-error-title" in css_content
+    assert ".callout-error-body" in css_content
+
+
+def test_app_py_contains_skeleton_loading_and_abstention_error_states():
+    app_path = Path("src/frontend/app.py")
+    app_content = app_path.read_text(encoding="utf-8")
+
+    # Issue #29 Skeleton Screen elements
+    assert "skeleton-card" in app_content
+    assert "skeleton" in app_content
+    assert "loading_placeholder" in app_content
+
+    # Issue #30 Abstention Card elements
+    assert "callout-abstain" in app_content
+    assert "💭" in app_content
+    assert "We don't have enough information" in app_content
+    assert "Ayurveda patents" in app_content
+
+    # Issue #30 Error Card elements
+    assert "callout-error" in app_content
+    assert "⚡" in app_content
+    assert "Service temporarily unavailable" in app_content
+    assert "Try another question →" in app_content
