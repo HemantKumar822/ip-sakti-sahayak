@@ -158,8 +158,8 @@ class AnswerGenerator:
             response = self.model.generate_content(
                 refusal_prompt,
                 generation_config=genai.GenerationConfig(
-                    temperature=0.3, # slightly higher temp for conversational tone
-                    max_output_tokens=150,
+                    temperature=0.3,  # slightly higher temp for conversational tone
+                    max_output_tokens=300,
                 ),
             )
             if response and getattr(response, "text", None):
@@ -175,6 +175,7 @@ class AnswerGenerator:
         chunks: list[dict[str, Any]] | None,
         product_category: str | None = None,
         abs_flag: bool = False,
+        conversation_history: list[dict[str, str]] | None = None,
     ) -> GeneratorOutput:
         """Generates a citation-grounded answer based strictly on retrieved chunks.
 
@@ -196,10 +197,21 @@ class AnswerGenerator:
             f"Product Category: {product_category}\n" if product_category else ""
         )
 
+        # Build conversation history block for multi-turn context
+        history_block = ""
+        if conversation_history:
+            turns = conversation_history[-6:]  # Cap at last 6 turns to stay within token budget
+            history_lines = []
+            for turn in turns:
+                role = "User" if turn.get("role") == "user" else "Assistant"
+                history_lines.append(f"{role}: {turn.get('content', '')}")
+            history_block = "\nPrior Conversation Context (for follow-up awareness only):\n" + "\n".join(history_lines) + "\n"
+
         full_prompt = (
             f"{SYSTEM_PROMPT}\n\n"
             f"{category_header}"
-            f"Retrieved Legal Documents:\n{context_text}\n\n"
+            f"Retrieved Legal Documents:\n{context_text}\n"
+            f"{history_block}\n"
             f"User Question: {query}\n\n"
             f'Mandatory Disclaimer text to include exactly: "{config.DISCLAIMER_TEXT}"'
         )

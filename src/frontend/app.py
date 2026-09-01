@@ -299,9 +299,19 @@ if prompt := st.chat_input("Ask your Ayurveda IP question", disabled=not api_onl
             unsafe_allow_html=True,
         )
 
+        # Build conversation history from prior messages (last 6 turns, oldest first)
+        history = []
+        for m in st.session_state.messages[-6:]:
+            role = m["role"]
+            if role == "user":
+                history.append({"role": "user", "content": m["content"]})
+            elif role == "assistant" and m.get("status") == "answered":
+                history.append({"role": "assistant", "content": m.get("content", "")})
+
         payload = {
             "query_text": prompt.strip(),
             "session_id": st.session_state.session_id,
+            "conversation_history": history,
         }
 
         try:

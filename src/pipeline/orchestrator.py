@@ -35,7 +35,9 @@ class PipelineOrchestrator:
         self.confidence_gate = confidence_gate or ConfidenceGate()
         self.answer_generator = answer_generator or AnswerGenerator()
 
-    async def run_pipeline(self, query_text: str, session_id: str) -> QueryResponse:
+    async def run_pipeline(
+        self, query_text: str, session_id: str, conversation_history: list[dict[str, str]] | None = None
+    ) -> QueryResponse:
         """Execute the full pipeline asynchronously for an incoming user query.
 
         Execution flow:
@@ -90,6 +92,7 @@ class PipelineOrchestrator:
                 chunks=gate_out.chunks,
                 product_category=category_out.category,
                 abs_flag=abs_out.abs_flag,
+                conversation_history=conversation_history,
             )
 
             # Map generator citations to API response citation models
@@ -165,19 +168,11 @@ async def run_pipeline(
     query_text: str | None = None,
     session_id: str = "",
     query: str | None = None,
+    conversation_history: list[dict[str, str]] | None = None,
 ) -> QueryResponse:
-    """Convenience functional wrapper for executing the RAG pipeline asynchronously.
-
-    Args:
-        query_text: Primary query text parameter.
-        session_id: Session identifier.
-        query: Alternative query string parameter for backwards compatibility.
-
-    Returns:
-        QueryResponse object.
-    """
+    """Convenience functional wrapper for executing the RAG pipeline asynchronously."""
     target_query = query_text if query_text is not None else (query or "")
     orchestrator = PipelineOrchestrator()
     return await orchestrator.run_pipeline(
-        query_text=target_query, session_id=session_id
+        query_text=target_query, session_id=session_id, conversation_history=conversation_history
     )

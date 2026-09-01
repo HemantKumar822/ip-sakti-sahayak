@@ -47,6 +47,7 @@ def test_query_endpoint_answered_success():
         mock_run.assert_called_once_with(
             query_text="Can I patent a classical Triphala formulation in India?",
             session_id="abc-123",
+            conversation_history=None,
         )
 
         data = response.json()
