@@ -105,6 +105,53 @@ def test_styles_css_contains_category_badge_and_card_header():
     assert ".callout-abstain" in css_content
 
 
+def test_styles_css_contains_abs_callout_and_citations_accordion_styles():
+    css_path = Path("src/frontend/styles.css")
+    css_content = css_path.read_text(encoding="utf-8")
+
+    # Issue #28 ABS Callout styling rules
+    assert "#FFF3CD" in css_content
+    assert "#92400E" in css_content
+    assert ".callout-abs-header" in css_content
+    assert ".callout-abs-title" in css_content
+    assert ".callout-abs-body" in css_content
+    assert ".callout-abs-source" in css_content
+
+    # Issue #27 Citations Accordion styling rules
+    assert "details.citations-accordion" in css_content
+    assert "summary.citations-summary" in css_content
+    assert ".summary-arrow" in css_content
+    assert "transform: rotate(90deg)" in css_content
+    assert ".citations-list" in css_content
+    assert ".citation-row" in css_content
+    assert "border-left: 3px solid var(--color-border)" in css_content
+    assert ".citation-title" in css_content
+    assert ".citation-snippet" in css_content
+    assert ".citation-url" in css_content
+    assert ".citation-meta" in css_content
+
+
+def test_app_py_contains_notion_abs_and_citations_accordion_elements():
+    app_path = Path("src/frontend/app.py")
+    app_content = app_path.read_text(encoding="utf-8")
+
+    # Issue #28 ABS Callout elements
+    assert "ABS Compliance Note" in app_content
+    assert "⚠️" in app_content
+    assert "callout-abs-header" in app_content
+    assert "callout-abs-title" in app_content
+    assert "callout-abs-body" in app_content
+
+    # Issue #27 Citations Accordion elements
+    assert 'details class="citations-accordion"' in app_content
+    assert 'summary class="citations-summary"' in app_content
+    assert "summary-arrow" in app_content
+    assert "citations-list" in app_content
+    assert "citation-row" in app_content
+    assert "citation-title" in app_content
+    assert "citation-meta" in app_content
+
+
 def test_inline_citation_regex_formatting():
     import re
 
@@ -133,3 +180,27 @@ def test_inline_citation_regex_formatting():
     assert '<a href="#citation-3" class="citation-marker" target="_self">[3]</a>' in res
     assert res.startswith("<p>")
     assert res.endswith("</p>")
+
+
+def test_abs_detail_source_formatting():
+    import re
+
+    def format_abs_detail(text: str) -> tuple[str, str]:
+        source_match = re.search(r"\[Source:\s*([^\]]+)\]", text)
+        if source_match:
+            src_url = source_match.group(1).strip()
+            clean_abs_msg = text[: source_match.start()].strip()
+            source_html = f'<div class="callout-abs-source"><strong>Source:</strong> <a href="{src_url}" target="_blank" rel="noopener noreferrer">{src_url} ↗</a></div>'
+            return clean_abs_msg, source_html
+        return text, ""
+
+    sample_with_source = "Ashwagandha is a biological resource. [Source: https://indiacode.nic.in/handle/123]"
+    clean_msg, src_html = format_abs_detail(sample_with_source)
+    assert clean_msg == "Ashwagandha is a biological resource."
+    assert 'href="https://indiacode.nic.in/handle/123"' in src_html
+    assert 'target="_blank"' in src_html
+
+    sample_without_source = "Ashwagandha is a biological resource."
+    clean_msg2, src_html2 = format_abs_detail(sample_without_source)
+    assert clean_msg2 == "Ashwagandha is a biological resource."
+    assert src_html2 == ""
