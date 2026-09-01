@@ -13,10 +13,11 @@ Your task is to analyze the user's question and determine which Ayurveda product
 Categories:
 1. "Classical Ayurveda": Formulations described in ancient texts (e.g. Charaka Samhita) and based on traditional recipes.
 2. "Proprietary Ayurveda": Modern Ayurveda products with unique formulas not in classical texts (e.g., Dabur Chyawanprash).
-3. "Unclassifiable": The query is not related to Ayurveda products, or lacks enough context to decide.
+3. "Conversational": A general greeting, pleasantry, or follow-up that does not ask a specific legal or factual question (e.g., "hi", "thank you", "okay").
+4. "Unclassifiable": The query is not related to Ayurveda products, or lacks enough context to decide.
 
 Analyze the question carefully and return a JSON object containing:
-- "category": Must be exactly one of "Classical Ayurveda", "Proprietary Ayurveda", or "Unclassifiable".
+- "category": Must be exactly one of "Classical Ayurveda", "Proprietary Ayurveda", "Conversational", or "Unclassifiable".
 - "confidence": A float between 0.0 and 1.0 indicating your confidence.
 - "reason": A one-sentence explanation for your classification.
 """

@@ -137,6 +137,48 @@ class AnswerGenerator:
             disclaimer=config.DISCLAIMER_TEXT,
         )
 
+    def generate_conversational(self, query: str, conversation_history: list[dict[str, str]] | None = None) -> GeneratorOutput:
+        """Handles conversational queries (e.g. greetings) without strict RAG chunks."""
+        prompt = (
+            "You are IP-SAKTI Sahayak, an expert IP legal assistant for Ayurveda, ABS compliance, and Traditional Knowledge in India.\n"
+            f"The user said: \"{query}\"\n\n"
+            "Respond politely and conversationally in 1-2 sentences. "
+            "If they are greeting you, greet them back and ask how you can help them with their Ayurveda IP queries."
+        )
+        
+        try:
+            if conversation_history:
+                chat_history = []
+                for turn in conversation_history:
+                    role = "user" if turn.get("role") == "user" else "model"
+                    chat_history.append({"role": role, "parts": [turn.get("content", "")]})
+                chat = self.model.start_chat(history=chat_history)
+                response = chat.send_message(
+                    prompt, 
+                    generation_config=genai.GenerationConfig(temperature=0.5, max_output_tokens=300)
+                )
+            else:
+                response = self.model.generate_content(
+                    prompt, 
+                    generation_config=genai.GenerationConfig(temperature=0.5, max_output_tokens=300)
+                )
+
+            answer = response.text.strip() if response and getattr(response, "text", None) else "Hello! How can I help you with Ayurveda IP today?"
+            return GeneratorOutput(
+                answer=answer,
+                citations=[],
+                abs_flag=False,
+                disclaimer=config.DISCLAIMER_TEXT
+            )
+        except Exception as e:
+            logger.error("Failed to generate conversational response: %s", e)
+            return GeneratorOutput(
+                answer="Hello! How can I help you with Ayurveda IP today?",
+                citations=[],
+                abs_flag=False,
+                disclaimer=config.DISCLAIMER_TEXT
+            )
+
     def generate_refusal(self, query: str) -> str:
         """Generates a dynamic, polite refusal for out-of-domain queries using the LLM.
 

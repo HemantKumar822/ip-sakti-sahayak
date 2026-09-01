@@ -4,10 +4,10 @@ import time
 
 from src.config import config
 from src.models.response import Citation, QueryResponse
-from src.pipeline.abs_tkdl_checker import ABSChecker
+from src.pipeline.abs_tkdl_checker import ABSChecker, ABSCheckerOutput
 from src.pipeline.answer_generator import AnswerGenerator
 from src.pipeline.classifier import Classifier
-from src.pipeline.confidence_gate import ConfidenceGate
+from src.pipeline.confidence_gate import ConfidenceGate, ConfidenceGateOutput
 from src.pipeline.jurisdiction_router import JurisdictionRouter
 from src.pipeline.retriever import Retriever
 from src.privacy.pii_strip import log_query, strip_pii
@@ -75,58 +75,75 @@ class PipelineOrchestrator:
             cleaned_query, classifier_output=category_out
         )
 
-        # 4. Retrieval & ABS / TKDL Prior Art Check (Parallel execution)
-        retrieved_chunks, abs_out = await asyncio.gather(
-            asyncio.to_thread(self.retriever.retrieve, cleaned_query),
-            asyncio.to_thread(self.abs_checker.check, cleaned_query),
-        )
-
-        # 5. Confidence Gate (Anti-Hallucination)
-        gate_out = self.confidence_gate.evaluate(retrieved_chunks)
-
-        # 6. Answer Generation vs Abstention
-        if gate_out.decision == "generate":
+        # 4. Retrieval & ABS / TKDL Prior Art Check
+        if category_out.category == "Conversational":
+            retrieved_chunks = []
+            abs_out = ABSCheckerOutput(abs_flag=False, abs_detail=None)
+            gate_out = ConfidenceGateOutput(decision="generate", max_score=1.0, chunks=[])
+            
             gen_out = await asyncio.to_thread(
-                self.answer_generator.generate,
+                self.answer_generator.generate_conversational,
                 query=cleaned_query,
-                chunks=gate_out.chunks,
-                product_category=category_out.category,
-                abs_flag=abs_out.abs_flag,
                 conversation_history=conversation_history,
             )
-
-            # Map generator citations to API response citation models
-            response_citations = [
-                Citation(
-                    doc_id=c.doc_id,
-                    source_url=c.source_url,
-                    doc_type=c.doc_type,
-                    section=c.section,
-                    date_retrieved=c.date_retrieved,
-                )
-                for c in gen_out.citations
-            ]
-
-            status = (
-                "answered"
-                if response_citations
-                or (gen_out.answer and gen_out.answer != config.ABSTENTION_MESSAGE)
-                else "abstained"
-            )
-            final_answer = gen_out.answer if status == "answered" else None
-            abstention_msg = (
-                None
-                if status == "answered"
-                else (gen_out.answer or config.ABSTENTION_MESSAGE)
-            )
-        else:
-            status = "abstained"
-            final_answer = None
+            
+            status = "answered"
+            final_answer = gen_out.answer
             response_citations = []
-            abstention_msg = await asyncio.to_thread(
-                self.answer_generator.generate_refusal,
-                query=cleaned_query,
+            abstention_msg = None
+        else:
+            # Parallel execution of external checks
+            retrieved_chunks, abs_out = await asyncio.gather(
+                asyncio.to_thread(self.retriever.retrieve, cleaned_query),
+                asyncio.to_thread(self.abs_checker.check, cleaned_query),
             )
+
+            # 5. Confidence Gate (Anti-Hallucination)
+            gate_out = self.confidence_gate.evaluate(retrieved_chunks)
+
+            # 6. Answer Generation vs Abstention
+            if gate_out.decision == "generate":
+                gen_out = await asyncio.to_thread(
+                    self.answer_generator.generate,
+                    query=cleaned_query,
+                    chunks=gate_out.chunks,
+                    product_category=category_out.category,
+                    abs_flag=abs_out.abs_flag,
+                    conversation_history=conversation_history,
+                )
+
+                # Map generator citations to API response citation models
+                response_citations = [
+                    Citation(
+                        doc_id=c.doc_id,
+                        source_url=c.source_url,
+                        doc_type=c.doc_type,
+                        section=c.section,
+                        date_retrieved=c.date_retrieved,
+                    )
+                    for c in gen_out.citations
+                ]
+
+                status = (
+                    "answered"
+                    if response_citations
+                    or (gen_out.answer and gen_out.answer != config.ABSTENTION_MESSAGE)
+                    else "abstained"
+                )
+                final_answer = gen_out.answer if status == "answered" else None
+                abstention_msg = (
+                    None
+                    if status == "answered"
+                    else (gen_out.answer or config.ABSTENTION_MESSAGE)
+                )
+            else:
+                status = "abstained"
+                final_answer = None
+                response_citations = []
+                abstention_msg = await asyncio.to_thread(
+                    self.answer_generator.generate_refusal,
+                    query=cleaned_query,
+                )
 
         # Extract retrieved document IDs for audit logging
         retrieved_doc_ids = []
