@@ -252,9 +252,7 @@ if submit_button:
                             date_retrieved = cit.get("date_retrieved") or "2026-08-01"
 
                             section_display = (
-                                f" — Section: <code>{section}</code>"
-                                if section
-                                else ""
+                                f" — Section: <code>{section}</code>" if section else ""
                             )
                             title_html = f'<div class="citation-title"><strong>[{idx}] {doc_id}</strong>{section_display}</div>'
 
@@ -270,16 +268,14 @@ if submit_button:
                             )
                             meta_html = f'<div class="citation-meta">Retrieved: {date_retrieved} · {doc_type}</div>'
 
-                            citation_rows.append(
-                                f"""
+                            citation_rows.append(f"""
                                 <div id="citation-{idx}" class="citation-row citation-target">
                                     {title_html}
                                     {snippet_html}
                                     {url_html}
                                     {meta_html}
                                 </div>
-                                """
-                            )
+                                """)
 
                         citation_rows_joined = "".join(citation_rows)
                         st.markdown(

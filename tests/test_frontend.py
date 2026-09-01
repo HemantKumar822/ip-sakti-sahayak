@@ -143,8 +143,8 @@ def test_app_py_contains_notion_abs_and_citations_accordion_elements():
     assert "callout-abs-body" in app_content
 
     # Issue #27 Citations Accordion elements
-    assert "details class=\"citations-accordion\"" in app_content
-    assert "summary class=\"citations-summary\"" in app_content
+    assert 'details class="citations-accordion"' in app_content
+    assert 'summary class="citations-summary"' in app_content
     assert "summary-arrow" in app_content
     assert "citations-list" in app_content
     assert "citation-row" in app_content
@@ -204,4 +204,3 @@ def test_abs_detail_source_formatting():
     clean_msg2, src_html2 = format_abs_detail(sample_without_source)
     assert clean_msg2 == "Ashwagandha is a biological resource."
     assert src_html2 == ""
-
