@@ -32,7 +32,7 @@ class Classifier:
     def __init__(self):
         """Initializes the Classifier and configures the Gemini API."""
         genai.configure(api_key=config.GEMINI_API_KEY)
-        model_name = getattr(config, "GEMINI_MODEL", "gemini-1.5-flash")
+        model_name = config.GEMINI_MODEL
         self.model = genai.GenerativeModel(model_name)
 
     def classify(self, query: str) -> ClassifierOutput:
@@ -51,7 +51,7 @@ class Classifier:
                 generation_config=genai.GenerationConfig(
                     response_mime_type="application/json",
                     response_schema=ClassifierOutput,
-                    temperature=0.1,
+                    temperature=config.GEMINI_TEMPERATURE,
                 ),
             )
             return ClassifierOutput.model_validate_json(response.text)
