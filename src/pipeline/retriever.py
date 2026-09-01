@@ -25,9 +25,7 @@ class Retriever:
         self.vector_store: VectorStore = (
             vector_store if vector_store is not None else ChromaStore()
         )
-        self.top_k: int = (
-            top_k if top_k is not None else getattr(config, "RETRIEVAL_TOP_K", 5)
-        )
+        self.top_k: int = top_k if top_k is not None else config.RETRIEVAL_TOP_K
 
     def retrieve(
         self,

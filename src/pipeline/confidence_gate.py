@@ -39,9 +39,7 @@ class ConfidenceGate:
             threshold: Minimum similarity score required to generate (defaults to config.CONFIDENCE_THRESHOLD).
         """
         self.threshold: float = (
-            threshold
-            if threshold is not None
-            else getattr(config, "CONFIDENCE_THRESHOLD", 0.65)
+            threshold if threshold is not None else config.CONFIDENCE_THRESHOLD
         )
 
     def evaluate(self, chunks: list[dict[str, Any]] | None) -> ConfidenceGateOutput:

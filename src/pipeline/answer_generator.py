@@ -84,19 +84,15 @@ class AnswerGenerator:
             max_output_tokens: Max output token limit.
         """
         self.api_key = api_key if api_key is not None else config.GEMINI_API_KEY
-        self.model_name = model_name or getattr(
-            config, "GEMINI_MODEL", "gemini-1.5-flash"
-        )
+        self.model_name = model_name if model_name is not None else config.GEMINI_MODEL
         self.manifest_path = manifest_path or config.CORPUS_MANIFEST_PATH
         self.temperature = (
-            temperature
-            if temperature is not None
-            else getattr(config, "GEMINI_TEMPERATURE", 0.1)
+            temperature if temperature is not None else config.GEMINI_TEMPERATURE
         )
         self.max_output_tokens = (
             max_output_tokens
             if max_output_tokens is not None
-            else getattr(config, "GEMINI_MAX_OUTPUT_TOKENS", 2048)
+            else config.GEMINI_MAX_OUTPUT_TOKENS
         )
 
         if self.api_key:

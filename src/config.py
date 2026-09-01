@@ -7,7 +7,7 @@ load_dotenv()
 
 class Config:
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "")
     GEMINI_TEMPERATURE: float = float(os.getenv("GEMINI_TEMPERATURE", "0.1"))
     GEMINI_MAX_OUTPUT_TOKENS: int = int(os.getenv("GEMINI_MAX_OUTPUT_TOKENS", "2048"))
 
@@ -24,7 +24,7 @@ class Config:
     # Chroma collection name (supports both CHROMA_COLLECTION_NAME and legacy VECTOR_DB_COLLECTION_NAME)
     CHROMA_COLLECTION_NAME: str = os.getenv(
         "CHROMA_COLLECTION_NAME",
-        os.getenv("VECTOR_DB_COLLECTION_NAME", "ip_sakti_corpus"),
+        os.getenv("VECTOR_DB_COLLECTION_NAME", ""),
     )
     VECTOR_DB_COLLECTION_NAME: str = CHROMA_COLLECTION_NAME
 

@@ -68,9 +68,7 @@ class ABSTKDLChecker:
             vector_store if vector_store is not None else ChromaStore()
         )
         self.threshold: float = (
-            threshold
-            if threshold is not None
-            else getattr(config, "ABS_THRESHOLD", 0.55)
+            threshold if threshold is not None else config.ABS_THRESHOLD
         )
         self.top_k: int = top_k if top_k is not None else 3
 

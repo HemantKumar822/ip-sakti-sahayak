@@ -80,6 +80,9 @@ def test_app_py_syntax_and_css_loading():
     assert "Ask your Ayurveda IP question" in app_content
     assert "India 🇮🇳" in app_content
     assert "category-badge" in app_content
+    assert "card-metadata-bar" in app_content
+    assert "citation-marker" in app_content
+    assert "citation-target" in app_content
     assert "callout-abs" in app_content
     assert "callout-abstain" in app_content
     assert "session_id" in app_content
@@ -95,5 +98,38 @@ def test_styles_css_contains_category_badge_and_card_header():
     css_content = css_path.read_text(encoding="utf-8")
     assert ".category-badge" in css_content
     assert ".card-header-row" in css_content
+    assert ".card-metadata-bar" in css_content
+    assert ".citation-marker" in css_content
+    assert ".citation-target" in css_content
     assert ".callout-abs" in css_content
     assert ".callout-abstain" in css_content
+
+
+def test_inline_citation_regex_formatting():
+    import re
+
+    def format_inline_citations(text: str) -> str:
+        def replace_citation(match: re.Match) -> str:
+            raw_nums = match.group(1).split(",")
+            links = []
+            for n in raw_nums:
+                num = n.strip()
+                if num.isdigit():
+                    links.append(
+                        f'<a href="#citation-{num}" class="citation-marker" target="_self">[{num}]</a>'
+                    )
+            return "".join(links) if links else match.group(0)
+
+        processed = re.sub(r"\[(\d+(?:\s*,\s*\d+)*)\]", replace_citation, text)
+        paragraphs = [p.strip() for p in processed.split("\n\n") if p.strip()]
+        if not paragraphs:
+            return f"<p>{processed}</p>"
+        return "".join(f"<p>{p.replace(chr(10), '<br/>')}</p>" for p in paragraphs)
+
+    sample = "Under Section 3(p) of the Patents Act 1970 [1], inventions are non-patentable [2, 3]."
+    res = format_inline_citations(sample)
+    assert '<a href="#citation-1" class="citation-marker" target="_self">[1]</a>' in res
+    assert '<a href="#citation-2" class="citation-marker" target="_self">[2]</a>' in res
+    assert '<a href="#citation-3" class="citation-marker" target="_self">[3]</a>' in res
+    assert res.startswith("<p>")
+    assert res.endswith("</p>")

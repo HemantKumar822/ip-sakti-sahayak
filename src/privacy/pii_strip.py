@@ -93,7 +93,7 @@ def log_query(
     Returns:
         Structured dictionary of the emitted log entry.
     """
-    pii_enabled = getattr(config, "PII_STRIP_ENABLED", True)
+    pii_enabled = config.PII_STRIP_ENABLED
     clean_query = strip_pii(query_text) if pii_enabled else query_text
 
     effective_session_id = session_id or f"anon-{uuid.uuid4()}"

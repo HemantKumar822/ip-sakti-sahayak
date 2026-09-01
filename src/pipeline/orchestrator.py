@@ -62,9 +62,7 @@ class PipelineOrchestrator:
 
         # 1. PII Stripping
         cleaned_query = (
-            strip_pii(query_text)
-            if getattr(config, "PII_STRIP_ENABLED", True)
-            else query_text
+            strip_pii(query_text) if config.PII_STRIP_ENABLED else query_text
         )
 
         # 2. Classification

@@ -145,7 +145,7 @@ sprints:
         notes: "Wires all pipeline stages. Measures response_time_ms. 503 on Gemini failure."
       - id: "3.4"
         title: "Streamlit Web Interface"
-        status: in-progress
+        status: done
         component: frontend
         labels: ["component:frontend", "type:feature", "priority:p1"]
         owner: "HemantKumar822"
@@ -182,10 +182,10 @@ sprints:
         notes: "All queries <10s, ChromaDB volume persists, corpus bind-mounted not baked."
       - id: "4.3"
         title: "Compliance and Configuration Audit"
-        status: todo
+        status: done
         component: testing
         labels: ["component:testing", "type:validation", "priority:p0"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "P0 — grep for hardcoded values, PII test, disclaimer string exact match."
     risks:
       - "Accuracy < 90% on golden set — may require classifier prompt iteration"
