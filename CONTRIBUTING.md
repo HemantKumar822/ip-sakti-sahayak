@@ -143,3 +143,27 @@ We use a feature-branch workflow.
 6. Open a **Pull Request (PR)** on GitHub targeting the `develop` branch.
 7. In your PR description, write `Closes #<issue-number>` so GitHub links and closes the issue when merged.
 8. Wait for CI checks (Lint & Tests) to pass and at least **1 approving review** from a teammate before merging.
+
+---
+
+## 🎯 Demo Day Setup & Performance Checklist
+
+Use this checklist to ensure the system is demo-ready, verified for offline performance, and meets all latency gates:
+
+1. **Environment Verification:**
+   - Confirm `.env` exists and contains a valid `GEMINI_API_KEY`.
+   - Verify that `CONFIDENCE_THRESHOLD=0.65` and `RETRIEVAL_TOP_K=5` are set.
+2. **Corpus & Vector Store Warmup:**
+   - Ensure pre-loaded embeddings exist in `corpus/embeddings/` and `corpus/manifest.json` is present.
+   - Vector search runs 100% locally with ChromaDB (no internet needed for retrieval).
+3. **Execution Scripts:**
+   - Run backend API: `run_api.bat` (Windows) or `./run_api.sh` (Mac/Linux). Notice `--reload` is disabled in production mode for optimal latency.
+   - Run frontend UI: `run_frontend.bat` (Windows) or `./run_frontend.sh` (Mac/Linux).
+4. **Performance & Accuracy Gates:**
+   - Vector search latency: `< 2.0s` per query.
+   - End-to-end response time: `< 10.0s` per query across 5 consecutive queries.
+   - Run the full golden test validation suite before presentation:
+     ```bash
+     pytest tests/test_pipeline_integration.py -v -s
+     ```
+   - Verify that hallucinated citations count is `0`.
