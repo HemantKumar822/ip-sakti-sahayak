@@ -137,6 +137,38 @@ class AnswerGenerator:
             disclaimer=config.DISCLAIMER_TEXT,
         )
 
+    def generate_refusal(self, query: str) -> str:
+        """Generates a dynamic, polite refusal for out-of-domain queries using the LLM.
+
+        Args:
+            query: The user's original query.
+
+        Returns:
+            A string containing a context-aware polite refusal, or the static fallback message if the LLM fails.
+        """
+        refusal_prompt = (
+            "You are the IP-SAKTI Sahayak legal AI assistant.\n"
+            f"The user asked: \"{query}\"\n\n"
+            "We do not have legal documents in our corpus to answer this. "
+            "Write a brief (1-2 sentences), polite refusal explaining that you can only answer questions related to Ayurveda patents, ABS compliance, and traditional knowledge, and therefore cannot help with this query. "
+            "Do NOT attempt to answer the question itself."
+        )
+
+        try:
+            response = self.model.generate_content(
+                refusal_prompt,
+                generation_config=genai.GenerationConfig(
+                    temperature=0.3, # slightly higher temp for conversational tone
+                    max_output_tokens=150,
+                ),
+            )
+            if response and getattr(response, "text", None):
+                return response.text.strip()
+            return config.ABSTENTION_MESSAGE
+        except Exception as e:
+            logger.error("Failed to generate dynamic refusal: %s", e)
+            return config.ABSTENTION_MESSAGE
+
     def generate(
         self,
         query: str,

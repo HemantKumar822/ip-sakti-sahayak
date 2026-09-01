@@ -138,6 +138,7 @@ def test_orchestrator_abstain_on_low_confidence():
     )
 
     mock_gen = MagicMock()
+    mock_gen.generate_refusal.return_value = "Mocked dynamic refusal message"
 
     orchestrator = PipelineOrchestrator(
         classifier=mock_classifier,
@@ -158,9 +159,10 @@ def test_orchestrator_abstain_on_low_confidence():
     assert response.status == "abstained"
     assert response.answer is None
     assert response.citations == []
-    assert response.abstention_message == config.ABSTENTION_MESSAGE
+    assert response.abstention_message == "Mocked dynamic refusal message"
     assert response.disclaimer == config.DISCLAIMER_TEXT
     mock_gen.generate.assert_not_called()
+    mock_gen.generate_refusal.assert_called_once_with(query="What is the patent status of quantum computing semiconductor?")
 
 
 def test_run_pipeline_wrapper_function():
@@ -198,6 +200,10 @@ def test_run_pipeline_wrapper_function():
                 retrieved_count=0,
                 chunks=[],
             ),
+        ),
+        patch(
+            "src.pipeline.answer_generator.AnswerGenerator.generate_refusal",
+            return_value="Mocked dynamic refusal message",
         ),
     ):
         res = asyncio.run(

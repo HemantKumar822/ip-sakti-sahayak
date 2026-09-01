@@ -120,7 +120,10 @@ class PipelineOrchestrator:
             status = "abstained"
             final_answer = None
             response_citations = []
-            abstention_msg = config.ABSTENTION_MESSAGE
+            abstention_msg = await asyncio.to_thread(
+                self.answer_generator.generate_refusal,
+                query=cleaned_query,
+            )
 
         # Extract retrieved document IDs for audit logging
         retrieved_doc_ids = []
