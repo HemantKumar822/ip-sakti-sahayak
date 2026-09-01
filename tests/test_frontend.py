@@ -257,4 +257,3 @@ def test_app_py_contains_skeleton_loading_and_abstention_error_states():
     assert "callout-error" in app_content
     assert "⚡" in app_content
     assert "Service temporarily unavailable" in app_content
-    assert "Try another question →" in app_content

@@ -87,9 +87,11 @@ for message in st.session_state.messages:
         elif message["role"] == "assistant":
             # Check if this is an error/abstain state
             status = message.get("status", "answered")
-            
+
             if status == "abstained":
-                abstain_text = message.get("content", "Our corpus doesn't contain sufficient evidence...")
+                abstain_text = message.get(
+                    "content", "Our corpus doesn't contain sufficient evidence..."
+                )
                 st.markdown(
                     f"""
                     <div class="callout-abstain">
@@ -124,7 +126,7 @@ for message in st.session_state.messages:
                 )
             else:
                 data = message.get("data", {})
-                
+
                 # 1. ABS Detection Alert Callout (Notion Callout Style)
                 if data.get("abs_flag"):
                     abs_msg = data.get(
@@ -155,7 +157,7 @@ for message in st.session_state.messages:
                         """,
                         unsafe_allow_html=True,
                     )
-                    
+
                 category = data.get("category", "")
                 answer_text = message.get("content", "No answer text returned.")
                 jurisdiction = data.get("jurisdiction", "India")
@@ -301,7 +303,7 @@ if prompt := st.chat_input("Ask your Ayurveda IP question", disabled=not api_onl
             "query_text": prompt.strip(),
             "session_id": st.session_state.session_id,
         }
-        
+
         try:
             response = requests.post(
                 f"{API_URL}/api/v1/query",
@@ -309,19 +311,19 @@ if prompt := st.chat_input("Ask your Ayurveda IP question", disabled=not api_onl
                 timeout=20,
             )
             loading_placeholder.empty()
-            
+
             if response.status_code == 200:
                 data = response.json()
                 status = data.get("status", "answered")
-                
+
                 if status == "abstained":
                     msg = {
                         "role": "assistant",
                         "status": "abstained",
                         "content": data.get(
                             "abstention_message",
-                            "Our corpus doesn't contain sufficient evidence to answer this question accurately. Rather than guess, we prefer to be honest about our limitations."
-                        )
+                            "Our corpus doesn't contain sufficient evidence to answer this question accurately. Rather than guess, we prefer to be honest about our limitations.",
+                        ),
                     }
                     st.session_state.messages.append(msg)
                     st.rerun()
@@ -330,7 +332,7 @@ if prompt := st.chat_input("Ask your Ayurveda IP question", disabled=not api_onl
                         "role": "assistant",
                         "status": "answered",
                         "content": data.get("answer", "No answer text returned."),
-                        "data": data
+                        "data": data,
                     }
                     st.session_state.messages.append(msg)
                     st.rerun()
@@ -338,17 +340,17 @@ if prompt := st.chat_input("Ask your Ayurveda IP question", disabled=not api_onl
                 msg = {
                     "role": "assistant",
                     "status": "error",
-                    "content": f"Please wait a moment and try again. (Status: {response.status_code})"
+                    "content": f"Please wait a moment and try again. (Status: {response.status_code})",
                 }
                 st.session_state.messages.append(msg)
                 st.rerun()
-                
+
         except requests.RequestException:
             loading_placeholder.empty()
             msg = {
                 "role": "assistant",
                 "status": "error",
-                "content": "Cannot connect to Backend API. Please ensure the API server is running and try again."
+                "content": "Cannot connect to Backend API. Please ensure the API server is running and try again.",
             }
             st.session_state.messages.append(msg)
             st.rerun()
