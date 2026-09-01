@@ -236,6 +236,22 @@ class AnswerGenerator:
 
             return result
 
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
+            err_msg = str(e).lower()
+            if any(
+                k in err_msg
+                for k in [
+                    "api_key",
+                    "api key",
+                    "invalid api key",
+                    "unauthenticated",
+                    "permission denied",
+                    "api key not valid",
+                    "api_key_invalid",
+                ]
+            ):
+                logger.error("AnswerGenerator API key/auth error: %s", e)
+                raise RuntimeError(f"Gemini API key error: {e}") from e
+
             logger.error("AnswerGenerator failed: %s. Falling back to abstention.", e)
             return self._fallback_abstention(abs_flag=abs_flag)

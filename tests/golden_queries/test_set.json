@@ -1,0 +1,182 @@
+[
+  {
+    "id": 1,
+    "query": "Can Triphala be patented under Indian patent law?",
+    "category": "Classical Ayurveda",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": false,
+    "description": "Classical formulation patent eligibility under Section 3(p)"
+  },
+  {
+    "id": 2,
+    "query": "Is a traditional formulation of Chyawanprash eligible for patent protection in India?",
+    "category": "Classical Ayurveda",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": false,
+    "description": "Classical recipe from ancient texts"
+  },
+  {
+    "id": 3,
+    "query": "Can an ancient Ayurvedic recipe for Trikatu Churna be patented?",
+    "category": "Classical Ayurveda",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": false,
+    "description": "Ancient textbook classical formulation"
+  },
+  {
+    "id": 4,
+    "query": "What protection exists for classical Ayurvedic formulations under Section 3(p) of the Patents Act?",
+    "category": "Classical Ayurveda",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": false,
+    "description": "Statutory exclusion of traditional knowledge"
+  },
+  {
+    "id": 5,
+    "query": "Can classical Ayurvedic medicine mentioned in Charaka Samhita be granted patent protection?",
+    "category": "Classical Ayurveda",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": false,
+    "description": "Charaka Samhita reference classical knowledge"
+  },
+  {
+    "id": 6,
+    "query": "Is Sitopaladi Churna patentable as an invention in India?",
+    "category": "Classical Ayurveda",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": false,
+    "description": "Traditional Ayurvedic powder preparation"
+  },
+  {
+    "id": 7,
+    "query": "Does traditional knowledge of Turmeric and Neem prevent patenting in India?",
+    "category": "Classical Ayurveda",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": false,
+    "description": "TKDL case studies regarding Neem and Turmeric prior art"
+  },
+  {
+    "id": 8,
+    "query": "How does the Traditional Knowledge Digital Library (TKDL) protect classical formulations like Ashwagandha?",
+    "category": "Classical Ayurveda",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": false,
+    "description": "TKDL defensive protection framework"
+  },
+  {
+    "id": 9,
+    "query": "What law protects Chyawanprash branding and trademark in India?",
+    "category": "Proprietary Ayurveda",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": false,
+    "description": "Proprietary branding and trademark protection"
+  },
+  {
+    "id": 10,
+    "query": "Can a novel, modified herbal formulation with enhanced bioavailability derived from Ashwagandha be patented?",
+    "category": "Proprietary Ayurveda",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": true,
+    "description": "Novel proprietary extraction with biological resource"
+  },
+  {
+    "id": 11,
+    "query": "Can a company obtain a patent for an improved extraction process of Curcumin from Turmeric?",
+    "category": "Proprietary Ayurveda",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": true,
+    "description": "Novel process patent on biological material"
+  },
+  {
+    "id": 12,
+    "query": "What IP rights protect the proprietary formulation and packaging of a branded Ayurvedic cough syrup?",
+    "category": "Proprietary Ayurveda",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": false,
+    "description": "Proprietary commercial Ayurvedic formulation and trade dress"
+  },
+  {
+    "id": 13,
+    "query": "Can a novel synthetic derivative of an Ayurvedic herb compound be patented in India?",
+    "category": "Proprietary Ayurveda",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": false,
+    "description": "Synthetic derivative chemical modification"
+  },
+  {
+    "id": 14,
+    "query": "Does Ashwagandha cultivation and commercial extraction require ABS permission under the Biological Diversity Act?",
+    "category": "Proprietary Ayurveda",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": true,
+    "description": "Access and Benefit Sharing (ABS) compliance"
+  },
+  {
+    "id": 15,
+    "query": "How can a proprietary Ayurvedic cosmetic cream obtain trademark and design protection in India?",
+    "category": "Proprietary Ayurveda",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": false,
+    "description": "Cosmetic design registration and trademarking"
+  },
+  {
+    "id": 16,
+    "query": "Is an innovative synergistic combination of standardized Ayurvedic herbal extracts patentable?",
+    "category": "Proprietary Ayurveda",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "expected_abs_flag": true,
+    "description": "Synergistic novel composition"
+  },
+  {
+    "id": 17,
+    "query": "What is quantum computing and how do qubits operate?",
+    "category": "Unclassifiable",
+    "expected_category": "Unclassifiable",
+    "expected_status": "abstained",
+    "expected_abs_flag": false,
+    "description": "Out-of-corpus quantum computing question"
+  },
+  {
+    "id": 18,
+    "query": "How do I build a nuclear reactor using heavy water?",
+    "category": "Unclassifiable",
+    "expected_category": "Unclassifiable",
+    "expected_status": "abstained",
+    "expected_abs_flag": false,
+    "description": "Out-of-corpus nuclear physics question"
+  },
+  {
+    "id": 19,
+    "query": "What are the legal requirements for registering a corporate trademark in Germany?",
+    "category": "Unclassifiable",
+    "expected_category": "Unclassifiable",
+    "expected_status": "abstained",
+    "expected_abs_flag": false,
+    "description": "Out-of-corpus international jurisdiction question"
+  },
+  {
+    "id": 20,
+    "query": "How does the backpropagation algorithm optimize weights in a deep neural network?",
+    "category": "Unclassifiable",
+    "expected_category": "Unclassifiable",
+    "expected_status": "abstained",
+    "expected_abs_flag": false,
+    "description": "Out-of-corpus machine learning question"
+  }
+]

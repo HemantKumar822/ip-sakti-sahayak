@@ -168,17 +168,17 @@ sprints:
     stories:
       - id: "4.1"
         title: "Golden Test Set and Accuracy Validation"
-        status: todo
+        status: done
         component: testing
         labels: ["component:testing", "type:validation", "priority:p0"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "P0 — 20 queries, 0 hallucinated citations. Must run before demo freeze."
       - id: "4.2"
         title: "Performance and Docker Compose Validation"
-        status: todo
+        status: done
         component: infra
         labels: ["component:infra", "type:validation", "priority:p1"]
-        owner: ""
+        owner: "HemantKumar822"
         notes: "All queries <10s, ChromaDB volume persists, corpus bind-mounted not baked."
       - id: "4.3"
         title: "Compliance and Configuration Audit"
