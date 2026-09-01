@@ -51,9 +51,9 @@ html, body, [class*="css"], .stApp {
   color: var(--color-text-primary);
 }
 
-/* Constrain max width to 1080px centered */
+/* Constrain max width to 760px centered */
 .block-container {
-  max-width: 1080px !important;
+  max-width: 760px !important;
   padding-top: 0rem !important;
   padding-bottom: var(--space-8) !important;
   padding-left: var(--space-6) !important;
@@ -498,7 +498,37 @@ details.citations-accordion[open] .summary-arrow {
   text-align: center;
   color: var(--color-text-secondary);
   font-size: var(--text-sm); /* caption */
+  font-style: italic;
   padding: var(--space-8) 0;
   border-top: 1px solid var(--color-border);
   margin-top: var(--space-8);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 768px) {
+  .block-container {
+    padding-left: var(--space-4) !important;
+    padding-right: var(--space-4) !important;
+  }
+  .page-title {
+    font-size: 40px;
+    letter-spacing: -1px;
+  }
+}
+
+@media (max-width: 480px) {
+  .block-container {
+    padding-left: var(--space-3) !important;
+    padding-right: var(--space-3) !important;
+  }
+  .page-title {
+    font-size: 28px;
+    letter-spacing: -0.5px;
+  }
+  .page-subtitle {
+    font-size: 16px;
+  }
+  .disclaimer-footer {
+    font-size: 13px;
+  }
 }

@@ -359,8 +359,7 @@ if prompt := st.chat_input("Ask your Ayurveda IP question", disabled=not api_onl
 st.markdown(
     """
     <div class="disclaimer-footer">
-        ⚖️ <strong>Legal Disclaimer:</strong> IP-SAKTI Sahayak is an automated informational tool developed for SIH 2026.
-        It is provided for general awareness only and does not constitute formal legal advice.
+        This information is provided for general awareness and does not constitute legal advice. Consult a qualified IP attorney for decisions specific to your situation.
     </div>
     """,
     unsafe_allow_html=True,
