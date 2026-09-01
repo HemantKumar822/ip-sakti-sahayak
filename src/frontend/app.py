@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 from pathlib import Path
 
@@ -158,26 +159,62 @@ if submit_button:
                     else:
                         category = data.get("category", "")
                         answer_text = data.get("answer", "No answer text returned.")
-                        jurisdiction = data.get("jurisdiction", "India (MVP)")
-                        response_time = data.get("response_time_ms", 0)
+                        jurisdiction = data.get("jurisdiction", "India")
+                        response_time_ms = data.get("response_time_ms", 0)
 
                         category_badge_html = (
                             f'<span class="category-badge">🏷️ {category}</span>'
                             if category
-                            else ""
+                            else '<span class="category-badge">🏷️ Advisory</span>'
                         )
+                        time_display = (
+                            f"Answered in {response_time_ms / 1000:.1f}s"
+                            if response_time_ms >= 1000
+                            else f"Answered in {response_time_ms} ms"
+                        )
+
+                        # Format inline citations like [1] or [1, 2] into superscript anchor links
+                        def format_inline_citations(text: str) -> str:
+                            def replace_citation(match: re.Match) -> str:
+                                raw_nums = match.group(1).split(",")
+                                links = []
+                                for n in raw_nums:
+                                    num = n.strip()
+                                    if num.isdigit():
+                                        links.append(
+                                            f'<a href="#citation-{num}" class="citation-marker" target="_self">[{num}]</a>'
+                                        )
+                                return "".join(links) if links else match.group(0)
+
+                            processed = re.sub(
+                                r"\[(\d+(?:\s*,\s*\d+)*)\]",
+                                replace_citation,
+                                text,
+                            )
+                            paragraphs = [
+                                p.strip() for p in processed.split("\n\n") if p.strip()
+                            ]
+                            if not paragraphs:
+                                return f"<p>{processed}</p>"
+                            return "".join(
+                                f"<p>{p.replace(chr(10), '<br/>')}</p>"
+                                for p in paragraphs
+                            )
+
+                        formatted_answer_html = format_inline_citations(answer_text)
 
                         st.markdown(
                             f"""
                             <div class="card">
-                                <div class="card-header-row">
-                                    <div class="card-title">Advisory Guidance</div>
+                                <div class="card-metadata-bar">
                                     {category_badge_html}
+                                    <span class="meta-separator">•</span>
+                                    <span class="meta-item">{jurisdiction}</span>
+                                    <span class="meta-separator">•</span>
+                                    <span class="meta-item">{time_display}</span>
                                 </div>
-                                <div class="card-body">{answer_text}</div>
-                                <div class="card-meta">
-                                    <span>Jurisdiction: <strong>{jurisdiction}</strong></span> &nbsp;•&nbsp;
-                                    <span>Response time: <strong>{response_time} ms</strong></span>
+                                <div class="card-body">
+                                    {formatted_answer_html}
                                 </div>
                             </div>
                             """,
@@ -198,7 +235,9 @@ if submit_button:
                                 source_url = cit.get("source_url")
 
                                 st.markdown(
-                                    f"**{idx}. [{doc_id}]** — Section: `{section}`"
+                                    f'<div id="citation-{idx}" class="citation-target"></div>'
+                                    f"**{idx}. [{doc_id}]** — Section: `{section}`",
+                                    unsafe_allow_html=True,
                                 )
                                 if snippet:
                                     st.caption(f'> "{snippet}"')
