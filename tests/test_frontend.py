@@ -86,6 +86,9 @@ def test_app_py_syntax_and_css_loading():
     assert "callout-abs" in app_content
     assert "callout-abstain" in app_content
     assert "session_id" in app_content
+    assert "messages" in app_content
+    assert "st.chat_input" in app_content
+    assert "st.chat_message" in app_content
 
     # Verify no personal data collection fields exist
     assert "email" not in app_content.lower()

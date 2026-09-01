@@ -114,65 +114,6 @@ html, body, [class*="css"], .stApp {
   margin-bottom: var(--space-8);
 }
 
-/* Text Area Input Override */
-.stTextArea {
-  margin-bottom: var(--space-2);
-}
-
-.stTextArea label {
-  display: none !important;
-}
-
-.stTextArea div[data-baseweb="textarea"],
-.stTextArea textarea {
-  border: 1px solid rgb(221,221,221) !important;
-  border-radius: var(--radius-sm) !important;
-  background-color: var(--color-surface) !important;
-  box-shadow: var(--shadow-flat) !important;
-  font-size: 15px !important;
-  color: var(--color-text-primary) !important;
-  padding: 6px !important;
-  line-height: 1.33 !important;
-  resize: vertical !important;
-  transition: box-shadow 0.2s ease !important;
-}
-
-.stTextArea textarea:focus,
-.stTextArea div[data-baseweb="textarea"]:focus-within {
-  border-color: var(--color-accent) !important;
-  box-shadow: var(--shadow-soft) !important;
-}
-
-.stTextArea textarea::placeholder {
-  color: #a39e98 !important; /* ink-faint */
-  font-weight: 400 !important;
-}
-
-/* Submit Action Button (button-primary) */
-.stButton > button {
-  background-color: var(--color-accent) !important;
-  color: #FFFFFF !important;
-  border: none !important;
-  border-radius: 9999px !important; /* pill */
-  font-size: var(--text-base) !important;
-  font-weight: 500 !important;
-  padding: 10px 24px !important;
-  transition: transform 0.15s ease, background-color 0.15s ease !important;
-  cursor: pointer !important;
-}
-
-.stButton > button:hover {
-  background-color: #005bab !important; /* primary-active */
-}
-
-.stButton > button:active {
-  transform: scale(0.9) !important;
-}
-
-.stButton > button:disabled {
-  opacity: 0.4 !important;
-  cursor: not-allowed !important;
-}
 
 /* Helper & Jurisdiction Note */
 .jurisdiction-note {
