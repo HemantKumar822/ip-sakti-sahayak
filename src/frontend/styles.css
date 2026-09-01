@@ -115,6 +115,45 @@ html, body, [class*="css"], .stApp {
 }
 
 
+/* Chat Input & Form Field Text Visibility Overrides */
+[data-testid="stChatInput"],
+[data-testid="stChatInput"] div[data-baseweb="base-input"],
+[data-testid="stChatInput"] div[data-baseweb="textarea"],
+[data-testid="stChatInput"] textarea,
+.stTextArea textarea,
+.stTextInput input,
+input,
+textarea {
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-surface) !important;
+  -webkit-text-fill-color: var(--color-text-primary) !important;
+}
+
+[data-testid="stChatInput"] textarea::placeholder,
+.stTextArea textarea::placeholder,
+.stTextInput input::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-secondary) !important;
+  -webkit-text-fill-color: var(--color-text-secondary) !important;
+  opacity: 1 !important;
+}
+
+[data-testid="stChatMessage"] {
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-md) !important;
+  margin-bottom: var(--space-4) !important;
+}
+
+[data-testid="stChatMessage"] p,
+[data-testid="stChatMessage"] span,
+[data-testid="stChatMessage"] div {
+  color: var(--color-text-primary);
+}
+
+
 /* Helper & Jurisdiction Note */
 .jurisdiction-note {
   font-size: var(--text-sm); /* caption */
