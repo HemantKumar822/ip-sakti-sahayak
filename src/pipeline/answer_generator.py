@@ -166,6 +166,10 @@ class AnswerGenerator:
                 return response.text.strip()
             return config.ABSTENTION_MESSAGE
         except Exception as e:
+            err_msg = str(e).lower()
+            if "429" in err_msg or "quota" in err_msg or "rate limit" in err_msg:
+                logger.error("Failed to generate dynamic refusal (Rate Limit): %s", e)
+                return "Our system is currently experiencing high traffic and has hit its API rate limits. Please try again later."
             logger.error("Failed to generate dynamic refusal: %s", e)
             return config.ABSTENTION_MESSAGE
 
@@ -197,35 +201,31 @@ class AnswerGenerator:
             f"Product Category: {product_category}\n" if product_category else ""
         )
 
-        # Build conversation history block for multi-turn context
-        history_block = ""
-        if conversation_history:
-            turns = conversation_history[-6:]  # Cap at last 6 turns to stay within token budget
-            history_lines = []
-            for turn in turns:
-                role = "User" if turn.get("role") == "user" else "Assistant"
-                history_lines.append(f"{role}: {turn.get('content', '')}")
-            history_block = "\nPrior Conversation Context (for follow-up awareness only):\n" + "\n".join(history_lines) + "\n"
-
         full_prompt = (
             f"{SYSTEM_PROMPT}\n\n"
             f"{category_header}"
             f"Retrieved Legal Documents:\n{context_text}\n"
-            f"{history_block}\n"
             f"User Question: {query}\n\n"
             f'Mandatory Disclaimer text to include exactly: "{config.DISCLAIMER_TEXT}"'
         )
 
         try:
-            response = self.model.generate_content(
-                full_prompt,
-                generation_config=genai.GenerationConfig(
-                    response_mime_type="application/json",
-                    response_schema=GeneratorOutput,
-                    temperature=self.temperature,
-                    max_output_tokens=self.max_output_tokens,
-                ),
+            gen_config = genai.GenerationConfig(
+                response_mime_type="application/json",
+                response_schema=GeneratorOutput,
+                temperature=self.temperature,
+                max_output_tokens=self.max_output_tokens,
             )
+
+            if conversation_history:
+                chat_history = []
+                for turn in conversation_history:
+                    role = "user" if turn.get("role") == "user" else "model"
+                    chat_history.append({"role": role, "parts": [turn.get("content", "")]})
+                chat = self.model.start_chat(history=chat_history)
+                response = chat.send_message(full_prompt, generation_config=gen_config)
+            else:
+                response = self.model.generate_content(full_prompt, generation_config=gen_config)
 
             if not response or not getattr(response, "text", None):
                 logger.warning("AnswerGenerator: Empty response from Gemini.")
@@ -271,6 +271,10 @@ class AnswerGenerator:
             ):
                 logger.error("AnswerGenerator API key/auth error: %s", e)
                 raise RuntimeError(f"Gemini API key error: {e}") from e
+
+            if "429" in err_msg or "quota" in err_msg or "rate limit" in err_msg:
+                logger.error("AnswerGenerator hit API Rate Limit: %s", e)
+                return self._fallback_abstention(abs_flag=abs_flag, message="Our system is currently experiencing high traffic and has hit its API rate limits. Please try again later.")
 
             logger.error("AnswerGenerator failed: %s. Falling back to abstention.", e)
             return self._fallback_abstention(abs_flag=abs_flag)
