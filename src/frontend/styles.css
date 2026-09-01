@@ -336,15 +336,109 @@ html, body, [class*="css"], .stApp {
 }
 
 .callout-abstain {
+  background-color: #F7F6F3;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6) var(--space-8);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-4);
+  color: var(--color-text-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.callout-abstain-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.callout-abstain-icon {
+  font-size: var(--text-base);
+}
+
+.callout-abstain-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--color-text-primary);
+}
+
+.callout-abstain-body {
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-4);
+}
+
+.callout-abstain-suggestions {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Error Card (Issue #30) */
+.callout-error {
+  background-color: #FEE2E2;
+  border: 1px solid #FCA5A5;
+  border-radius: var(--radius-md);
+  padding: var(--space-6) var(--space-8);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.callout-error-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.callout-error-icon {
+  font-size: var(--text-base);
+}
+
+.callout-error-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #991B1B;
+}
+
+.callout-error-body {
+  font-size: var(--text-sm);
+  color: #7F1D1D;
+  line-height: 1.5;
+}
+
+/* Skeleton Loading Screen (Issue #29) */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+  height: 16px;
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-left: 4px solid #a39e98; /* ink-faint */
   border-radius: var(--radius-md);
-  padding: var(--space-4) var(--space-6);
-  margin: var(--space-4) 0;
-  color: #31302e; /* ink-secondary */
-  font-size: 15px; /* body-sm */
-  box-shadow: var(--shadow-soft);
+  padding: var(--space-8);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 /* Citations Accordion (Notion Toggle Style) */
