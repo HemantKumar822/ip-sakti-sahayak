@@ -257,3 +257,26 @@ def test_app_py_contains_skeleton_loading_and_abstention_error_states():
     assert "callout-error" in app_content
     assert "⚡" in app_content
     assert "Service temporarily unavailable" in app_content
+
+
+def test_disclaimer_footer_and_responsive_layout_styles():
+    css_path = Path("src/frontend/styles.css")
+    css_content = css_path.read_text(encoding="utf-8")
+
+    # Issue #31 Responsive layout and disclaimer styles
+    assert "max-width: 760px !important;" in css_content
+    assert "font-style: italic;" in css_content
+    assert "@media (max-width: 768px)" in css_content
+    assert "@media (max-width: 480px)" in css_content
+
+
+def test_exact_disclaimer_text_in_app_py():
+    app_path = Path("src/frontend/app.py")
+    app_content = app_path.read_text(encoding="utf-8")
+
+    # Issue #31 Exact Disclaimer Wording
+    expected_disclaimer = (
+        "This information is provided for general awareness and does not constitute legal advice. "
+        "Consult a qualified IP attorney for decisions specific to your situation."
+    )
+    assert expected_disclaimer in app_content
