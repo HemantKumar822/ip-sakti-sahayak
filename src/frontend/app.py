@@ -125,17 +125,32 @@ if submit_button:
                     data = response.json()
                     status = data.get("status", "answered")
 
-                    # 1. ABS Detection Alert Callout
+                    # 1. ABS Detection Alert Callout (Notion Callout Style)
                     if data.get("abs_flag"):
                         abs_msg = data.get(
                             "abs_detail",
                             "This query involves biological resources. ABS compliance under the Biological Diversity Act 2002 may apply.",
                         )
+                        source_match = re.search(r"\[Source:\s*([^\]]+)\]", abs_msg)
+                        if source_match:
+                            src_url = source_match.group(1).strip()
+                            clean_abs_msg = abs_msg[: source_match.start()].strip()
+                            source_html = f'<div class="callout-abs-source"><strong>Source:</strong> <a href="{src_url}" target="_blank" rel="noopener noreferrer">{src_url} ↗</a></div>'
+                        else:
+                            clean_abs_msg = abs_msg
+                            source_html = ""
+
                         st.markdown(
                             f"""
                             <div class="callout-abs">
-                                <strong>🧬 Access and Benefit Sharing (ABS) Alert</strong><br/>
-                                {abs_msg}
+                                <div class="callout-abs-header">
+                                    <span class="callout-abs-icon">⚠️</span>
+                                    <span class="callout-abs-title">ABS Compliance Note</span>
+                                </div>
+                                <div class="callout-abs-body">
+                                    <div class="callout-abs-text">{clean_abs_msg}</div>
+                                    {source_html}
+                                </div>
                             </div>
                             """,
                             unsafe_allow_html=True,
@@ -221,31 +236,66 @@ if submit_button:
                             unsafe_allow_html=True,
                         )
 
-                    # 3. Citations Accordion
+                    # 3. Citations Accordion (Notion Toggle Style)
                     citations = data.get("citations", [])
                     if citations:
-                        with st.expander(
-                            f"📄 Citations ({len(citations)})",
-                            expanded=True,
-                        ):
-                            for idx, cit in enumerate(citations, 1):
-                                doc_id = cit.get("doc_id", "Document")
-                                section = cit.get("section", "General")
-                                snippet = cit.get("snippet", "")
-                                source_url = cit.get("source_url")
+                        count = len(citations)
+                        source_label = "Source" if count == 1 else "Sources"
 
-                                st.markdown(
-                                    f'<div id="citation-{idx}" class="citation-target"></div>'
-                                    f"**{idx}. [{doc_id}]** — Section: `{section}`",
-                                    unsafe_allow_html=True,
-                                )
-                                if snippet:
-                                    st.caption(f'> "{snippet}"')
-                                if source_url:
-                                    st.markdown(
-                                        f"[View Official Source ↗]({source_url})"
-                                    )
-                                st.divider()
+                        citation_rows = []
+                        for idx, cit in enumerate(citations, 1):
+                            doc_id = cit.get("doc_id", "Document")
+                            section = cit.get("section")
+                            snippet = cit.get("snippet", "")
+                            source_url = cit.get("source_url")
+                            doc_type = cit.get("doc_type") or "Statute"
+                            date_retrieved = cit.get("date_retrieved") or "2026-08-01"
+
+                            section_display = (
+                                f" — Section: <code>{section}</code>"
+                                if section
+                                else ""
+                            )
+                            title_html = f'<div class="citation-title"><strong>[{idx}] {doc_id}</strong>{section_display}</div>'
+
+                            snippet_html = (
+                                f'<div class="citation-snippet">"{snippet}"</div>'
+                                if snippet
+                                else ""
+                            )
+                            url_html = (
+                                f'<div class="citation-url-wrap"><a href="{source_url}" target="_blank" rel="noopener noreferrer" class="citation-url">{source_url} ↗</a></div>'
+                                if source_url
+                                else ""
+                            )
+                            meta_html = f'<div class="citation-meta">Retrieved: {date_retrieved} · {doc_type}</div>'
+
+                            citation_rows.append(
+                                f"""
+                                <div id="citation-{idx}" class="citation-row citation-target">
+                                    {title_html}
+                                    {snippet_html}
+                                    {url_html}
+                                    {meta_html}
+                                </div>
+                                """
+                            )
+
+                        citation_rows_joined = "".join(citation_rows)
+                        st.markdown(
+                            f"""
+                            <details class="citations-accordion">
+                                <summary class="citations-summary">
+                                    <span class="summary-arrow">▶</span>
+                                    <span class="summary-title">📄 {count} {source_label}</span>
+                                </summary>
+                                <div class="citations-list">
+                                    {citation_rows_joined}
+                                </div>
+                            </details>
+                            """,
+                            unsafe_allow_html=True,
+                        )
                 else:
                     st.error(f"API Error ({response.status_code}): {response.text}")
             except requests.RequestException as e:
