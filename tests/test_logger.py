@@ -22,7 +22,9 @@ def test_beautiful_console_formatter_levels_and_components():
 
 
 def test_beautiful_console_formatter_warning_and_error():
-    formatter = BeautifulConsoleFormatter(use_color=True)
+    formatter_color = BeautifulConsoleFormatter(use_color=True)
+    formatter_nocolor = BeautifulConsoleFormatter(use_color=False)
+
     rec_warn = logging.LogRecord(
         name="ip_sakti.pipeline.classifier",
         level=logging.WARNING,
@@ -41,13 +43,18 @@ def test_beautiful_console_formatter_warning_and_error():
         args=(),
         exc_info=None,
     )
-    out_warn = formatter.format(rec_warn)
-    out_err = formatter.format(rec_err)
 
-    assert "WARN" in out_warn
-    assert "CLASSIFIER" in out_warn
-    assert "FAIL" in out_err
-    assert "PII-GUARD" in out_err
+    out_warn_color = formatter_color.format(rec_warn)
+    out_err_color = formatter_color.format(rec_err)
+    assert "WARN" in out_warn_color
+    assert "CLASSIFIER" in out_warn_color
+    assert "FAIL" in out_err_color
+    assert "PII-GUARD" in out_err_color
+
+    out_warn_no = formatter_nocolor.format(rec_warn)
+    out_err_no = formatter_nocolor.format(rec_err)
+    assert "WARN" in out_warn_no
+    assert "ERROR" in out_err_no
 
 
 def test_json_log_formatter():

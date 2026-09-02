@@ -64,14 +64,16 @@ COMPONENT_BADGES: dict[str, tuple[str, str]] = {
 class BeautifulConsoleFormatter(logging.Formatter):
     """Custom logging formatter rendering clean, information-rich terminal output."""
 
-    def __init__(self, use_color: bool = True) -> None:
+    def __init__(self, use_color: bool | None = None) -> None:
         super().__init__()
-        self.use_color = use_color and (
-            hasattr(sys.stdout, "isatty")
-            and sys.stdout.isatty()
-            or os.getenv("FORCE_COLOR", "0") in ("1", "true")
-            or os.name == "nt"  # Modern Windows Terminal supports ANSI
-        )
+        if use_color is not None:
+            self.use_color = use_color
+        else:
+            self.use_color = bool(
+                (hasattr(sys.stdout, "isatty") and sys.stdout.isatty())
+                or os.getenv("FORCE_COLOR", "0") in ("1", "true")
+                or os.name == "nt"  # Modern Windows Terminal supports ANSI
+            )
 
     def format(self, record: logging.LogRecord) -> str:
         # 1. Clean local timestamp (HH:MM:SS.mmm)
