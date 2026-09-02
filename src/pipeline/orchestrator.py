@@ -62,16 +62,28 @@ class PipelineOrchestrator:
             and verification metadata.
         """
         start_time = time.perf_counter()
+        short_id = session_id[:8] if session_id else "anon"
+        preview_text = query_text[:60] + "..." if len(query_text) > 60 else query_text
 
-        logger.info("Executing async RAG pipeline for session %s", session_id)
+        logger.info("--> [%s] Processing query: %r", short_id, preview_text)
 
         # 1. PII Stripping
         cleaned_query = (
             strip_pii(query_text) if config.PII_STRIP_ENABLED else query_text
         )
+        if config.PII_STRIP_ENABLED and cleaned_query != query_text:
+            logger.info(
+                "[PII-GUARD] [%s] Redacted sensitive personal entities", short_id
+            )
 
         # 2. Classification
         category_out = await asyncio.to_thread(self.classifier.classify, cleaned_query)
+        logger.info(
+            "[CLASSIFIER] [%s] Category: '%s' (confidence: %.1f%%)",
+            short_id,
+            category_out.category,
+            category_out.confidence * 100,
+        )
 
         # 3. Jurisdiction Routing
         routed_out = self.jurisdiction_router.route(
@@ -80,6 +92,12 @@ class PipelineOrchestrator:
 
         if routed_out.status == "out_of_scope_international":
             latency_ms = int((time.perf_counter() - start_time) * 1000)
+            logger.info(
+                "[ROUTER] [%s] Out of scope (Jurisdiction: %s, latency: %dms)",
+                short_id,
+                routed_out.jurisdiction,
+                latency_ms,
+            )
             return QueryResponse(
                 status="abstained",
                 category=category_out.category,
@@ -98,6 +116,9 @@ class PipelineOrchestrator:
 
         # 4. Retrieval & ABS / TKDL Prior Art Check
         if category_out.category == "Conversational":
+            logger.info(
+                "[CONVERSATIONAL] [%s] Direct conversational response", short_id
+            )
             retrieved_chunks = []
             abs_out = ABSCheckerOutput(abs_flag=False, abs_detail=None)
             gate_out = ConfidenceGateOutput(
@@ -121,6 +142,14 @@ class PipelineOrchestrator:
                 asyncio.to_thread(self.abs_checker.check, cleaned_query),
             )
 
+            logger.info(
+                "[HYBRID-SEARCH] [%s] Retrieved %d chunks | ABS: %s | TKDL: %s",
+                short_id,
+                len(retrieved_chunks),
+                abs_out.abs_flag,
+                abs_out.tkdl_flag,
+            )
+
             # 5. Confidence Gate (Anti-Hallucination)
             gate_out = self.confidence_gate.evaluate(retrieved_chunks)
 
@@ -129,6 +158,12 @@ class PipelineOrchestrator:
                 gate_out.decision == "generate"
                 and category_out.category != "Unclassifiable"
             ):
+                logger.info(
+                    "[CONF-GATE] [%s] Decision: PASSED (score: %.3f >= %.2f threshold)",
+                    short_id,
+                    gate_out.max_score,
+                    self.confidence_gate.threshold,
+                )
                 gen_out = await asyncio.to_thread(
                     self.answer_generator.generate,
                     query=cleaned_query,
@@ -191,6 +226,13 @@ class PipelineOrchestrator:
         )
 
         elapsed_ms = max(int((time.perf_counter() - start_time) * 1000), 0)
+        logger.info(
+            "[PIPELINE-COMPLETE] [%s] Status: %s | Citations: %d | Latency: %dms",
+            short_id,
+            status,
+            len(response_citations),
+            elapsed_ms,
+        )
 
         return QueryResponse(
             status=status,

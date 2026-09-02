@@ -5,7 +5,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from src.api.routes import router
+from src.utils.logger import setup_logging
 
+setup_logging()
 logger = logging.getLogger("ip_sakti.api")
 
 
