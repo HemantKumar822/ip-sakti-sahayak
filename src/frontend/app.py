@@ -64,6 +64,7 @@ st.markdown(
 if not st.session_state.messages:
     st.markdown(
         """
+        <div class="hero-badge">🏛️ DPIIT PS-26045 • NATIONAL IPR INTELLIGENCE CO-PILOT</div>
         <div class="page-title">AI Legal Intelligence for Ayurveda & Natural Bio-Assets</div>
         <div class="page-subtitle">Statutory-grade IP advisory grounded in the Patents Act 1970, Biological Diversity Act 2002/2023, and authentic TKDL prior art records.</div>
         """,
@@ -116,14 +117,14 @@ if not st.session_state.messages:
     qcol1, qcol2 = st.columns(2)
     with qcol1:
         if st.button(
-            "🌿 Classical: Triphala Churnam Bar\nSection 3(p) Traditional Knowledge Bar",
+            "🌿 Classical: Triphala Churnam Bar\nSection 3(p) & 3(e) Traditional Knowledge Exclusion",
             use_container_width=True,
             help="Test Section 3(p) and Section 3(e) admixture exclusions",
         ):
             st.session_state.pending_query = "Can a standard classical formulation of Triphala churnam or Chyawanprash be patented under the Indian Patents Act?"
             st.rerun()
         if st.button(
-            "🏷️ Trademark: 'Chyawanprash' Genericness\nTrade Marks Act 1999 Section 9 Bar",
+            "🏷️ Trademark: 'Chyawanprash' Genericness\nTrade Marks Act 1999 Section 9 Distinctiveness Bar",
             use_container_width=True,
             help="Test publici juris and distinctiveness of Ayurvedic terms",
         ):
@@ -131,19 +132,40 @@ if not st.session_state.messages:
             st.rerun()
     with qcol2:
         if st.button(
-            "🔬 Proprietary: Withanolide Fraction Synergy\nNovartis v. UOI (2013) Efficacy Test",
+            "🔬 Proprietary: Withanolide Fraction Synergy\nNovartis v. UOI (2013) Therapeutic Efficacy Standard",
             use_container_width=True,
             help="Test Section 3(d) therapeutic efficacy standard",
         ):
             st.session_state.pending_query = "If we isolate a purified withanolide fraction from Ashwagandha and prove significant synergistic anti-inflammatory efficacy compared to raw root powder, can this composition be patented?"
             st.rerun()
         if st.button(
-            "🏛️ ABS Mandate: Bacopa monnieri\nForeign Entity NBA Form III Clearance",
+            "🏛️ ABS Mandate: Bacopa monnieri\nBiological Diversity Act Section 6 NBA Form III Clearance",
             use_container_width=True,
             help="Test Biological Diversity Act Section 6 prior approval",
         ):
             st.session_state.pending_query = "We are a foreign entity from Germany sourcing Bacopa monnieri (Brahmi) cultivated in Kerala to file a patent application in India. Do we need prior approval from the National Biodiversity Authority?"
             st.rerun()
+
+    # System Provenance & Trust Matrix Strip (Empty State Elevation)
+    st.markdown(
+        """
+        <div class="trust-strip">
+            <div class="trust-item">
+                <div class="trust-item-title">📜 11 Statutory Sources</div>
+                <div class="trust-item-desc">Patents Act, BDA 2002/2023, AYUSH 2025, Novartis & Emami precedents</div>
+            </div>
+            <div class="trust-item">
+                <div class="trust-item-title">⚡ Hybrid RRF Engine</div>
+                <div class="trust-item-desc">bge-small-en-v1.5 dense vectors fused with BM25 Okapi lexical ranking</div>
+            </div>
+            <div class="trust-item">
+                <div class="trust-item-title">🛡️ Anti-Hallucination Gate</div>
+                <div class="trust-item-desc">Mathematical confidence gate with mandatory statutory citation grounding</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 # Render Chat Conversation History
 for msg_idx, message in enumerate(st.session_state.messages):

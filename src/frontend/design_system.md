@@ -83,3 +83,6 @@ Pill badges with direct outbound links to official gazettes on IP India and Indi
 
 ### 4. Legal Memorandum Export Action Bar
 1-Click `.md` memorandum generator that packages timestamp, jurisdiction, statutory citations, ABS clearance checklist, and non-patentability risk matrix into a formal legal brief.
+
+### 5. System Provenance & Trust Matrix Strip
+A 3-column translucent trust strip displayed in the empty state documenting the 11 official statutory instruments, the hybrid dense + BM25 RRF retrieval engine, and the mathematical anti-hallucination gate.
