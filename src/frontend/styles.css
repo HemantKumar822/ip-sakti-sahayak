@@ -1,54 +1,71 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  /* Colors from Notion DESIGN.md */
-  --color-canvas: #f6f5f4;         /* Notion's warm canvas-soft */
+  /* Core Palette (Notion + Apple Cupertino Precision) */
+  --color-canvas: #faf9f7;         /* Warm ethereal canvas */
   --color-surface: #ffffff;        /* Pure white for cards */
-  --color-border: #e6e6e6;         /* Notion's hairline */
-  --color-text-primary: #000000;   /* Notion's ink */
-  --color-text-secondary: #615d59; /* Notion's ink-muted */
-  --color-accent: #0075de;         /* Notion's primary blue */
+  --color-border: #e8e7e3;         /* Hairline subtle border */
+  --color-border-subtle: rgba(0, 0, 0, 0.06);
+  --color-text-primary: #191714;   /* High-contrast ink */
+  --color-text-secondary: #6e6d69; /* Muted annotation slate */
+  --color-accent: #0071e3;         /* Apple signature blue */
   
-  /* Sticker palette for semantic use */
-  --color-success: #1aae39;        /* Notion's accent-green */
-  --color-warning: #dd5b00;        /* Notion's accent-orange */
-  --color-error: #e03e3e;          /* Red (fallback) */
+  /* Semantic Palette */
+  --color-success: #1aae39;        /* Emerald green */
+  --color-warning: #dd5b00;        /* Amber orange */
+  --color-error: #e03e3e;          /* Crimson red */
+
+  /* Frosted Glass & Specular Materials */
+  --glass-surface: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-blur: blur(20px) saturate(180%);
 
   /* Typography */
-  --font-sans: 'Inter', -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   
-  /* Notion typography scale mapping */
-  --text-xs: 12px;       /* eyebrow */
-  --text-sm: 14px;       /* caption */
+  /* Scale Mapping */
+  --text-xs: 12px;       /* eyebrow / badge */
+  --text-sm: 14px;       /* caption / metadata */
   --text-base: 16px;     /* body-md */
   --text-lg: 20px;       /* title */
-  --text-xl: 40px;       /* heading-1 */
+  --text-xl: 32px;       /* heading-1 */
 
-  /* Notion spacing scale mapping */
-  --space-1: 4px;        /* xxs */
-  --space-2: 8px;        /* xs */
-  --space-3: 12px;       /* sm */
-  --space-4: 16px;       /* md */
-  --space-6: 24px;       /* lg */
-  --space-8: 32px;       /* xxl */
+  /* Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
   --space-12: 48px;
 
-  /* Notion radius scale mapping */
-  --radius-sm: 4px;      /* xs */
-  --radius-md: 8px;      /* md */
-  --radius-lg: 12px;     /* lg */
+  /* Radius Scale */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 9999px;
 
-  /* Shadows */
+  /* Shadows (Apple multi-layer ambient diffusion) */
   --shadow-flat: none;
-  --shadow-soft: 0 0.175px 1.041px rgba(0,0,0,0.01), 0 0.8px 2.925px rgba(0,0,0,0.02), 0 2.025px 7.847px rgba(0,0,0,0.027), 0 4px 18px rgba(0,0,0,0.04);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.035);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.025), 0 12px 28px rgba(0, 0, 0, 0.045);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.04), 0 16px 36px rgba(0, 0, 0, 0.07);
+
+  /* Physics & Transitions */
+  --spring-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transition-fast: 0.15s var(--spring-easing);
+  --transition-normal: 0.22s var(--spring-easing);
 }
 
-/* Global Streamlit Resets & Typography */
+/* Global Layout Resets & Canvas */
 html, body, [class*="css"], .stApp {
   font-family: var(--font-sans);
-  background-color: var(--color-canvas);
+  background-color: var(--color-canvas) !important;
   color: var(--color-text-primary);
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Constrain max width to 760px centered */
@@ -60,78 +77,201 @@ html, body, [class*="css"], .stApp {
   padding-right: var(--space-6) !important;
 }
 
-/* Header & Top Bar */
+/* Apple Cupertino Navigation Bar */
 .top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
-  background-color: var(--color-canvas);
+  height: 58px;
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--color-border);
   padding: 0 var(--space-4);
   margin-left: calc(-1 * var(--space-6));
   margin-right: calc(-1 * var(--space-6));
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .top-bar-title {
-  font-size: 15px; /* body-sm */
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--color-text-primary);
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  letter-spacing: -0.015em;
 }
 
 .top-bar-badge {
   font-size: var(--text-xs);
   color: var(--color-accent);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 9999px; /* full */
-  padding: 4px 8px;
+  background: rgba(0, 113, 227, 0.08);
+  border: 1px solid rgba(0, 113, 227, 0.18);
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
   font-weight: 600;
-  letter-spacing: 0.125px;
+  letter-spacing: -0.005em;
 }
 
-/* Page Title & Headings */
+/* Hero Title Section */
 .page-title {
-  font-size: 64px; /* display-1 */
+  font-size: 32px;
   font-weight: 700;
   color: var(--color-text-primary);
-  line-height: 1.0;
-  letter-spacing: -2.125px;
-  margin-top: var(--space-8);
-  margin-bottom: var(--space-4);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-2);
 }
 
 .page-subtitle {
-  font-size: var(--text-lg); /* title */
-  font-weight: 600;
-  color: #31302e; /* ink-secondary */
-  line-height: 1.4;
-  letter-spacing: -0.125px;
-  margin-bottom: var(--space-8);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  letter-spacing: -0.008em;
+  margin-bottom: var(--space-6);
+  max-width: 680px;
 }
 
-
-/* Helper & Jurisdiction Note */
 .jurisdiction-note {
-  font-size: var(--text-sm); /* caption */
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
   margin-top: var(--space-2);
   margin-bottom: var(--space-6);
 }
 
-/* Output Cards & Callouts (feature-card) */
-.card {
-  background-color: var(--color-surface);
+/* Bento Scenario Grid (Empty State) */
+.bento-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+
+.bento-card {
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: var(--space-8);
-  margin-top: var(--space-6);
+  padding: var(--space-4);
+  cursor: pointer;
+  text-decoration: none !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 110px;
+  box-shadow: var(--shadow-soft);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.bento-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(0, 113, 227, 0.3);
+}
+
+.bento-card:active {
+  transform: scale(0.98);
+}
+
+.bento-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-accent);
+  background: rgba(0, 113, 227, 0.06);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  margin-bottom: 6px;
+  width: fit-content;
+}
+
+.bento-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+
+.bento-desc {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.bento-action {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  transition: transform 0.15s ease;
+}
+
+.bento-card:hover .bento-action {
+  transform: translateX(3px);
+}
+
+/* Streamlit Button Override (Tactile Cupertino Physics) */
+.stButton > button {
+  width: 100%;
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--color-border) !important;
+  background: var(--color-surface) !important;
+  color: var(--color-text-primary) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  padding: 10px 14px !important;
+  box-shadow: var(--shadow-soft) !important;
+  transition: all var(--transition-fast) !important;
+  text-align: left !important;
+  display: flex !important;
+  justify-content: flex-start !important;
+}
+
+.stButton > button:hover {
+  border-color: rgba(0, 113, 227, 0.4) !important;
+  box-shadow: var(--shadow-hover) !important;
+  transform: translateY(-1px) !important;
+  color: var(--color-accent) !important;
+}
+
+.stButton > button:active {
+  transform: scale(0.98) !important;
+}
+
+/* Legal Memorandum Card */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-top: var(--space-4);
   margin-bottom: var(--space-4);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-card);
+  position: relative;
 }
 
 .card-header-row {
@@ -146,8 +286,8 @@ html, body, [class*="css"], .stApp {
   align-items: center;
   flex-wrap: wrap;
   gap: var(--space-2);
-  padding-bottom: var(--space-4);
-  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
   border-bottom: 1px solid var(--color-border);
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
@@ -167,60 +307,60 @@ html, body, [class*="css"], .stApp {
 }
 
 .category-badge {
-  font-size: var(--text-xs); /* eyebrow */
+  font-size: var(--text-xs);
   font-weight: 600;
-  color: var(--color-surface);
-  background-color: var(--color-success); /* Sticker green */
-  border: 1px solid var(--color-success);
-  border-radius: 9999px; /* pill */
-  padding: 4px 8px;
-  letter-spacing: 0.125px;
+  color: #065f46;
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  letter-spacing: -0.005em;
 }
 
 .card-title {
-  font-size: 22px; /* heading-3 */
+  font-size: 20px;
   font-weight: 700;
   color: var(--color-text-primary);
-  line-height: 1.27;
-  letter-spacing: -0.25px;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
   margin-top: 0;
   margin-bottom: 0;
 }
 
 .card-body {
-  font-size: var(--text-base);
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.65;
   color: var(--color-text-primary);
   font-weight: 400;
 }
 
 .card-body p {
-  margin-bottom: 1em;
+  margin-bottom: 0.9em;
 }
 
 .card-body p:last-child {
   margin-bottom: 0;
 }
 
-/* Citation marker styling - Notion style superscript */
+/* Citation markers - Superscript anchors */
 .citation-marker, a.citation-marker {
   color: var(--color-accent) !important;
-  font-size: 0.75em !important;
+  font-size: 0.78em !important;
   vertical-align: super !important;
   font-weight: 600 !important;
   text-decoration: none !important;
-  padding: 0 1px;
+  padding: 0 2px;
   cursor: pointer;
-  transition: opacity 0.15s ease, text-decoration 0.15s ease;
+  transition: opacity 0.15s ease;
 }
 
 .citation-marker:hover, a.citation-marker:hover {
   text-decoration: underline !important;
-  opacity: 0.85;
+  opacity: 0.8;
 }
 
 .citation-target {
-  scroll-margin-top: 40px;
+  scroll-margin-top: 60px;
 }
 
 .card-meta {
@@ -231,10 +371,127 @@ html, body, [class*="css"], .stApp {
   border-top: 1px solid var(--color-border);
 }
 
+/* Statutory Citation Badges */
+.statutory-badge-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.statutory-citation-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 113, 227, 0.05);
+  border: 1px solid rgba(0, 113, 227, 0.18);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-accent) !important;
+  text-decoration: none !important;
+  transition: all var(--transition-fast);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.statutory-citation-badge:hover {
+  background: rgba(0, 113, 227, 0.12);
+  border-color: rgba(0, 113, 227, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 113, 227, 0.12);
+}
+
+/* Reasoning Capsule (Dynamic Island Style) */
+.reasoning-capsule {
+  margin-bottom: var(--space-3);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-size: 12px;
+  box-shadow: var(--shadow-soft);
+  transition: all var(--transition-fast);
+}
+
+.capsule-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  list-style: none;
+}
+
+.capsule-summary::-webkit-details-marker {
+  display: none;
+}
+
+.capsule-summary::marker {
+  display: none;
+}
+
+.capsule-pill-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  background-color: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.capsule-expanded-hud {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+}
+
+.hud-metric {
+  background: var(--color-canvas);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+}
+
+.hud-metric-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.hud-metric-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-top: 2px;
+}
+
+/* Compliance Notice Callouts */
 .callout-abs {
   background-color: #FFF3CD;
   border: 1px solid rgba(221, 91, 0, 0.2);
-  border-left: 4px solid var(--color-warning); /* Sticker orange */
+  border-left: 4px solid var(--color-warning);
   border-radius: var(--radius-md);
   padding: var(--space-4) var(--space-6);
   margin: var(--space-4) 0;
@@ -274,6 +531,35 @@ html, body, [class*="css"], .stApp {
   margin-top: var(--space-2);
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
+}
+
+.callout-tkdl {
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-left: 4px solid #7c3aed;
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  box-shadow: var(--shadow-soft);
+}
+
+.callout-tkdl-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.callout-tkdl-title {
+  font-weight: 600;
+  font-size: 15px;
+  color: #5b21b6;
+}
+
+.callout-tkdl-body {
+  font-size: var(--text-sm);
+  color: #4c1d95;
+  line-height: 1.5;
 }
 
 .callout-abstain {
@@ -319,7 +605,6 @@ html, body, [class*="css"], .stApp {
   border-top: 1px solid var(--color-border);
 }
 
-/* Error Card (Issue #30) */
 .callout-error {
   background-color: #FEE2E2;
   border: 1px solid #FCA5A5;
@@ -353,7 +638,7 @@ html, body, [class*="css"], .stApp {
   line-height: 1.5;
 }
 
-/* Skeleton Loading Screen (Issue #29) */
+/* Skeleton Loading Shimmer */
 @keyframes shimmer {
   0% {
     background-position: -200px 0;
@@ -364,7 +649,7 @@ html, body, [class*="css"], .stApp {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e7 50%, #f0f0f0 75%);
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
   border-radius: var(--radius-sm);
@@ -391,7 +676,7 @@ details.citations-accordion {
   margin-bottom: var(--space-6);
   padding: var(--space-3) var(--space-4);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 details.citations-accordion summary.citations-summary {
@@ -400,14 +685,14 @@ details.citations-accordion summary.citations-summary {
   gap: var(--space-2);
   cursor: pointer;
   user-select: none;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--color-text-primary);
-  list-style: none; /* Hide standard browser marker */
+  list-style: none;
 }
 
 details.citations-accordion summary.citations-summary::-webkit-details-marker {
-  display: none; /* Hide Chrome/Safari default marker */
+  display: none;
 }
 
 details.citations-accordion summary.citations-summary::marker {
@@ -440,7 +725,7 @@ details.citations-accordion[open] .summary-arrow {
   padding-left: var(--space-3);
   padding-top: var(--space-1);
   padding-bottom: var(--space-1);
-  transition: border-color 0.15s ease;
+  transition: border-color var(--transition-fast);
 }
 
 .citation-row:hover {
@@ -448,7 +733,7 @@ details.citations-accordion[open] .summary-arrow {
 }
 
 .citation-title {
-  font-size: 15px;
+  font-size: 14px;
   color: var(--color-text-primary);
   margin-bottom: var(--space-1);
 }
@@ -459,23 +744,23 @@ details.citations-accordion[open] .summary-arrow {
 
 .citation-title code {
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
+  font-size: 12px;
   background-color: var(--color-canvas);
-  padding: 2px 4px;
+  padding: 2px 5px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
 }
 
 .citation-snippet {
-  font-size: var(--text-sm);
+  font-size: 13px;
   color: var(--color-text-secondary);
   font-style: italic;
   margin-bottom: var(--space-1);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .citation-url, a.citation-url {
-  font-size: var(--text-sm);
+  font-size: 13px;
   color: var(--color-accent) !important;
   text-decoration: underline !important;
   display: inline-block;
@@ -489,15 +774,46 @@ details.citations-accordion[open] .summary-arrow {
 
 .citation-meta {
   color: var(--color-text-secondary);
-  font-size: var(--text-sm);
+  font-size: 12px;
   line-height: 1.4;
 }
 
-/* Footer */
+/* Legal Memo Toolbar */
+.memo-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.memo-tool-btn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all var(--transition-fast);
+}
+
+.memo-tool-btn:hover {
+  background: var(--color-surface);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Footer & Disclaimers */
 .disclaimer-footer {
   text-align: center;
   color: var(--color-text-secondary);
-  font-size: var(--text-sm); /* caption */
+  font-size: var(--text-sm);
   font-style: italic;
   padding: var(--space-8) 0;
   border-top: 1px solid var(--color-border);
@@ -511,8 +827,14 @@ details.citations-accordion[open] .summary-arrow {
     padding-right: var(--space-4) !important;
   }
   .page-title {
-    font-size: 40px;
-    letter-spacing: -1px;
+    font-size: 26px;
+    letter-spacing: -0.02em;
+  }
+  .bento-grid {
+    grid-template-columns: 1fr;
+  }
+  .capsule-expanded-hud {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -522,173 +844,12 @@ details.citations-accordion[open] .summary-arrow {
     padding-right: var(--space-3) !important;
   }
   .page-title {
-    font-size: 28px;
-    letter-spacing: -0.5px;
+    font-size: 22px;
   }
   .page-subtitle {
-    font-size: 16px;
+    font-size: 14px;
   }
   .disclaimer-footer {
-    font-size: 13px;
+    font-size: 12px;
   }
-}
-
-/* Statutory Citation Badge with Direct PDF Link */
-.statutory-badge-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-top: var(--space-3);
-  margin-bottom: var(--space-2);
-}
-
-.statutory-citation-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background-color: #f0f4f9;
-  border: 1px solid #d0d7de;
-  border-radius: 9999px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #0969da;
-  text-decoration: none !important;
-  transition: all 0.15s ease-in-out;
-}
-
-.statutory-citation-badge:hover {
-  background-color: #ddf4ff;
-  border-color: #54aeff;
-  color: #0969da;
-  transform: translateY(-1px);
-}
-
-/* Quick-Launch Action Matrix */
-.quick-action-section {
-  margin-top: var(--space-6);
-  margin-bottom: var(--space-6);
-  padding: var(--space-4);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-soft);
-}
-
-.quick-action-header {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: var(--space-3);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-/* Pipeline Live Stepper */
-.pipeline-stepper {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: var(--space-4);
-  padding: 8px 12px;
-  background-color: #ffffff;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-}
-
-.stepper-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 9999px;
-  font-weight: 500;
-}
-
-.stepper-pill.completed {
-  background-color: #ecfdf5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
-}
-
-.stepper-pill.active {
-  background-color: #eff6ff;
-  color: #1e40af;
-  border: 1px solid #bfdbfe;
-}
-
-.stepper-separator {
-  color: #9ca3af;
-  font-size: 10px;
-}
-
-/* TKDL Prior Art Alert Callout Card */
-.callout-tkdl {
-  background-color: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: var(--radius-md);
-  padding: var(--space-4);
-  margin-bottom: var(--space-4);
-}
-
-.callout-tkdl-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
-}
-
-.callout-tkdl-title {
-  font-weight: 600;
-  font-size: var(--text-base);
-  color: #1e40af;
-}
-
-.callout-tkdl-body {
-  font-size: var(--text-sm);
-  color: #1e3a8a;
-  line-height: 1.5;
-}
-
-/* Technical Inspector Drawer */
-.tech-inspector-drawer {
-  margin-top: var(--space-3);
-  padding: var(--space-3);
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
-  font-size: 12px;
-}
-
-.inspector-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
-}
-
-.inspector-card {
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  padding: 6px 10px;
-}
-
-.inspector-label {
-  font-size: 10px;
-  color: #64748b;
-  text-transform: uppercase;
-}
-
-.inspector-val {
-  font-size: 13px;
-  font-weight: 600;
-  color: #0f172a;
 }
