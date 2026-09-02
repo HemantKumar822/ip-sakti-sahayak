@@ -69,7 +69,7 @@ with st.sidebar:
     if api_online:
         st.success("🟢 Backend API Connected")
     else:
-        st.warning("🟠 Backend API Offline (Run `./run_api.sh`)")
+        st.warning("🟠 Backend API Offline (Run `python run.py`)")
     st.caption(f"Session ID: `{st.session_state.session_id[:8]}...`")
     st.markdown("---")
     st.markdown(
@@ -78,6 +78,25 @@ with st.sidebar:
         "- 🧬 ABS & TKDL Detection\n"
         "- 🔒 Privacy by Design (DPDP Act)"
     )
+
+# Quick-Launch Action Matrix (Empty State Experience)
+if not st.session_state.messages:
+    st.markdown('<div class="quick-action-header">⚡ Quick-Launch Legal Verification Scenarios</div>', unsafe_allow_html=True)
+    qcol1, qcol2 = st.columns(2)
+    with qcol1:
+        if st.button("🌿 Classical: Triphala Patentability", use_container_width=True, help="Test Section 3(p) Traditional Knowledge Bar"):
+            st.session_state.pending_query = "Can a formulation of Triphala and Honey be patented under Indian patent law?"
+            st.rerun()
+        if st.button("🏷️ Trademark: Chyawanprash Brand", use_container_width=True, help="Test Trade Marks Act 1999 Section 9 distinctiveness"):
+            st.session_state.pending_query = "Can a company register 'Chyawanprash' as an exclusive trademark under Trade Marks Act 1999?"
+            st.rerun()
+    with qcol2:
+        if st.button("🧬 Extraction: Curcumin Process Patent", use_container_width=True, help="Test Biological Diversity Act Section 6 ABS approval"):
+            st.session_state.pending_query = "Can an improved solvent extraction process of Curcumin from Turmeric be patented under Section 3(p)?"
+            st.rerun()
+        if st.button("🚫 Out-of-Scope: Foreign Trademark", use_container_width=True, help="Test Jurisdiction Router immediate abstention"):
+            st.session_state.pending_query = "What are the legal requirements for registering a corporate trademark in Germany?"
+            st.rerun()
 
 # Render Chat History
 for message in st.session_state.messages:
@@ -126,6 +145,28 @@ for message in st.session_state.messages:
                 )
             else:
                 data = message.get("data", {})
+                category = data.get("category", "")
+                answer_text = message.get("content", "No answer text returned.")
+                jurisdiction = data.get("jurisdiction", "India")
+                response_time_ms = data.get("response_time_ms", 0)
+
+                # Live Pipeline Stepper
+                st.markdown(
+                    f"""
+                    <div class="pipeline-stepper">
+                        <span class="stepper-pill completed">🔒 PII Scrubbed</span>
+                        <span class="stepper-separator">➔</span>
+                        <span class="stepper-pill completed">🏷️ {category or "Categorized"}</span>
+                        <span class="stepper-separator">➔</span>
+                        <span class="stepper-pill completed">⚖️ {jurisdiction}</span>
+                        <span class="stepper-separator">➔</span>
+                        <span class="stepper-pill completed">⚡ Hybrid Search (RRF)</span>
+                        <span class="stepper-separator">➔</span>
+                        <span class="stepper-pill completed">🛡️ Anti-Hallucination Gate</span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
                 # 1. ABS Detection Alert Callout (Notion Callout Style)
                 if data.get("abs_flag"):
@@ -158,10 +199,28 @@ for message in st.session_state.messages:
                         unsafe_allow_html=True,
                     )
 
-                category = data.get("category", "")
-                answer_text = message.get("content", "No answer text returned.")
-                jurisdiction = data.get("jurisdiction", "India")
-                response_time_ms = data.get("response_time_ms", 0)
+                # 2. TKDL Prior Art Alert Callout Card
+                if data.get("tkdl_flag"):
+                    tkdl_msg = data.get(
+                        "tkdl_detail",
+                        "Traditional Knowledge Prior Art Notice: Inventions based on traditional knowledge or known aggregation of properties are non-patentable under Section 3(p) of the Patents Act, 1970 and subject to TKDL prior art verification.",
+                    )
+                    st.markdown(
+                        f"""
+                        <div class="callout-tkdl">
+                            <div class="callout-tkdl-header">
+                                <span class="callout-tkdl-icon">🏛️</span>
+                                <span class="callout-tkdl-title">Traditional Knowledge & TKDL Prior Art Notice</span>
+                            </div>
+                            <div class="callout-tkdl-body">
+                                {tkdl_msg}
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+
 
                 category_badge_html = (
                     f'<span class="category-badge">🏷️ {category}</span>'
@@ -221,8 +280,30 @@ for message in st.session_state.messages:
                     unsafe_allow_html=True,
                 )
 
-                # 3. Citations Accordion (Notion Toggle Style)
+                # Clickable Statutory Citation Badges with Government PDF Links
                 citations = data.get("citations", [])
+                statutory_badges = []
+                for cit in citations:
+                    c_title = cit.get("title") or cit.get("doc_id", "Statute")
+                    c_sec = cit.get("section")
+                    c_url = cit.get("source_url")
+                    c_label = f"{c_title} (S. {c_sec})" if c_sec else c_title
+                    if c_url:
+                        statutory_badges.append(
+                            f'<a href="{c_url}" target="_blank" rel="noopener noreferrer" class="statutory-citation-badge">📜 {c_label} ↗</a>'
+                        )
+
+                if statutory_badges:
+                    st.markdown(
+                        f"""
+                        <div class="statutory-badge-wrap">
+                            {''.join(statutory_badges[:4])}
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+                # 3. Citations Accordion (Notion Toggle Style)
                 if citations:
                     count = len(citations)
                     source_label = "Source" if count == 1 else "Sources"
@@ -278,8 +359,47 @@ for message in st.session_state.messages:
                         unsafe_allow_html=True,
                     )
 
+                # Technical Inspector & Telemetry Cockpit
+                conf_score = data.get("confidence_score", 0.0)
+                st.markdown(
+                    f"""
+                    <details class="tech-inspector-drawer">
+                        <summary style="cursor: pointer; color: #475569; font-weight: 500;">
+                            ⚙️ Technical Telemetry & Verification Cockpit
+                        </summary>
+                        <div class="inspector-grid" style="margin-top: 8px;">
+                            <div class="inspector-card">
+                                <div class="inspector-label">Anti-Hallucination Score</div>
+                                <div class="inspector-val">{conf_score * 100:.1f}%</div>
+                            </div>
+                            <div class="inspector-card">
+                                <div class="inspector-label">Retrieval Mode</div>
+                                <div class="inspector-val">Dense + BM25 (RRF)</div>
+                            </div>
+                            <div class="inspector-card">
+                                <div class="inspector-label">End-to-End Latency</div>
+                                <div class="inspector-val">{response_time_ms} ms</div>
+                            </div>
+                            <div class="inspector-card">
+                                <div class="inspector-label">DPDP Privacy Hash</div>
+                                <div class="inspector-val">{st.session_state.session_id[:8]}...</div>
+                            </div>
+                        </div>
+                    </details>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
 # Query Input Form (ChatGPT style)
-if prompt := st.chat_input("Ask your Ayurveda IP question", disabled=not api_online):
+chat_input_val = st.chat_input("Ask your Ayurveda IP question", disabled=not api_online)
+prompt = None
+if "pending_query" in st.session_state and st.session_state.pending_query:
+    prompt = st.session_state.pending_query
+    del st.session_state.pending_query
+elif chat_input_val:
+    prompt = chat_input_val
+
+if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)

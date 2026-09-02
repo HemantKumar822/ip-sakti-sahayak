@@ -26,12 +26,14 @@ class Retriever:
             vector_store if vector_store is not None else ChromaStore()
         )
         self.top_k: int = top_k if top_k is not None else config.RETRIEVAL_TOP_K
+        self.hybrid_retriever: Any = None
 
     def retrieve(
         self,
         query: str,
         top_k: int | None = None,
         where: dict[str, Any] | None = None,
+        use_hybrid: bool = True,
     ) -> list[dict[str, Any]]:
         """Retrieves the most similar legal corpus chunks for a given query string.
 
@@ -39,6 +41,7 @@ class Retriever:
             query: The user query string.
             top_k: Optional override for the number of results to retrieve.
             where: Optional metadata filter dictionary to pass to the vector store.
+            use_hybrid: Whether to use dense + BM25 hybrid retrieval (defaults to True).
 
         Returns:
             List of formatted chunk dictionaries sorted by similarity score descending.
@@ -60,21 +63,41 @@ class Retriever:
             logger.warning("Error checking vector store count: %s", e)
             return []
 
-        try:
-            raw_results = self.vector_store.search(
-                query=query.strip(),
-                n_results=limit,
-                where=where,
-            )
-        except TypeError:
-            # Fallback if custom VectorStore implementation doesn't support 'where'
-            raw_results = self.vector_store.search(
-                query=query.strip(),
-                n_results=limit,
-            )
-        except Exception as e:  # noqa: BLE001
-            logger.error("Vector store search failed for query '%s': %s", query, e)
-            return []
+        raw_results = None
+        if use_hybrid:
+            try:
+                if self.hybrid_retriever is None:
+                    from src.pipeline.hybrid_retriever import HybridRetriever
+
+                    self.hybrid_retriever = HybridRetriever(
+                        vector_store=self.vector_store
+                    )
+                raw_results = self.hybrid_retriever.retrieve(
+                    query=query.strip(), top_k=limit, where=where
+                )
+            except Exception as e:  # noqa: BLE001
+                logger.warning(
+                    "Hybrid retrieval delegation failed (%s); falling back to dense search.",
+                    e,
+                )
+                raw_results = None
+
+        if raw_results is None:
+            try:
+                raw_results = self.vector_store.search(
+                    query=query.strip(),
+                    n_results=limit,
+                    where=where,
+                )
+            except TypeError:
+                # Fallback if custom VectorStore implementation doesn't support 'where'
+                raw_results = self.vector_store.search(
+                    query=query.strip(),
+                    n_results=limit,
+                )
+            except Exception as e:  # noqa: BLE001
+                logger.error("Vector store search failed for query '%s': %s", query, e)
+                return []
 
         formatted_chunks: list[dict[str, Any]] = []
         for item in raw_results:

@@ -44,10 +44,18 @@ class QueryResponse(BaseModel):
     )
     abs_flag: bool = Field(
         default=False,
-        description="Indicates if Access and Benefit Sharing (ABS) applies",
+        description="Indicates if Access and Benefit Sharing (ABS) applies under Biological Diversity Act",
     )
     abs_detail: str | None = Field(
         default=None, description="Detailed explanation of ABS requirement if flagged"
+    )
+    tkdl_flag: bool = Field(
+        default=False,
+        description="Indicates if Traditional Knowledge Digital Library (TKDL) or Section 3(p) prior art applies",
+    )
+    tkdl_detail: str | None = Field(
+        default=None,
+        description="Detailed explanation of TKDL / Section 3(p) patent exclusion if flagged",
     )
     confidence_score: float | None = Field(
         default=None, description="Overall pipeline confidence score"
@@ -63,3 +71,13 @@ class QueryResponse(BaseModel):
     response_time_ms: int = Field(
         default=0, description="Total request processing time in milliseconds"
     )
+
+    @property
+    def requires_abs(self) -> bool:
+        """Backward compatibility property for abs_flag."""
+        return self.abs_flag
+
+    @property
+    def has_tkdl_prior_art(self) -> bool:
+        """Convenience property for tkdl_flag."""
+        return self.tkdl_flag

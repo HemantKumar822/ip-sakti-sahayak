@@ -26,3 +26,4 @@ _bmad/
 *.snapshot.md
 scratch/
 .ruff_cache/
+uv.lock

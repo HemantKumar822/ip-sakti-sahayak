@@ -9,4 +9,5 @@ pypdf
 tiktoken
 requests
 sentence-transformers
-
+gunicorn
+redis

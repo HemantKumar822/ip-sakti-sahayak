@@ -36,7 +36,10 @@ class PipelineOrchestrator:
         self.answer_generator = answer_generator or AnswerGenerator()
 
     async def run_pipeline(
-        self, query_text: str, session_id: str, conversation_history: list[dict[str, str]] | None = None
+        self,
+        query_text: str,
+        session_id: str,
+        conversation_history: list[dict[str, str]] | None = None,
     ) -> QueryResponse:
         """Execute the full pipeline asynchronously for an incoming user query.
 
@@ -75,18 +78,38 @@ class PipelineOrchestrator:
             cleaned_query, classifier_output=category_out
         )
 
+        if routed_out.status == "out_of_scope_international":
+            latency_ms = int((time.perf_counter() - start_time) * 1000)
+            return QueryResponse(
+                status="abstained",
+                category=category_out.category,
+                jurisdiction=routed_out.jurisdiction,
+                answer=None,
+                citations=[],
+                abs_flag=False,
+                abs_detail=None,
+                tkdl_flag=False,
+                tkdl_detail=None,
+                confidence_score=0.0,
+                abstention_message=routed_out.message or config.ABSTENTION_MESSAGE,
+                disclaimer=config.DISCLAIMER_TEXT,
+                response_time_ms=latency_ms,
+            )
+
         # 4. Retrieval & ABS / TKDL Prior Art Check
         if category_out.category == "Conversational":
             retrieved_chunks = []
             abs_out = ABSCheckerOutput(abs_flag=False, abs_detail=None)
-            gate_out = ConfidenceGateOutput(decision="generate", max_score=1.0, chunks=[])
-            
+            gate_out = ConfidenceGateOutput(
+                decision="generate", max_score=1.0, chunks=[]
+            )
+
             gen_out = await asyncio.to_thread(
                 self.answer_generator.generate_conversational,
                 query=cleaned_query,
                 conversation_history=conversation_history,
             )
-            
+
             status = "answered"
             final_answer = gen_out.answer
             response_citations = []
@@ -102,7 +125,7 @@ class PipelineOrchestrator:
             gate_out = self.confidence_gate.evaluate(retrieved_chunks)
 
             # 6. Answer Generation vs Abstention
-            if gate_out.decision == "generate":
+            if gate_out.decision == "generate" and category_out.category != "Unclassifiable":
                 gen_out = await asyncio.to_thread(
                     self.answer_generator.generate,
                     query=cleaned_query,
@@ -174,6 +197,8 @@ class PipelineOrchestrator:
             citations=response_citations,
             abs_flag=abs_out.abs_flag,
             abs_detail=abs_out.abs_detail,
+            tkdl_flag=abs_out.tkdl_flag,
+            tkdl_detail=abs_out.tkdl_detail,
             confidence_score=gate_out.max_score,
             abstention_message=abstention_msg,
             disclaimer=config.DISCLAIMER_TEXT,
@@ -191,5 +216,7 @@ async def run_pipeline(
     target_query = query_text if query_text is not None else (query or "")
     orchestrator = PipelineOrchestrator()
     return await orchestrator.run_pipeline(
-        query_text=target_query, session_id=session_id, conversation_history=conversation_history
+        query_text=target_query,
+        session_id=session_id,
+        conversation_history=conversation_history,
     )

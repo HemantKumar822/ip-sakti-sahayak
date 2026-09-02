@@ -35,6 +35,14 @@ class ABSCheckerOutput(BaseModel):
         default=None,
         description="Statutory explanation and retrieved citation for the ABS requirement if flagged.",
     )
+    tkdl_flag: bool = Field(
+        default=False,
+        description="Indicates whether Traditional Knowledge Digital Library (TKDL) or Section 3(p) prior art applies.",
+    )
+    tkdl_detail: str | None = Field(
+        default=None,
+        description="Statutory explanation for TKDL prior art / Section 3(p) patent exclusion if flagged.",
+    )
     citations: list[dict[str, Any]] = Field(
         default_factory=list,
         description="List of relevant ABS/TKDL citations retrieved from the legal corpus.",
@@ -60,23 +68,27 @@ class ABSTKDLChecker:
         """Initializes the ABS/TKDL Checker with a VectorStore and similarity threshold.
 
         Args:
-            vector_store: VectorStore instance for corpus retrieval (defaults to ChromaStore).
-            threshold: Minimum similarity score to trigger ABS flag (defaults to config.ABS_THRESHOLD).
-            top_k: Maximum number of candidate chunks to evaluate (default: 3).
+            vector_store: VectorStore instance (defaults to persistent ChromaStore).
+            threshold: Cosine similarity threshold for flagging ABS/TKDL relevance.
+                       Defaults to config.ABS_THRESHOLD (0.55).
+            top_k: Number of candidate chunks to retrieve and evaluate.
+                   Defaults to config.RETRIEVAL_TOP_K (5).
         """
-        self.vector_store: VectorStore = (
-            vector_store if vector_store is not None else ChromaStore()
-        )
+        self.vector_store = vector_store or ChromaStore()
         self.threshold: float = (
             threshold if threshold is not None else config.ABS_THRESHOLD
         )
-        self.top_k: int = top_k if top_k is not None else 3
+        self.top_k: int = top_k if top_k is not None else config.RETRIEVAL_TOP_K
 
-    def is_abs_document(self, metadata: dict[str, Any], chunk_text: str = "") -> bool:
-        """Determines if a document chunk originates from the ABS/TKDL corpus slice.
+    def is_abs_document(
+        self, metadata: dict[str, Any], chunk_text: str = ""
+    ) -> bool:
+        """Determines if a document or chunk belongs to the ABS / TKDL statutory regime.
+
+        Inspects metadata fields (doc_id, doc_type, title, source_url, section_heading).
 
         Args:
-            metadata: Metadata dictionary associated with the chunk.
+            metadata: Metadata dictionary associated with a chunk.
             chunk_text: Text content of the chunk.
 
         Returns:
@@ -236,15 +248,34 @@ class ABSTKDLChecker:
                 f"and National Biodiversity Authority (NBA) approval may be required prior to patenting or commercialization.{url_suffix}"
             )
 
+            tkdl_match = any(
+                "tkdl" in c.get("doc_id", "").lower()
+                or "traditional" in c.get("doc_id", "").lower()
+                or "traditional" in c.get("title", "").lower()
+                or "s3p" in c.get("doc_id", "").lower()
+                or "3(p)" in str(c.get("section", ""))
+                for c in matching_abs_citations
+            )
+            tkdl_detail = (
+                "Traditional Knowledge Prior Art Notice: Inventions based on traditional knowledge "
+                "or aggregation of known properties are non-patentable under Section 3(p) of the Patents Act, 1970 "
+                "and subject to prior art screening against the Traditional Knowledge Digital Library (TKDL)."
+                if tkdl_match
+                else None
+            )
+
             logger.info(
-                "ABS flag TRIGGERED (score=%.4f >= %.4f) for query: %s",
+                "ABS flag TRIGGERED (score=%.4f >= %.4f) for query: %s (tkdl_flag=%s)",
                 highest_abs_score,
                 self.threshold,
                 query[:60],
+                tkdl_match,
             )
             return ABSCheckerOutput(
                 abs_flag=True,
                 abs_detail=abs_detail,
+                tkdl_flag=tkdl_match,
+                tkdl_detail=tkdl_detail,
                 citations=matching_abs_citations,
                 similarity_score=highest_abs_score,
             )
@@ -258,6 +289,8 @@ class ABSTKDLChecker:
         return ABSCheckerOutput(
             abs_flag=False,
             abs_detail=None,
+            tkdl_flag=False,
+            tkdl_detail=None,
             citations=matching_abs_citations,
             similarity_score=highest_abs_score,
         )

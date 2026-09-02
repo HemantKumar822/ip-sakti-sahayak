@@ -78,5 +78,22 @@ The typography stack uses **Inter** for crisp document readability and **JetBrai
 - **Disabled:** Opacity `0.4` with `not-allowed` cursor during in-flight queries.
 
 ### 4. Alert & Abstention Callouts
-- **ABS Alert:** Warm amber border (`--color-warning`) with `#FFF9F2` tinted background.
-- **Abstention Notice:** Soft red border (`--color-error`) with `#FDF3F3` tinted background.
+- **ABS Compliance Callout (`.callout-abs`):** Warm amber border (`--color-warning`) with `#FFFDF5` tinted background, dedicated to Biological Diversity Act & NBA Access and Benefit Sharing clearances.
+- **TKDL Prior Art Callout (`.callout-tkdl`):** Deep indigo border (`#213183`) with `#F4F6FB` tinted background, dedicated to Section 3(p) Patents Act Traditional Knowledge exclusions.
+- **Abstention Notice (`.callout-abstain`):** Soft red border (`--color-error`) with `#FDF3F3` tinted background and domain explanation.
+
+### 5. Statutory Citation Badges (`.statutory-citation-badge`)
+- **Visual Style:** Pill token (`border-radius: 9999px`), crisp `1px solid #D0D7DE`, `#F6F8FA` background, dark ink text (`#0969DA` link tone).
+- **Interaction:** Hover micro-animation (subtle shadow, background tint transition, cursor pointer). Directly hyperlinked with `target="_blank"` to official government gazette PDFs.
+
+### 6. Live Pipeline State Stepper (`.pipeline-stepper`)
+- **Structure:** Horizontal flex chain of steps:
+  `[🔒 PII Scrubbed] ➔ [🏷️ Categorized] ➔ [⚖️ Routed] ➔ [⚡ Hybrid Search] ➔ [🛡️ Gate Verified]`
+- **Tokens:** Minimalist border, pill badges, active state indicators.
+
+### 7. Quick-Launch Scenario Chips (`.quick-action-chip`)
+- **Visual Style:** Soft gray pill buttons with icon prefix. Hover elevation and background transition.
+- **Action:** Populates the query state and triggers immediate execution on click.
+
+### 8. Technical Inspector Drawer (`.tech-inspector-drawer`)
+- **Structure:** Collapsible metadata cockpit containing confidence score metric gauge, hybrid retrieval mode indicator (Dense + BM25 RRF), latency in milliseconds, and SHA-256 session hash.

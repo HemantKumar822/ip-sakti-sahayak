@@ -24,6 +24,10 @@ INTERNATIONAL_IP_PATTERNS = [
     re.compile(r"\bUSPTO\b", re.IGNORECASE),
     re.compile(r"\bEPO\b", re.IGNORECASE),
     re.compile(r"\bEuropean\s+Patent\s+Office\b", re.IGNORECASE),
+    re.compile(
+        r"\b(?:Germany|German|United States|USA|UK|United Kingdom|Japan|China|Australia|Canada|Europe)\b",
+        re.IGNORECASE,
+    ),
 ]
 
 

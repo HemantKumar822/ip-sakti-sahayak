@@ -162,7 +162,9 @@ def test_orchestrator_abstain_on_low_confidence():
     assert response.abstention_message == "Mocked dynamic refusal message"
     assert response.disclaimer == config.DISCLAIMER_TEXT
     mock_gen.generate.assert_not_called()
-    mock_gen.generate_refusal.assert_called_once_with(query="What is the patent status of quantum computing semiconductor?")
+    mock_gen.generate_refusal.assert_called_once_with(
+        query="What is the patent status of quantum computing semiconductor?"
+    )
 
 
 def test_run_pipeline_wrapper_function():
