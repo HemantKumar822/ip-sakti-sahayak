@@ -1,7 +1,5 @@
-import datetime
 import os
 import re
-import time
 import uuid
 from pathlib import Path
 
@@ -37,138 +35,135 @@ if "session_id" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Check API Health silently for status indicator
-api_online = False
-ping_ms = 0
-try:
-    t0 = time.perf_counter()
-    health_resp = requests.get(f"{API_URL}/health", timeout=2)
-    if health_resp.status_code == 200:
-        api_online = True
-        ping_ms = int((time.perf_counter() - t0) * 1000)
-except requests.RequestException:
-    api_online = False
-
-# Apple Cupertino Top Navigation Bar
+# Top Bar
 st.markdown(
     """
     <div class="top-bar">
         <span class="top-bar-title">🏛️ IP-SAKTI Sahayak</span>
-        <span class="top-bar-badge">Republic of India 🇮🇳 • DPIIT PS-26045</span>
+        <span class="top-bar-badge">India 🇮🇳</span>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-# Compact Dynamic Hero Section
+# Check API Health silently for status indicator
+api_online = False
+try:
+    health_resp = requests.get(f"{API_URL}/health", timeout=2)
+    if health_resp.status_code == 200:
+        api_online = True
+except requests.RequestException:
+    api_online = False
+
+with st.sidebar:
+    st.markdown("### System Status")
+    if api_online:
+        st.success("🟢 Backend API Connected")
+    else:
+        st.warning("🟠 Backend API Offline (Run `python run.py`)")
+    st.caption(f"Session ID: `{st.session_state.session_id[:8]}...`")
+    st.markdown("---")
+    st.markdown(
+        "**Guarantees:**\n"
+        "- 🛡️ Zero Hallucinations\n"
+        "- 🧬 ABS & TKDL Detection\n"
+        "- 🔒 Privacy by Design (DPDP Act)"
+    )
+
+# Adaptive Page Heading
 if not st.session_state.messages:
     st.markdown(
         """
-        <div class="hero-badge">🏛️ DPIIT PS-26045 • NATIONAL IPR INTELLIGENCE CO-PILOT</div>
-        <div class="page-title">AI Legal Intelligence for Ayurveda & Natural Bio-Assets</div>
-        <div class="page-subtitle">Statutory-grade IP advisory grounded in the Patents Act 1970, Biological Diversity Act 2002/2023, and authentic TKDL prior art records.</div>
+        <div class="page-title">Ask your Ayurveda IP question</div>
+        <div class="page-subtitle">Citation-grounded Intellectual Property advisory for Traditional Knowledge & Biological Resources</div>
         """,
         unsafe_allow_html=True,
     )
-
-# macOS Legal Inspector Sidebar Control Center
-with st.sidebar:
-    st.markdown("### 🏛️ Legal Control Center")
-    if api_online:
-        st.success(f"🟢 Core Engine Connected ({ping_ms}ms)")
-    else:
-        st.warning("🟠 Core Engine Offline (Run `./start.sh`)")
-
-    st.caption(f"Session Hash: `{st.session_state.session_id[:8]}...`")
-
-    st.markdown("---")
-    st.markdown("### 📜 Corpus Provenance")
-    st.markdown("""
-        - **The Patents Act, 1970** (S. 3(p), 3(d), 3(e))
-        - **Biological Diversity Act 2002 / 2023** (S. 3, 4, 6)
-        - **Biological Diversity Rules 2004** (SBB / NBA)
-        - **AYUSH Patent Examination Guidelines 2025**
-        - **TKDL Biological Material Guidelines 2012**
-        - *Novartis AG v. Union of India* (2013) 6 SCC 1
-        - *Emami Ltd. v. Dabur India Ltd.* (2024)
-        """)
-    st.caption("296 Vector Chunks • Hybrid Dense + BM25 RRF")
-
-    st.markdown("---")
-    if st.button("🧹 New Legal Briefing", use_container_width=True):
-        st.session_state.messages = []
-        st.session_state.session_id = str(uuid.uuid4())
-        st.rerun()
-
-    st.markdown("---")
     st.markdown(
-        "**System Guarantees:**\n"
-        "- 🛡️ Zero Legal Hallucinations\n"
-        "- 🧬 Dual ABS & TKDL Clearance Flags\n"
-        "- 🔒 DPDP Act Privacy by Design"
-    )
-
-# Selected Statutory Verification Scenarios (Bento Grid Empty State)
-if not st.session_state.messages:
-    st.markdown(
-        '<div class="bento-header">⚡ Selected Statutory Verification Scenarios</div>',
+        '<div class="quick-action-header">⚡ Quick-Launch Legal Verification Scenarios</div>',
         unsafe_allow_html=True,
     )
     qcol1, qcol2 = st.columns(2)
     with qcol1:
         if st.button(
-            "🌿 Classical: Triphala Churnam Bar\nSection 3(p) & 3(e) Traditional Knowledge Exclusion",
+            "🌿 Classical: Triphala Patentability",
             use_container_width=True,
-            help="Test Section 3(p) and Section 3(e) admixture exclusions",
+            help="Test Section 3(p) Traditional Knowledge Bar",
         ):
-            st.session_state.pending_query = "Can a standard classical formulation of Triphala churnam or Chyawanprash be patented under the Indian Patents Act?"
+            st.session_state.pending_query = "Can a formulation of Triphala and Honey be patented under Indian patent law?"
             st.rerun()
         if st.button(
-            "🏷️ Trademark: 'Chyawanprash' Genericness\nTrade Marks Act 1999 Section 9 Distinctiveness Bar",
+            "🏷️ Trademark: Chyawanprash Brand",
             use_container_width=True,
-            help="Test publici juris and distinctiveness of Ayurvedic terms",
+            help="Test Trade Marks Act 1999 Section 9 distinctiveness",
         ):
-            st.session_state.pending_query = "Can our brand register the generic name 'Chyawanprash' or 'Ayur' as an exclusive registered trademark for herbal wellness products?"
+            st.session_state.pending_query = "Can a company register 'Chyawanprash' as an exclusive trademark under Trade Marks Act 1999?"
             st.rerun()
     with qcol2:
         if st.button(
-            "🔬 Proprietary: Withanolide Fraction Synergy\nNovartis v. UOI (2013) Therapeutic Efficacy Standard",
+            "🧬 Extraction: Curcumin Process Patent",
             use_container_width=True,
-            help="Test Section 3(d) therapeutic efficacy standard",
+            help="Test Biological Diversity Act Section 6 ABS approval",
         ):
-            st.session_state.pending_query = "If we isolate a purified withanolide fraction from Ashwagandha and prove significant synergistic anti-inflammatory efficacy compared to raw root powder, can this composition be patented?"
+            st.session_state.pending_query = "Can an improved solvent extraction process of Curcumin from Turmeric be patented under Section 3(p)?"
             st.rerun()
         if st.button(
-            "🏛️ ABS Mandate: Bacopa monnieri\nBiological Diversity Act Section 6 NBA Form III Clearance",
+            "🚫 Out-of-Scope: Foreign Trademark",
             use_container_width=True,
-            help="Test Biological Diversity Act Section 6 prior approval",
+            help="Test Jurisdiction Router immediate abstention",
         ):
-            st.session_state.pending_query = "We are a foreign entity from Germany sourcing Bacopa monnieri (Brahmi) cultivated in Kerala to file a patent application in India. Do we need prior approval from the National Biodiversity Authority?"
+            st.session_state.pending_query = "What are the legal requirements for registering a corporate trademark in Germany?"
+            st.rerun()
+else:
+    # Compact consultation banner with reset action
+    head_col1, head_col2 = st.columns([5, 2])
+    with head_col1:
+        turn_count = len([m for m in st.session_state.messages if m["role"] == "user"])
+        turn_label = "inquiry" if turn_count == 1 else "inquiries"
+        st.markdown(
+            f"""
+            <div class="compact-chat-header">
+                <span class="compact-chat-title">🏛️ Active Legal Consultation</span>
+                <span style="font-size: 12px; color: #787774;">{turn_count} verified {turn_label}</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with head_col2:
+        if st.button(
+            "🔄 New Inquiry", use_container_width=True, help="Start a new consultation"
+        ):
+            st.session_state.messages = []
+            st.session_state.session_id = str(uuid.uuid4())
             st.rerun()
 
-    # System Provenance & Trust Matrix Strip (Empty State Elevation)
-    st.markdown(
-        """
-        <div class="trust-strip">
-            <div class="trust-item">
-                <div class="trust-item-title">📜 11 Statutory Sources</div>
-                <div class="trust-item-desc">Patents Act, BDA 2002/2023, AYUSH 2025, Novartis & Emami precedents</div>
-            </div>
-            <div class="trust-item">
-                <div class="trust-item-title">⚡ Hybrid RRF Engine</div>
-                <div class="trust-item-desc">bge-small-en-v1.5 dense vectors fused with BM25 Okapi lexical ranking</div>
-            </div>
-            <div class="trust-item">
-                <div class="trust-item-title">🛡️ Anti-Hallucination Gate</div>
-                <div class="trust-item-desc">Mathematical confidence gate with mandatory statutory citation grounding</div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
-# Render Chat Conversation History
-for msg_idx, message in enumerate(st.session_state.messages):
+# Format inline citations like [1] or [1, 2] into superscript anchor links
+def format_inline_citations(text: str) -> str:
+    def replace_citation(match: re.Match) -> str:
+        raw_nums = match.group(1).split(",")
+        links = []
+        for n in raw_nums:
+            num = n.strip()
+            if num.isdigit():
+                links.append(
+                    f'<a href="#citation-{num}" class="citation-marker" target="_self">[{num}]</a>'
+                )
+        return "".join(links) if links else match.group(0)
+
+    processed = re.sub(
+        r"\[(\d+(?:\s*,\s*\d+)*)\]",
+        replace_citation,
+        text,
+    )
+    paragraphs = [p.strip() for p in processed.split("\n\n") if p.strip()]
+    if not paragraphs:
+        return f"<p>{processed}</p>"
+    return "".join(f"<p>{p.replace(chr(10), '<br/>')}</p>" for p in paragraphs)
+
+
+# Render Chat History
+for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["role"] == "user":
             st.markdown(message["content"])
@@ -177,8 +172,7 @@ for msg_idx, message in enumerate(st.session_state.messages):
 
             if status == "abstained":
                 abstain_text = message.get(
-                    "content",
-                    "Our corpus doesn't contain sufficient evidence to answer this question accurately. Rather than guess, we prefer to be honest about our limitations.",
+                    "content", "Our corpus doesn't contain sufficient evidence..."
                 )
                 st.markdown(
                     f"""
@@ -219,43 +213,24 @@ for msg_idx, message in enumerate(st.session_state.messages):
                 jurisdiction = data.get("jurisdiction", "India")
                 response_time_ms = data.get("response_time_ms", 0)
                 conf_score = data.get("confidence_score", 0.0)
-                citations = data.get("citations", [])
 
-                # The Reasoning Capsule (Apple Dynamic Island Inspection HUD)
-                st.markdown(
-                    f"""
-                    <details class="reasoning-capsule">
-                        <summary class="capsule-summary">
-                            <div class="capsule-pill-group">
-                                <span class="pulse-dot"></span>
-                                <span><strong>Audit Trail:</strong> Verified against {len(citations)} statutory authorities • {conf_score * 100:.1f}% Confidence</span>
-                            </div>
-                            <span style="color: var(--color-accent); font-size: 11px;">Inspect Verification HUD ▾</span>
-                        </summary>
-                        <div class="capsule-expanded-hud">
-                            <div class="hud-metric">
-                                <div class="hud-metric-label">Anti-Hallucination</div>
-                                <div class="hud-metric-value">{conf_score * 100:.1f}%</div>
-                            </div>
-                            <div class="hud-metric">
-                                <div class="hud-metric-label">Retrieval Engine</div>
-                                <div class="hud-metric-value">Dense + BM25 (RRF)</div>
-                            </div>
-                            <div class="hud-metric">
-                                <div class="hud-metric-label">Latency</div>
-                                <div class="hud-metric-value">{response_time_ms} ms</div>
-                            </div>
-                            <div class="hud-metric">
-                                <div class="hud-metric-label">DPDP Privacy Hash</div>
-                                <div class="hud-metric-value">{st.session_state.session_id[:8]}...</div>
-                            </div>
-                        </div>
-                    </details>
-                    """,
-                    unsafe_allow_html=True,
-                )
+                # 1. Pipeline Stepper HTML
+                stepper_html = f"""
+                <div class="pipeline-stepper">
+                    <span class="stepper-pill completed">🔒 PII Scrubbed</span>
+                    <span class="stepper-separator">➔</span>
+                    <span class="stepper-pill completed">🏷️ {category or "Categorized"}</span>
+                    <span class="stepper-separator">➔</span>
+                    <span class="stepper-pill completed">⚖️ {jurisdiction}</span>
+                    <span class="stepper-separator">➔</span>
+                    <span class="stepper-pill completed">⚡ Hybrid Search (RRF)</span>
+                    <span class="stepper-separator">➔</span>
+                    <span class="stepper-pill completed">🛡️ Anti-Hallucination Gate</span>
+                </div>
+                """
 
-                # 1. ABS Detection Alert Callout
+                # 2. ABS Callout HTML
+                abs_callout_html = ""
                 if data.get("abs_flag"):
                     abs_msg = data.get(
                         "abs_detail",
@@ -270,103 +245,43 @@ for msg_idx, message in enumerate(st.session_state.messages):
                         clean_abs_msg = abs_msg
                         source_html = ""
 
-                    st.markdown(
-                        f"""
-                        <div class="callout-abs">
-                            <div class="callout-abs-header">
-                                <span class="callout-abs-icon">⚠️</span>
-                                <span class="callout-abs-title">ABS Compliance Note (Biological Diversity Act)</span>
-                            </div>
-                            <div class="callout-abs-body">
-                                <div class="callout-abs-text">{clean_abs_msg}</div>
-                                {source_html}
-                            </div>
+                    abs_callout_html = f"""
+                    <div class="callout-abs">
+                        <div class="callout-abs-header">
+                            <span class="callout-abs-icon">⚠️</span>
+                            <span class="callout-abs-title">ABS Compliance Note</span>
                         </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
+                        <div class="callout-abs-body">
+                            <div class="callout-abs-text">{clean_abs_msg}</div>
+                            {source_html}
+                        </div>
+                    </div>
+                    """
 
-                # 2. TKDL Prior Art Alert Callout Card
+                # 3. TKDL Callout HTML
+                tkdl_callout_html = ""
                 if data.get("tkdl_flag"):
                     tkdl_msg = data.get(
                         "tkdl_detail",
                         "Traditional Knowledge Prior Art Notice: Inventions based on traditional knowledge or known aggregation of properties are non-patentable under Section 3(p) of the Patents Act, 1970 and subject to TKDL prior art verification.",
                     )
-                    st.markdown(
-                        f"""
-                        <div class="callout-tkdl">
-                            <div class="callout-tkdl-header">
-                                <span class="callout-tkdl-icon">🏛️</span>
-                                <span class="callout-tkdl-title">Traditional Knowledge Prior Art Notice (Section 3(p) Bar)</span>
-                            </div>
-                            <div class="callout-tkdl-body">
-                                {tkdl_msg}
-                            </div>
+                    tkdl_callout_html = f"""
+                    <div class="callout-tkdl">
+                        <div class="callout-tkdl-header">
+                            <span class="callout-tkdl-icon">🏛️</span>
+                            <span class="callout-tkdl-title">Traditional Knowledge & TKDL Prior Art Notice</span>
                         </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-                category_badge_html = (
-                    f'<span class="category-badge">🏷️ {category}</span>'
-                    if category
-                    else '<span class="category-badge">🏷️ Advisory</span>'
-                )
-                time_display = (
-                    f"Answered in {response_time_ms / 1000:.1f}s"
-                    if response_time_ms >= 1000
-                    else f"Answered in {response_time_ms} ms"
-                )
-
-                # Format inline citations [1], [2] into superscript anchors
-                def format_inline_citations(text: str) -> str:
-                    def replace_citation(match: re.Match) -> str:
-                        raw_nums = match.group(1).split(",")
-                        links = []
-                        for n in raw_nums:
-                            num = n.strip()
-                            if num.isdigit():
-                                links.append(
-                                    f'<a href="#citation-{num}" class="citation-marker" target="_self">[{num}]</a>'
-                                )
-                        return "".join(links) if links else match.group(0)
-
-                    processed = re.sub(
-                        r"\[(\d+(?:\s*,\s*\d+)*)\]",
-                        replace_citation,
-                        text,
-                    )
-                    paragraphs = [
-                        p.strip() for p in processed.split("\n\n") if p.strip()
-                    ]
-                    if not paragraphs:
-                        return f"<p>{processed}</p>"
-                    return "".join(
-                        f"<p>{p.replace(chr(10), '<br/>')}</p>" for p in paragraphs
-                    )
-
-                formatted_answer_html = format_inline_citations(answer_text)
-
-                # Legal Memorandum Card
-                st.markdown(
-                    f"""
-                    <div class="card">
-                        <div class="card-metadata-bar">
-                            {category_badge_html}
-                            <span class="meta-separator">•</span>
-                            <span class="meta-item">{jurisdiction}</span>
-                            <span class="meta-separator">•</span>
-                            <span class="meta-item">{time_display}</span>
-                        </div>
-                        <div class="card-body">
-                            {formatted_answer_html}
+                        <div class="callout-tkdl-body">
+                            {tkdl_msg}
                         </div>
                     </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+                    """
 
-                # Clickable Statutory Citation Badges with Official Gazette Links
+                # 4. Formatted Answer HTML
+                formatted_answer_html = format_inline_citations(answer_text)
+
+                # 5. Statutory Citation Badges HTML
+                citations = data.get("citations", [])
                 statutory_badges = []
                 for cit in citations:
                     c_title = cit.get("title") or cit.get("doc_id", "Statute")
@@ -378,23 +293,22 @@ for msg_idx, message in enumerate(st.session_state.messages):
                             f'<a href="{c_url}" target="_blank" rel="noopener noreferrer" class="statutory-citation-badge">📜 {c_label} ↗</a>'
                         )
 
+                statutory_badges_html = ""
                 if statutory_badges:
-                    st.markdown(
-                        f"""
-                        <div class="statutory-badge-wrap">
-                            {''.join(statutory_badges[:4])}
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
+                    statutory_badges_html = f"""
+                    <div class="statutory-badge-wrap">
+                        {''.join(statutory_badges[:4])}
+                    </div>
+                    """
 
-                # Citations Accordion (Notion Toggle Style)
+                # 6. Citations Accordion HTML
+                citations_accordion_html = ""
                 if citations:
                     count = len(citations)
                     source_label = "Source" if count == 1 else "Sources"
 
                     citation_rows = []
-                    for c_idx, cit in enumerate(citations, 1):
+                    for idx, cit in enumerate(citations, 1):
                         doc_id = cit.get("doc_id", "Document")
                         section = cit.get("section")
                         snippet = cit.get("snippet", "")
@@ -405,7 +319,7 @@ for msg_idx, message in enumerate(st.session_state.messages):
                         section_display = (
                             f" — Section: <code>{section}</code>" if section else ""
                         )
-                        title_html = f'<div class="citation-title"><strong>[{c_idx}] {doc_id}</strong>{section_display}</div>'
+                        title_html = f'<div class="citation-title"><strong>[{idx}] {doc_id}</strong>{section_display}</div>'
 
                         snippet_html = (
                             f'<div class="citation-snippet">"{snippet}"</div>'
@@ -420,7 +334,7 @@ for msg_idx, message in enumerate(st.session_state.messages):
                         meta_html = f'<div class="citation-meta">Retrieved: {date_retrieved} · {doc_type}</div>'
 
                         citation_rows.append(f"""
-                            <div id="citation-{c_idx}" class="citation-row citation-target">
+                            <div id="citation-{idx}" class="citation-row citation-target">
                                 {title_html}
                                 {snippet_html}
                                 {url_html}
@@ -429,60 +343,91 @@ for msg_idx, message in enumerate(st.session_state.messages):
                             """)
 
                     citation_rows_joined = "".join(citation_rows)
-                    st.markdown(
-                        f"""
-                        <details class="citations-accordion">
-                            <summary class="citations-summary">
-                                <span class="summary-arrow">▶</span>
-                                <span class="summary-title">📄 {count} Verified {source_label}</span>
-                            </summary>
-                            <div class="citations-list">
-                                {citation_rows_joined}
+                    citations_accordion_html = f"""
+                    <details class="citations-accordion">
+                        <summary class="citations-summary">
+                            <span class="summary-arrow">▶</span>
+                            <span class="summary-title">📄 {count} {source_label}</span>
+                        </summary>
+                        <div class="citations-list">
+                            {citation_rows_joined}
+                        </div>
+                    </details>
+                    """
+
+                # 7. Telemetry Inspector HTML
+                telemetry_html = f"""
+                <details class="tech-inspector-drawer">
+                    <summary>
+                        ⚙️ Technical Telemetry & Verification Cockpit
+                    </summary>
+                    <div class="inspector-grid">
+                        <div class="inspector-card">
+                            <div class="inspector-label">Anti-Hallucination Score</div>
+                            <div class="inspector-val">{conf_score * 100:.1f}%</div>
+                        </div>
+                        <div class="inspector-card">
+                            <div class="inspector-label">Retrieval Mode</div>
+                            <div class="inspector-val">Dense + BM25 (RRF)</div>
+                        </div>
+                        <div class="inspector-card">
+                            <div class="inspector-label">End-to-End Latency</div>
+                            <div class="inspector-val">{response_time_ms} ms</div>
+                        </div>
+                        <div class="inspector-card">
+                            <div class="inspector-label">DPDP Privacy Hash</div>
+                            <div class="inspector-val">{st.session_state.session_id[:8]}...</div>
+                        </div>
+                    </div>
+                </details>
+                """
+
+                # Metadata calculations
+                category_badge_html = (
+                    f'<span class="category-badge">🏷️ {category}</span>'
+                    if category
+                    else '<span class="category-badge">🏷️ Advisory</span>'
+                )
+                time_display = (
+                    f"Answered in {response_time_ms / 1000:.1f}s"
+                    if response_time_ms >= 1000
+                    else f"Answered in {response_time_ms} ms"
+                )
+
+                # RENDER UNIFIED DOSSIER CARD
+                st.markdown(
+                    f"""
+                    <div class="card">
+                        <div class="card-metadata-bar">
+                            <div class="card-header-row" style="width: 100%; margin-bottom: 0;">
+                                <div>
+                                    {category_badge_html}
+                                    <span class="meta-separator">•</span>
+                                    <span class="meta-item">{jurisdiction}</span>
+                                    <span class="meta-separator">•</span>
+                                    <span class="meta-item">{time_display}</span>
+                                </div>
+                                <div style="font-size: 12px; font-weight: 600; color: #10b981;">
+                                    🛡️ {conf_score * 100:.0f}% Grounded
+                                </div>
                             </div>
-                        </details>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-                # Export Memorandum Download Action
-                now_utc = datetime.datetime.now(datetime.timezone.utc).strftime(
-                    "%Y-%m-%d %H:%M:%S UTC"
-                )
-                disclaimer_note = (
-                    "\n\n---\n*Disclaimer: This information is provided for general awareness and does not constitute legal advice. "
-                    "Consult a qualified IP attorney for decisions specific to your situation.*"
-                )
-                memo_markdown = (
-                    f"# Legal Advisory Memorandum\n\n"
-                    f"**Date:** {now_utc}\n"
-                    f"**Jurisdiction:** {jurisdiction}\n"
-                    f"**Subject Category:** {category}\n"
-                    f"**Anti-Hallucination Gate Score:** {conf_score * 100:.1f}%\n"
-                    f"**ABS Clearance Required:** {'YES' if data.get('abs_flag') else 'NO'}\n"
-                    f"**Traditional Knowledge Bar:** {'DETECTED' if data.get('tkdl_flag') else 'NONE'}\n\n"
-                    f"## Advisory Finding\n\n{answer_text}\n\n"
-                    f"## Statutory Authorities\n\n"
-                    + "\n".join(
-                        f"- [{c.get('doc_id')}] Section: {c.get('section', 'N/A')} ({c.get('source_url', '')})"
-                        for c in citations
-                    )
-                    + disclaimer_note
-                )
-
-                st.download_button(
-                    label="📄 Export Formal Legal Memo (.md)",
-                    data=memo_markdown,
-                    file_name=f"IP_SAKTI_Advisory_{st.session_state.session_id[:6]}_{msg_idx}.md",
-                    mime="text/markdown",
-                    key=f"dl_btn_{msg_idx}",
-                    help="Download timestamped legal advisory briefing with statutory citations",
+                        </div>
+                        {stepper_html}
+                        {abs_callout_html}
+                        {tkdl_callout_html}
+                        <div class="card-body">
+                            {formatted_answer_html}
+                        </div>
+                        {statutory_badges_html}
+                        {citations_accordion_html}
+                        {telemetry_html}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
                 )
 
 # Query Input Form (ChatGPT style)
-chat_input_val = st.chat_input(
-    "Ask your Ayurveda IP question (e.g. patentability, ABS clearance, TKDL prior art)...",
-    disabled=not api_online,
-)
+chat_input_val = st.chat_input("Ask your Ayurveda IP question", disabled=not api_online)
 prompt = None
 if "pending_query" in st.session_state and st.session_state.pending_query:
     prompt = st.session_state.pending_query
