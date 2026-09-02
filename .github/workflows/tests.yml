@@ -6,6 +6,10 @@ on:
   push:
     branches: [main, develop]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Run Pytest Suite with Coverage
@@ -21,9 +25,23 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Install dependencies
+      - name: Cache Hugging Face models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: huggingface-${{ runner.os }}-${{ hashFiles('src/config.py') }}
+          restore-keys: |
+            huggingface-${{ runner.os }}-
+
+      - name: Fast Lint & Syntax Pre-Check
         run: |
           python -m pip install --upgrade pip
+          pip install ruff black
+          ruff check src/ tests/
+          black --check src/ tests/
+
+      - name: Install dependencies
+        run: |
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 

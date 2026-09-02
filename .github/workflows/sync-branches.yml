@@ -1,17 +1,21 @@
-name: Auto-Sync Main and Develop
+name: Auto-Sync Main to Develop
 
 on:
   push:
     branches:
       - main
-      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: sync-branches
+  cancel-in-progress: true
 
 permissions:
   contents: write
 
 jobs:
   sync:
-    name: Sync Branches
+    name: Sync Main to Develop
     # Avoid infinite recursion if the bot pushes
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
@@ -28,16 +32,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Sync develop -> main
-        if: github.ref == 'refs/heads/develop'
-        run: |
-          git checkout main
-          git pull origin main
-          git merge origin/develop --no-edit -m "ci: auto-sync develop to main [skip ci]"
-          git push origin main
-
       - name: Sync main -> develop
-        if: github.ref == 'refs/heads/main'
         run: |
           git checkout develop
           git pull origin develop
