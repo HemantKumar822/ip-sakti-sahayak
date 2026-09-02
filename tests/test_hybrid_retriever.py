@@ -59,14 +59,24 @@ class MockDenseStore:
 
 def test_hybrid_retriever_fusion():
     dense_items = [
-        {"id": "doc_a", "similarity_score": 0.85, "chunk_text": "General herbal patent rules"},
-        {"id": "doc_b", "similarity_score": 0.75, "chunk_text": "Section 3(p) traditional knowledge"},
+        {
+            "id": "doc_a",
+            "similarity_score": 0.85,
+            "chunk_text": "General herbal patent rules",
+        },
+        {
+            "id": "doc_b",
+            "similarity_score": 0.75,
+            "chunk_text": "Section 3(p) traditional knowledge",
+        },
     ]
     bm25 = BM25Retriever()
-    bm25.index([
-        {"id": "doc_b", "chunk_text": "Section 3(p) traditional knowledge"},
-        {"id": "doc_a", "chunk_text": "General herbal patent rules"},
-    ])
+    bm25.index(
+        [
+            {"id": "doc_b", "chunk_text": "Section 3(p) traditional knowledge"},
+            {"id": "doc_a", "chunk_text": "General herbal patent rules"},
+        ]
+    )
 
     store = MockDenseStore(dense_items)
     hybrid = HybridRetriever(vector_store=store, bm25_retriever=bm25)

@@ -81,20 +81,39 @@ with st.sidebar:
 
 # Quick-Launch Action Matrix (Empty State Experience)
 if not st.session_state.messages:
-    st.markdown('<div class="quick-action-header">⚡ Quick-Launch Legal Verification Scenarios</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="quick-action-header">⚡ Quick-Launch Legal Verification Scenarios</div>',
+        unsafe_allow_html=True,
+    )
     qcol1, qcol2 = st.columns(2)
     with qcol1:
-        if st.button("🌿 Classical: Triphala Patentability", use_container_width=True, help="Test Section 3(p) Traditional Knowledge Bar"):
+        if st.button(
+            "🌿 Classical: Triphala Patentability",
+            use_container_width=True,
+            help="Test Section 3(p) Traditional Knowledge Bar",
+        ):
             st.session_state.pending_query = "Can a formulation of Triphala and Honey be patented under Indian patent law?"
             st.rerun()
-        if st.button("🏷️ Trademark: Chyawanprash Brand", use_container_width=True, help="Test Trade Marks Act 1999 Section 9 distinctiveness"):
+        if st.button(
+            "🏷️ Trademark: Chyawanprash Brand",
+            use_container_width=True,
+            help="Test Trade Marks Act 1999 Section 9 distinctiveness",
+        ):
             st.session_state.pending_query = "Can a company register 'Chyawanprash' as an exclusive trademark under Trade Marks Act 1999?"
             st.rerun()
     with qcol2:
-        if st.button("🧬 Extraction: Curcumin Process Patent", use_container_width=True, help="Test Biological Diversity Act Section 6 ABS approval"):
+        if st.button(
+            "🧬 Extraction: Curcumin Process Patent",
+            use_container_width=True,
+            help="Test Biological Diversity Act Section 6 ABS approval",
+        ):
             st.session_state.pending_query = "Can an improved solvent extraction process of Curcumin from Turmeric be patented under Section 3(p)?"
             st.rerun()
-        if st.button("🚫 Out-of-Scope: Foreign Trademark", use_container_width=True, help="Test Jurisdiction Router immediate abstention"):
+        if st.button(
+            "🚫 Out-of-Scope: Foreign Trademark",
+            use_container_width=True,
+            help="Test Jurisdiction Router immediate abstention",
+        ):
             st.session_state.pending_query = "What are the legal requirements for registering a corporate trademark in Germany?"
             st.rerun()
 
@@ -219,8 +238,6 @@ for message in st.session_state.messages:
                         """,
                         unsafe_allow_html=True,
                     )
-
-
 
                 category_badge_html = (
                     f'<span class="category-badge">🏷️ {category}</span>'

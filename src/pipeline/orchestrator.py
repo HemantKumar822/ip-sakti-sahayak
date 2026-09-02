@@ -125,7 +125,10 @@ class PipelineOrchestrator:
             gate_out = self.confidence_gate.evaluate(retrieved_chunks)
 
             # 6. Answer Generation vs Abstention
-            if gate_out.decision == "generate" and category_out.category != "Unclassifiable":
+            if (
+                gate_out.decision == "generate"
+                and category_out.category != "Unclassifiable"
+            ):
                 gen_out = await asyncio.to_thread(
                     self.answer_generator.generate,
                     query=cleaned_query,

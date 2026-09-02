@@ -123,7 +123,9 @@ class BM25Retriever:
 
                 # Okapi BM25 TF component with length normalization
                 numerator = freq * (self.k1 + 1.0)
-                denominator = freq + self.k1 * (1.0 - self.b + self.b * (doc_len / self.avgdl))
+                denominator = freq + self.k1 * (
+                    1.0 - self.b + self.b * (doc_len / self.avgdl)
+                )
                 score += idf * (numerator / denominator)
 
             if score > 0.0:

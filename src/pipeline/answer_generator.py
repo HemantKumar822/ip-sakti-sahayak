@@ -230,7 +230,9 @@ class AnswerGenerator:
                 return response.text.strip()
             return config.ABSTENTION_MESSAGE
         except Exception as e:  # noqa: BLE001
-            logger.warning("Could not generate dynamic refusal (%s); using standard refusal.", e)
+            logger.warning(
+                "Could not generate dynamic refusal (%s); using standard refusal.", e
+            )
             return (
                 "I cannot assist with this query as IP-SAKTI Sahayak is specifically scoped to Indian IP Law, "
                 "Ayurveda formulations, and Biological Diversity compliance. Please consult a specialist for this domain."

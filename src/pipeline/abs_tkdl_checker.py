@@ -80,9 +80,7 @@ class ABSTKDLChecker:
         )
         self.top_k: int = top_k if top_k is not None else config.RETRIEVAL_TOP_K
 
-    def is_abs_document(
-        self, metadata: dict[str, Any], chunk_text: str = ""
-    ) -> bool:
+    def is_abs_document(self, metadata: dict[str, Any], chunk_text: str = "") -> bool:
         """Determines if a document or chunk belongs to the ABS / TKDL statutory regime.
 
         Inspects metadata fields (doc_id, doc_type, title, source_url, section_heading).
