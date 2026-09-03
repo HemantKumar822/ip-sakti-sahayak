@@ -6,10 +6,12 @@ from src.config import config
 from src.models.response import Citation, QueryResponse
 from src.pipeline.abs_tkdl_checker import ABSChecker, ABSCheckerOutput
 from src.pipeline.answer_generator import AnswerGenerator
+from src.pipeline.bilingual import BilingualNormalizer
 from src.pipeline.classifier import Classifier
 from src.pipeline.confidence_gate import ConfidenceGate, ConfidenceGateOutput
 from src.pipeline.jurisdiction_router import JurisdictionRouter
 from src.pipeline.retriever import Retriever
+from src.pipeline.verifier import GroundingVerifier
 from src.privacy.pii_strip import log_query, strip_pii
 
 logger = logging.getLogger("ip_sakti.pipeline.orchestrator")
@@ -26,6 +28,7 @@ class PipelineOrchestrator:
         abs_checker: ABSChecker | None = None,
         confidence_gate: ConfidenceGate | None = None,
         answer_generator: AnswerGenerator | None = None,
+        verifier: GroundingVerifier | None = None,
     ) -> None:
         """Initialize pipeline components with optional dependency injection."""
         self.classifier = classifier or Classifier()
@@ -34,6 +37,7 @@ class PipelineOrchestrator:
         self.abs_checker = abs_checker or ABSChecker()
         self.confidence_gate = confidence_gate or ConfidenceGate()
         self.answer_generator = answer_generator or AnswerGenerator()
+        self.verifier = verifier or GroundingVerifier()
 
     async def run_pipeline(
         self,
@@ -136,11 +140,30 @@ class PipelineOrchestrator:
             response_citations = []
             abstention_msg = None
         else:
-            # Parallel execution of external checks
-            retrieved_chunks, abs_out = await asyncio.gather(
-                asyncio.to_thread(self.retriever.retrieve, cleaned_query),
-                asyncio.to_thread(self.abs_checker.check, cleaned_query),
+            # Bilingual Query Expansion Bridge (if Devanagari Hindi is detected)
+            bilingual_res = BilingualNormalizer.expand_query(cleaned_query)
+            search_query = (
+                bilingual_res.expanded_search_query
+                if bilingual_res.is_hindi
+                else cleaned_query
             )
+            if bilingual_res.is_hindi:
+                logger.info(
+                    "[BILINGUAL-BRIDGE] [%s] Hindi detected. Expanded search terms: %s",
+                    short_id,
+                    bilingual_res.matched_terms,
+                )
+
+            # Parallel execution of external checks
+            try:
+                retrieved_chunks, abs_out = await asyncio.gather(
+                    asyncio.to_thread(self.retriever.retrieve, search_query),
+                    asyncio.to_thread(self.abs_checker.check, search_query),
+                )
+            except Exception as e:
+                logger.error("[HYBRID-SEARCH] [%s] External search failure: %s", short_id, e)
+                retrieved_chunks = []
+                abs_out = ABSCheckerOutput(abs_flag=False, abs_detail=None)
 
             logger.info(
                 "[HYBRID-SEARCH] [%s] Retrieved %d chunks | ABS: %s | TKDL: %s",
@@ -185,22 +208,48 @@ class PipelineOrchestrator:
                     for c in gen_out.citations
                 ]
 
-                status = (
-                    "answered"
-                    if response_citations
-                    or (gen_out.answer and gen_out.answer != config.ABSTENTION_MESSAGE)
-                    else "abstained"
+                # Deterministic Grounding Verification (VERIFY step)
+                verify_out = self.verifier.verify(
+                    answer=gen_out.answer,
+                    citations=response_citations,
+                    retrieved_chunks=gate_out.chunks,
                 )
-                final_answer = gen_out.answer if status == "answered" else None
-                abstention_msg = (
-                    None
-                    if status == "answered"
-                    else (gen_out.answer or config.ABSTENTION_MESSAGE)
+                logger.info(
+                    "[VERIFY] [%s] Grounding check: %s (score=%.2f, status=%s)",
+                    short_id,
+                    verify_out.is_verified,
+                    verify_out.grounding_score,
+                    verify_out.status,
                 )
+
+                if not verify_out.is_verified:
+                    logger.warning(
+                        "[VERIFY-REJECT] [%s] Grounding verification failed: %s. Abstaining.",
+                        short_id,
+                        verify_out.audit_trail,
+                    )
+                    status = "abstained"
+                    final_answer = None
+                    response_citations = []
+                    abstention_msg = config.ABSTENTION_MESSAGE
+                    grounding_score = verify_out.grounding_score
+                    verification_status = verify_out.status
+                else:
+                    status = "answered" if response_citations else "abstained"
+                    final_answer = gen_out.answer if status == "answered" else None
+                    abstention_msg = (
+                        None
+                        if status == "answered"
+                        else (gen_out.answer or config.ABSTENTION_MESSAGE)
+                    )
+                    grounding_score = verify_out.grounding_score
+                    verification_status = verify_out.status
             else:
                 status = "abstained"
                 final_answer = None
                 response_citations = []
+                grounding_score = 1.0
+                verification_status = "verified"
                 abstention_msg = await asyncio.to_thread(
                     self.answer_generator.generate_refusal,
                     query=cleaned_query,
@@ -227,10 +276,11 @@ class PipelineOrchestrator:
 
         elapsed_ms = max(int((time.perf_counter() - start_time) * 1000), 0)
         logger.info(
-            "[PIPELINE-COMPLETE] [%s] Status: %s | Citations: %d | Latency: %dms",
+            "[PIPELINE-COMPLETE] [%s] Status: %s | Citations: %d | Grounding: %.2f | Latency: %dms",
             short_id,
             status,
             len(response_citations),
+            grounding_score if "grounding_score" in locals() else 1.0,
             elapsed_ms,
         )
 
@@ -245,6 +295,10 @@ class PipelineOrchestrator:
             tkdl_flag=abs_out.tkdl_flag,
             tkdl_detail=abs_out.tkdl_detail,
             confidence_score=gate_out.max_score,
+            grounding_score=grounding_score if "grounding_score" in locals() else 1.0,
+            verification_status=(
+                verification_status if "verification_status" in locals() else "verified"
+            ),
             abstention_message=abstention_msg,
             disclaimer=config.DISCLAIMER_TEXT,
             response_time_ms=elapsed_ms,

@@ -60,6 +60,14 @@ class QueryResponse(BaseModel):
     confidence_score: float | None = Field(
         default=None, description="Overall pipeline confidence score"
     )
+    grounding_score: float = Field(
+        default=1.0,
+        description="Deterministic citation grounding score (1.0 = verified provenance)",
+    )
+    verification_status: str = Field(
+        default="verified",
+        description="Verification state: 'verified', 'unverified_citations', or 'ungrounded'",
+    )
     abstention_message: str | None = Field(
         default=None,
         description="Explanation provided when system abstains from answering",

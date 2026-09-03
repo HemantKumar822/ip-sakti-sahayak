@@ -151,7 +151,7 @@ class HybridRetriever:
         for doc_id in sorted_doc_ids[:top_k]:
             item = dict(chunk_map[doc_id])
             base_dense_score = float(
-                item.get("similarity_score") or item.get("score") or 0.70
+                item.get("similarity_score") or item.get("score") or 0.45
             )
 
             # If document appeared in both dense and sparse, apply an agreement boost (+0.05)

@@ -1,136 +1,176 @@
-.topbar {
-  height: 60px;
-  background-color: #ffffff;
-  border-bottom: 1px solid var(--color-border);
+/* ==========================================================================
+   IP-SAKTI Sahayak — Notion Topbar Styles
+   ========================================================================== */
+
+.topbar-workbench {
+  height: 46px;
+  background-color: var(--notion-canvas);
+  border-bottom: 1px solid var(--notion-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 28px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-  z-index: 100;
-  position: sticky;
-  top: 0;
+  padding: 0 16px;
+  user-select: none;
+  z-index: 10;
+  flex-shrink: 0;
 }
 
-.brand {
+.topbar-left-section {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
-.brand-logo {
-  width: 38px;
-  height: 38px;
-  background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
-  border: 1px solid #bae6fd;
-  border-radius: 10px;
+.sidebar-toggle-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  box-shadow: 0 2px 4px rgba(2, 132, 199, 0.08);
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  color: var(--notion-muted);
+  transition: all 0.12s ease;
 }
 
-.brand-info {
-  display: flex;
-  flex-direction: column;
+.sidebar-toggle-btn:hover {
+  background-color: var(--notion-sidebar-hover);
+  color: var(--notion-text);
 }
 
-.brand-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  line-height: 1.2;
-}
-
-.brand-subtitle {
-  font-size: 0.72rem;
-  color: #64748b;
-  font-weight: 500;
-}
-
-.topbar-actions {
+/* --------------------------------------------------------------------------
+   Notion Breadcrumbs
+   -------------------------------------------------------------------------- */
+.notion-breadcrumbs {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 4px;
+  font-size: 0.82rem;
+  color: var(--notion-muted);
 }
 
-.system-status-indicator {
+.breadcrumb-item {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 10px;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 9999px;
-  font-size: 0.76rem;
-  color: #475569;
+  gap: 5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.12s ease;
 }
 
-.pulse-dot {
-  width: 8px;
-  height: 8px;
-  background-color: #10b981;
-  border-radius: 50%;
-  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  animation: pulse-green 2s infinite;
-}
-
-@keyframes pulse-green {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-  }
-}
-
-.new-chat-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background-color: #f0f9ff;
-  border: 1px solid #bae6fd;
-  border-radius: 6px;
-  color: #0284c7;
-  font-size: 0.8rem;
+.breadcrumb-item.brand-link {
   font-weight: 600;
-  transition: all 0.2s ease;
+  color: var(--notion-text);
+  cursor: pointer;
 }
 
-.new-chat-btn:hover {
-  background-color: #e0f2fe;
-  transform: translateY(-1px);
+.breadcrumb-item.brand-link:hover {
+  background-color: var(--notion-sidebar-hover);
 }
 
-.jurisdiction-pill {
-  display: inline-flex;
+.breadcrumb-item.jurisdiction-link {
+  color: var(--notion-text);
+}
+
+.breadcrumb-arrow {
+  color: var(--notion-subtle);
+}
+
+.category-current {
+  color: var(--color-accent);
+  font-weight: 500;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flag-icon-inline {
+  font-size: 0.85rem;
+}
+
+/* --------------------------------------------------------------------------
+   Topbar Right Section
+   -------------------------------------------------------------------------- */
+.topbar-right-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.corpus-live-indicator {
+  display: flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 9999px;
-  font-size: 0.8rem;
+  padding: 3px 8px;
+  background-color: var(--notion-sidebar);
+  border: 1px solid var(--notion-border);
+  border-radius: 4px;
+  font-size: 0.72rem;
+  color: var(--notion-muted);
   font-weight: 500;
-  color: #334155;
 }
 
-@media (max-width: 768px) {
-  .topbar {
-    padding: 0 16px;
-  }
-  .system-status-indicator {
-    display: none;
-  }
-  .brand-subtitle {
+.indicator-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-success);
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 2px rgba(15, 123, 108, 0.2);
+}
+
+.topbar-reset-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background-color: var(--notion-sidebar);
+  border: 1px solid var(--notion-border);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--notion-muted);
+  transition: all 0.12s ease;
+}
+
+.topbar-reset-btn:hover {
+  background-color: var(--notion-sidebar-hover);
+  color: var(--notion-text);
+  border-color: var(--notion-border-strong);
+}
+
+.inspector-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background-color: var(--notion-sidebar);
+  border: 1px solid var(--notion-border);
+  border-radius: 5px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--notion-muted);
+  transition: all 0.15s ease;
+}
+
+.inspector-toggle-btn:hover {
+  background-color: var(--notion-sidebar-hover);
+  color: var(--notion-text);
+  border-color: var(--color-accent);
+}
+
+.inspector-toggle-btn.active {
+  background-color: var(--notion-tag-blue-bg);
+  color: var(--notion-tag-blue-text);
+  border-color: rgba(35, 131, 226, 0.3);
+}
+
+.panel-right-icon {
+  opacity: 0.7;
+}
+
+@media (max-width: 640px) {
+  .corpus-live-indicator {
     display: none;
   }
 }

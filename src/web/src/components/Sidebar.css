@@ -1,0 +1,164 @@
+/* ==========================================================================
+   IP-SAKTI Sahayak — Notion Sidebar Navigation Styles
+   ========================================================================== */
+
+.sidebar-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  padding: 16px 14px;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: var(--notion-text);
+  background: var(--notion-sidebar);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* --------------------------------------------------------------------------
+   Branding Header
+   -------------------------------------------------------------------------- */
+.sidebar-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--notion-border);
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo-seal {
+  font-size: 1.4rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(120, 119, 116, 0.1);
+  border-radius: 6px;
+}
+
+.brand-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--notion-text);
+  letter-spacing: -0.01em;
+}
+
+.brand-subtitle {
+  font-size: 0.72rem;
+  color: var(--notion-muted);
+  font-weight: 400;
+}
+
+/* --------------------------------------------------------------------------
+   Primary New Note Action
+   -------------------------------------------------------------------------- */
+.sidebar-actions-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.new-note-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.82rem;
+  color: var(--notion-text);
+  transition: all 0.15s ease;
+}
+
+.new-note-btn:hover:not(:disabled) {
+  background-color: var(--notion-sidebar-hover);
+}
+
+.new-note-btn:active:not(:disabled) {
+  background-color: var(--notion-sidebar-active);
+  transform: scale(0.98);
+}
+
+.new-note-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-shortcut {
+  margin-left: auto;
+  font-size: 0.68rem;
+  color: var(--notion-muted);
+  font-family: var(--font-mono);
+  background: var(--notion-canvas);
+  padding: 2px 5px;
+  border-radius: 3px;
+  border: 1px solid var(--notion-border);
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar Footer & Compliance
+   -------------------------------------------------------------------------- */
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--notion-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.privacy-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 8px;
+  background-color: rgba(15, 123, 108, 0.06);
+  border: 1px solid rgba(15, 123, 108, 0.15);
+  border-radius: 5px;
+}
+
+.privacy-shield-icon {
+  color: var(--color-success);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.privacy-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.privacy-title {
+  font-weight: 600;
+  font-size: 0.72rem;
+  color: var(--color-success);
+}
+
+.privacy-sub {
+  font-size: 0.65rem;
+  color: var(--notion-muted);
+  line-height: 1.2;
+}
+
+.corpus-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.68rem;
+  color: var(--notion-muted);
+}

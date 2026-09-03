@@ -64,11 +64,21 @@ Unlike consumer chat apps, this interface is designed for **patent attorneys, tr
 ### 6. `Topbar.tsx`
 - **Role:** Sticky application header with branded seal logo, live legal core status indicator with green pulse, "New Inquiry" session reset button, and jurisdiction indicator.
 
-### 7. `CitationsDrawer.tsx`
-- **Role:** Collapsible evidentiary drawer that reveals detailed quoted snippets, document classifications, retrieval timestamps, and direct links to official government gazette records.
+### 8. `Sidebar.tsx` (Notion Workspace Navigation & Judge Mode)
+- **Role:** Collapsible left navigation column featuring live legal gazette index status (`11 Authentic Legal Gazettes`), `+ New Research Note` reset action, 4 one-click Judge Mode SIH demonstration presets, statutory domain filters, and jurisdiction selector.
+
+### 9. `ResearchMemo.tsx` (Notion Document Memorandum)
+- **Role:** Distraction-free central reading canvas presenting research findings as a living legal memorandum: title, metadata properties table (Category, Jurisdiction, Source Mode, Confidence), preliminary assessment callout, compliance alerts, structured analysis with interactive citation tags, and primary authorities grid.
+
+### 10. `TrustInspector.tsx` (On-Demand Trust & Telemetry Inspector)
+- **Role:** Collapsible right-hand inspector ("Why This Answer?") detailing the 6-stage verification lifecycle, confidence meter gauge with 0.65 threshold cutoff, grounding verifier status, latency telemetry breakdown, retrieved evidence excerpts, and one-click Markdown brief exporter.
+
+### 11. `AbstentionCard.tsx` (Useful Abstention & Guidance)
+- **Role:** Actionable advisory screen presented when confidence is below 0.65 or query is outside jurisdiction. Explains the exact reason, displays confidence score gauge, suggests rephrasings, and provides in-scope topic suggestions.
 
 ---
 
 ## ⚖️ Legal Disclaimer
 Every page renders the statutory disclaimer:
 > *"This information is provided for general awareness and does not constitute legal advice. Consult a qualified IP attorney for decisions specific to your situation."*
+

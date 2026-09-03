@@ -1,216 +1,206 @@
-.hero-container {
+/* ==========================================================================
+   IP-SAKTI Sahayak — Notion Hero Document Sheet Styles
+   ========================================================================== */
+
+.notion-hero-sheet {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  max-width: 880px;
-  margin: 20px auto 40px auto;
-  padding: 0 16px;
+  gap: 24px;
+  width: 100%;
+  max-width: 800px;
+  color: var(--notion-text);
 }
 
-.hero-badge {
+/* --------------------------------------------------------------------------
+   Document Header Block
+   -------------------------------------------------------------------------- */
+.hero-document-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hero-doc-icon {
+  font-size: 2.4rem;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.hero-event-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
-  background: rgba(46, 170, 220, 0.08);
-  border: 1px solid rgba(46, 170, 220, 0.25);
-  border-radius: 9999px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #0284c7;
-  margin-bottom: 20px;
-  backdrop-filter: blur(8px);
+  padding: 3px 8px;
+  background-color: var(--notion-tag-orange-bg);
+  color: var(--notion-tag-orange-text);
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 4px;
+  width: fit-content;
 }
 
-.hero-badge-icon {
-  color: #0284c7;
-}
-
-.hero-title {
-  font-size: 2.25rem;
+.hero-main-title {
+  margin: 0;
+  font-size: 1.8rem;
   font-weight: 700;
   line-height: 1.25;
-  color: var(--color-text-primary);
-  margin: 0 0 14px 0;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+  color: var(--notion-text);
 }
 
-.gradient-text {
-  background: linear-gradient(135deg, #0284c7 0%, #0f766e 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.hero-subtitle {
-  font-size: 1.05rem;
-  color: #64748b;
+.hero-main-subtitle {
+  margin: 0;
+  font-size: 0.94rem;
+  color: var(--notion-muted);
   line-height: 1.6;
-  max-width: 680px;
-  margin: 0 0 24px 0;
 }
 
-.hero-pillars {
+.hero-main-subtitle strong {
+  color: var(--notion-text);
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   Trust & Provenance Strip
+   -------------------------------------------------------------------------- */
+.hero-provenance-strip {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 36px;
+  gap: 8px;
+  padding: 10px 12px;
+  background-color: var(--notion-sidebar);
+  border: 1px solid var(--notion-border);
+  border-radius: 6px;
 }
 
-.pillar-item {
+.provenance-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  background-color: var(--color-bg-primary);
-  border: 1px solid var(--color-border-light);
-  border-radius: 6px;
-  font-size: 0.8rem;
-  color: #475569;
+  font-size: 0.74rem;
   font-weight: 500;
+  color: var(--notion-text);
 }
 
-.pillar-icon.success { color: #10b981; }
-.pillar-icon.primary { color: #0284c7; }
-.pillar-icon.warning { color: #f59e0b; }
-.pillar-icon.info { color: #6366f1; }
+.provenance-icon.success { color: var(--color-success); }
+.provenance-icon.primary { color: var(--color-accent); }
+.provenance-icon.warning { color: var(--color-warning); }
+.provenance-icon.info { color: var(--color-info); }
 
-.scenarios-header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-  padding: 0 4px;
-}
-
-.scenarios-label {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.scenarios-hint {
-  font-size: 0.78rem;
-  color: var(--color-text-secondary);
-}
-
-.scenarios-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  width: 100%;
-}
-
-.scenario-card {
-  background-color: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 20px;
-  text-align: left;
-  cursor: pointer;
+/* --------------------------------------------------------------------------
+   Scenarios Section & Grid
+   -------------------------------------------------------------------------- */
+.hero-scenarios-section {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  position: relative;
-  overflow: hidden;
+  gap: 12px;
 }
 
-.scenario-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(2, 132, 199, 0.4);
-  box-shadow: 0 12px 20px -6px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+.scenarios-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--notion-muted);
+  letter-spacing: 0.02em;
 }
 
-.scenario-card-header {
+.section-bullet {
+  font-size: 0.65rem;
+  color: var(--color-accent);
+}
+
+.hero-scenarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+}
+
+.notion-scenario-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  background-color: var(--notion-canvas);
+  border: 1px solid var(--notion-border-strong);
+  border-radius: 6px;
+  text-align: left;
+  transition: all 0.16s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.notion-scenario-card:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background-color: #FAFAFA;
+}
+
+.card-top-meta {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
 }
 
-.scenario-card-icon {
-  font-size: 1.3rem;
+.card-icon {
+  font-size: 1.2rem;
 }
 
-.scenario-card-category {
-  font-size: 0.75rem;
+.card-category {
+  font-size: 0.68rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #0284c7;
-  background-color: #f0f9ff;
-  padding: 3px 8px;
-  border-radius: 4px;
-  border: 1px solid #e0f2fe;
+  color: var(--notion-muted);
 }
 
-.scenario-card-title {
-  font-size: 1.05rem;
+.card-title {
+  margin: 0;
+  font-size: 0.95rem;
   font-weight: 600;
-  color: var(--color-text-primary);
-  margin: 0 0 8px 0;
+  color: var(--notion-text);
+  letter-spacing: -0.01em;
 }
 
-.scenario-card-prompt {
-  font-size: 0.88rem;
-  color: #64748b;
-  line-height: 1.5;
-  margin: 0 0 16px 0;
-  font-style: italic;
+.card-prompt {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--notion-muted);
+  line-height: 1.45;
+  flex: 1;
 }
 
-.scenario-card-footer {
+.card-footer-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-border-light);
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--notion-border);
 }
 
-.scenario-badges {
+.card-tags-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
 }
 
-.scenario-tag {
-  font-size: 0.72rem;
-  background-color: #f1f5f9;
-  color: #475569;
-  padding: 2px 6px;
-  border-radius: 4px;
+.card-tag {
+  font-size: 0.65rem;
+  padding: 1px 5px;
+  background-color: var(--notion-tag-gray-bg);
+  color: var(--notion-tag-gray-text);
+  border-radius: 3px;
   font-weight: 500;
 }
 
-.scenario-action-btn {
-  display: flex;
+.card-run-action {
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: #0284c7;
-  opacity: 0.8;
-  transition: opacity 0.2s, transform 0.2s;
+  color: var(--color-accent);
   white-space: nowrap;
-}
-
-.scenario-card:hover .scenario-action-btn {
-  opacity: 1;
-  transform: translateX(3px);
-}
-
-@media (max-width: 768px) {
-  .hero-title {
-    font-size: 1.65rem;
-  }
-  .hero-subtitle {
-    font-size: 0.95rem;
-  }
-  .scenarios-grid {
-    grid-template-columns: 1fr;
-  }
 }

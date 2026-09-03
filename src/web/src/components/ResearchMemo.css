@@ -1,0 +1,310 @@
+/* ==========================================================================
+   IP-SAKTI Sahayak — Notion Research Memorandum Styles
+   ========================================================================== */
+
+.research-memo-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  color: var(--notion-text);
+  line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+   Memorandum Header
+   -------------------------------------------------------------------------- */
+.memo-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--notion-border);
+}
+
+.memo-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--notion-muted);
+  text-transform: uppercase;
+}
+
+.memo-title {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--notion-text);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+/* --------------------------------------------------------------------------
+   Notion Property Metadata Grid
+   -------------------------------------------------------------------------- */
+.memo-properties-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+  padding: 10px 14px;
+  background-color: var(--notion-sidebar);
+  border: 1px solid var(--notion-border);
+  border-radius: 6px;
+}
+
+.property-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.property-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--notion-muted);
+}
+
+.property-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--notion-text);
+}
+
+.property-tag.confidence-tag {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.property-tag.latency-tag {
+  font-family: var(--font-mono);
+  color: var(--notion-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Preliminary Executive Assessment Banner
+   -------------------------------------------------------------------------- */
+.preliminary-assessment-callout {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.preliminary-assessment-callout.critical,
+.preliminary-assessment-callout.warning {
+  background-color: var(--notion-tag-orange-bg);
+  border-color: rgba(217, 115, 13, 0.3);
+}
+
+.preliminary-assessment-callout.info {
+  background-color: var(--notion-tag-blue-bg);
+  border-color: rgba(35, 131, 226, 0.25);
+}
+
+.preliminary-assessment-callout.success {
+  background-color: var(--notion-tag-green-bg);
+  border-color: rgba(43, 105, 64, 0.25);
+}
+
+.preliminary-assessment-callout.abstain {
+  background-color: var(--notion-tag-red-bg);
+  border-color: rgba(224, 62, 62, 0.3);
+}
+
+.assessment-verdict-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.assessment-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.assessment-verdict-title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: -0.01em;
+}
+
+.assessment-summary-text {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--notion-text);
+  line-height: 1.45;
+}
+
+/* --------------------------------------------------------------------------
+   Structured Legal Analysis Content
+   -------------------------------------------------------------------------- */
+.memo-body-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.memo-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--notion-text);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--notion-border);
+}
+
+.memo-section-heading h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.memo-prose-content {
+  font-size: 0.94rem;
+  color: var(--notion-text);
+  line-height: 1.7;
+}
+
+.memo-prose-content p {
+  margin: 0 0 12px 0;
+}
+
+.memo-prose-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Interactive Citation Markers [1], [2] */
+.citation-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 2px;
+  padding: 1px 5px;
+  background-color: var(--notion-tag-blue-bg);
+  color: var(--notion-tag-blue-text);
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  border-radius: 3px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  vertical-align: baseline;
+}
+
+.citation-marker:hover {
+  background-color: var(--color-accent);
+  color: #FFFFFF;
+  text-decoration: none;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 2px 4px rgba(35, 131, 226, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   Primary Authorities Grid
+   -------------------------------------------------------------------------- */
+.memo-authorities-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--notion-border);
+}
+
+.authorities-desc {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--notion-muted);
+}
+
+.authorities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+@keyframes flashTarget {
+  0% { box-shadow: 0 0 0 4px rgba(35, 131, 226, 0.6); background-color: rgba(35, 131, 226, 0.1); }
+  100% { box-shadow: 0 0 0 2px rgba(35, 131, 226, 0.3); background-color: var(--notion-canvas); }
+}
+
+.authority-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background-color: var(--notion-sidebar);
+  border: 1px solid var(--notion-border);
+  border-radius: 6px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.authority-card:hover {
+  border-color: var(--color-accent);
+  background-color: var(--notion-canvas);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.authority-card:target {
+  border-color: var(--color-accent);
+  animation: flashTarget 1.5s ease-out forwards;
+}
+
+.authority-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.authority-index-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--color-accent);
+}
+
+.authority-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.authority-doc-id {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--notion-muted);
+  word-break: break-all;
+}
+
+.authority-section-ref {
+  font-size: 0.78rem;
+  color: var(--notion-text);
+}
+
+.authority-external-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--color-accent);
+  margin-top: 4px;
+}
+
+.authority-external-link:hover {
+  text-decoration: underline;
+}

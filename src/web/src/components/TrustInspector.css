@@ -1,0 +1,434 @@
+/* ==========================================================================
+   IP-SAKTI Sahayak — Trust & Explainability Inspector Styles
+   ========================================================================== */
+
+.trust-inspector-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background-color: var(--notion-sidebar);
+  color: var(--notion-text);
+  font-size: 0.82rem;
+  overflow: hidden;
+}
+
+.trust-inspector-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  padding: 32px 24px;
+  gap: 12px;
+  color: var(--notion-muted);
+}
+
+.inspector-empty-icon {
+  font-size: 2.2rem;
+  opacity: 0.8;
+}
+
+.empty-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--notion-text);
+}
+
+.empty-desc {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.inspector-standby-pill {
+  padding: 4px 10px;
+  border-radius: 4px;
+  background-color: rgba(55, 53, 47, 0.06);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--notion-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Inspector Header
+   -------------------------------------------------------------------------- */
+.inspector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--notion-border);
+  flex-shrink: 0;
+  background-color: var(--notion-canvas);
+}
+
+.inspector-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inspector-title-icon {
+  color: var(--color-accent);
+}
+
+.inspector-title-text {
+  font-weight: 600;
+  font-size: 0.88rem;
+  letter-spacing: -0.01em;
+  color: var(--notion-text);
+}
+
+.inspector-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  color: var(--notion-muted);
+  font-size: 0.85rem;
+  transition: all 0.12s ease;
+}
+
+.inspector-close-btn:hover {
+  background-color: var(--notion-sidebar-hover);
+  color: var(--notion-text);
+}
+
+/* --------------------------------------------------------------------------
+   Inspector Scroll Body
+   -------------------------------------------------------------------------- */
+.inspector-scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inspector-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-label-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--notion-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Confidence Meter & Trust Telemetry
+   -------------------------------------------------------------------------- */
+.trust-metrics-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metric-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background-color: var(--notion-canvas);
+  border: 1px solid var(--notion-border);
+  border-radius: 6px;
+}
+
+.metric-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.metric-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--notion-text);
+}
+
+.metric-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.metric-value.pass { color: var(--color-success); }
+.metric-value.fail { color: var(--color-error); }
+
+.meter-track {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background-color: rgba(55, 53, 47, 0.08);
+  border-radius: 4px;
+  overflow: visible;
+  margin: 4px 0;
+}
+
+.meter-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease-out;
+}
+
+.meter-bar.pass { background-color: var(--color-success); }
+.meter-bar.fail { background-color: var(--color-error); }
+
+.meter-cutoff-marker {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background-color: var(--notion-text);
+  z-index: 2;
+}
+
+.marker-tooltip {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.62rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--notion-muted);
+  white-space: nowrap;
+}
+
+.meter-caption-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.66rem;
+  color: var(--notion-muted);
+}
+
+.cutoff-tag {
+  font-weight: 600;
+  color: var(--notion-text);
+}
+
+.metric-two-col-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.metric-sub-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background-color: var(--notion-canvas);
+  border: 1px solid var(--notion-border);
+  border-radius: 6px;
+}
+
+.sub-label {
+  font-size: 0.68rem;
+  color: var(--notion-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.sub-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--notion-text);
+}
+
+.sub-value.font-mono {
+  font-family: var(--font-mono);
+}
+
+.grounding-icon {
+  color: var(--color-success);
+}
+
+/* --------------------------------------------------------------------------
+   Dual-Flag Audit List
+   -------------------------------------------------------------------------- */
+.dual-flags-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.flag-status-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 0.78rem;
+}
+
+.flag-status-item.clear {
+  background-color: rgba(15, 123, 108, 0.05);
+  border-color: rgba(15, 123, 108, 0.2);
+  color: var(--color-success);
+}
+
+.flag-status-item.triggered {
+  background-color: rgba(224, 62, 62, 0.06);
+  border-color: rgba(224, 62, 62, 0.25);
+  color: var(--color-error);
+}
+
+.flag-status-item.warning {
+  background-color: rgba(217, 115, 13, 0.08);
+  border-color: rgba(217, 115, 13, 0.25);
+  color: var(--color-warning);
+}
+
+.flag-item-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.flag-title {
+  font-weight: 600;
+  font-size: 0.76rem;
+}
+
+.flag-status {
+  font-size: 0.7rem;
+  opacity: 0.9;
+}
+
+/* --------------------------------------------------------------------------
+   Evidence Provenance Accordion
+   -------------------------------------------------------------------------- */
+.provenance-chunks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.provenance-chunk-card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--notion-canvas);
+  border: 1px solid var(--notion-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.chunk-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  width: 100%;
+  text-align: left;
+  font-size: 0.76rem;
+  color: var(--notion-text);
+  transition: background-color 0.12s ease;
+}
+
+.chunk-card-header:hover {
+  background-color: var(--notion-sidebar-hover);
+}
+
+.chunk-num {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.chunk-doc-title {
+  font-weight: 500;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chunk-card-body {
+  padding: 10px;
+  border-top: 1px solid var(--notion-border);
+  background-color: var(--notion-sidebar);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.74rem;
+}
+
+.chunk-section-badge {
+  color: var(--color-accent);
+  font-weight: 500;
+}
+
+.chunk-quote {
+  margin: 0;
+  padding-left: 8px;
+  border-left: 2px solid var(--notion-border-strong);
+  color: var(--notion-muted);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.chunk-source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--color-accent);
+  margin-top: 2px;
+}
+
+.no-chunks-note {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--notion-muted);
+  font-style: italic;
+}
+
+/* --------------------------------------------------------------------------
+   Export Action
+   -------------------------------------------------------------------------- */
+.inspector-export-section {
+  padding-top: 10px;
+  border-top: 1px solid var(--notion-border);
+  margin-top: auto;
+}
+
+.export-brief-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  background-color: var(--notion-canvas);
+  border: 1px solid var(--notion-border-strong);
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: var(--notion-text);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+}
+
+.export-brief-btn:hover {
+  background-color: var(--notion-sidebar-hover);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}

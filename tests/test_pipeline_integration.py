@@ -315,7 +315,10 @@ def test_consecutive_queries_performance_under_10_seconds():
     mock_gate = ConfidenceGateOutput(
         decision="generate",
         max_score=0.85,
-        chunks=[{"doc_id": "tkdl-overview", "similarity_score": 0.85}],
+        chunks=[
+            {"doc_id": "tkdl-overview", "similarity_score": 0.85},
+            {"doc_id": "tkdl-neem-turmeric-prior-art", "similarity_score": 0.82},
+        ],
     )
     mock_gen = GeneratorOutput(
         answer="Under Section 3(p) [1], classical formulations cannot be patented [2].",

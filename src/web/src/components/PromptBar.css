@@ -1,0 +1,113 @@
+/* ==========================================================================
+   IP-SAKTI Sahayak — Prompt Bar Styles
+   ========================================================================== */
+
+.notion-prompt-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   Notion-Style Command Input Box (Glassmorphic)
+   -------------------------------------------------------------------------- */
+.notion-input-box {
+  display: flex;
+  align-items: center;
+  background-color: var(--notion-surface);
+  border: 1px solid var(--notion-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  gap: 10px;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  z-index: 10;
+  
+  /* Glassmorphism Effect */
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+@media (prefers-color-scheme: dark) {
+  .notion-input-box {
+    background-color: rgba(30, 30, 30, 0.6);
+  }
+}
+
+.notion-input-box:focus-within {
+  border-color: rgba(35, 131, 226, 0.5);
+  box-shadow: 0 0 0 2px rgba(35, 131, 226, 0.2), var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.input-prompt-symbol {
+  font-family: var(--font-mono);
+  color: var(--notion-muted);
+  font-size: 1rem;
+  user-select: none;
+}
+
+.notion-text-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  color: var(--notion-text);
+  padding: 4px 0;
+}
+
+.notion-text-input::placeholder {
+  color: var(--notion-muted);
+  opacity: 0.7;
+}
+
+.notion-text-input:disabled {
+  cursor: not-allowed;
+}
+
+.input-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-key-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: var(--notion-canvas);
+  border: 1px solid var(--notion-border);
+  border-radius: 4px;
+  color: var(--notion-muted);
+}
+
+.notion-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background-color: var(--notion-canvas);
+  border: 1px solid var(--notion-border);
+  color: var(--notion-text);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.notion-submit-btn:hover:not(:disabled) {
+  background-color: var(--notion-sidebar-hover);
+  color: var(--notion-text);
+}
+
+.notion-submit-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

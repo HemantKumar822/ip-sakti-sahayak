@@ -23,11 +23,21 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     app.state.is_ready = False
 
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(
     title="IP-SAKTI Sahayak API",
     description="Backend API for the IP-SAKTI Sahayak RAG system",
     version="0.1.0",
     lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(router)

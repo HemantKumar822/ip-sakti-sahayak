@@ -1,33 +1,103 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Color Palette */
-  --color-bg-primary: #F7F6F3;
+  /* ==========================================================================
+     Core Color Palette
+     ========================================================================== */
+  --color-bg-primary: #FBFBFA;
   --color-bg-secondary: #FFFFFF;
   --color-text-primary: #37352F;
-  --color-text-secondary: #9B9A97;
+  --color-text-secondary: #787774;
   
   --color-border: rgba(55, 53, 47, 0.16);
-  --color-border-light: rgba(55, 53, 47, 0.08);
+  --color-border-light: rgba(55, 53, 47, 0.09);
 
-  /* Semantic Tokens */
-  --color-accent: #2EAADC;
-  --color-success: #1aae39;
-  --color-warning: #dd5b00;
-  --color-warning-bg: #FFF3CD;
-  --color-warning-border: rgba(221, 91, 0, 0.2);
-  --color-error: #e03e3e;
-  --color-error-bg: #FEE2E2;
-  --color-info: #1e40af;
-  --color-info-bg: #eff6ff;
-  
+  /* Semantic Alert Tokens */
+  --color-accent: #2383E2;
+  --color-success: #0F7B6C;
+  --color-warning: #D9730D;
+  --color-warning-bg: #FBF3DB;
+  --color-warning-border: rgba(217, 115, 13, 0.25);
+  --color-error: #E03E3E;
+  --color-error-bg: #FBE4E4;
+  --color-info: #0B6E99;
+  --color-info-bg: #E7F3F8;
+
+  /* ==========================================================================
+     Notion Design System Tokens
+     ========================================================================== */
+  --notion-canvas: #FFFFFF;
+  --notion-sidebar: #FBFBFA;
+  --notion-sidebar-hover: rgba(55, 53, 47, 0.04);
+  --notion-sidebar-active: rgba(55, 53, 47, 0.08);
+  --notion-text: #37352F;
+  --notion-muted: #787774;
+  --notion-subtle: #9B9A97;
+  --notion-border: rgba(55, 53, 47, 0.09);
+  --notion-border-strong: rgba(55, 53, 47, 0.16);
+  --notion-card-bg: #FFFFFF;
+  --notion-callout-bg: #F7F6F3;
+  --notion-surface: #FFFFFF;
+
+  /* Notion Tag Badges */
+  --notion-tag-gray-bg: rgba(227, 226, 224, 0.5);
+  --notion-tag-gray-text: #32302C;
+  --notion-tag-blue-bg: rgba(211, 229, 239, 0.6);
+  --notion-tag-blue-text: #185579;
+  --notion-tag-orange-bg: rgba(250, 222, 201, 0.6);
+  --notion-tag-orange-text: #9B4912;
+  --notion-tag-green-bg: rgba(219, 237, 219, 0.6);
+  --notion-tag-green-text: #2B6940;
+  --notion-tag-red-bg: rgba(255, 226, 226, 0.6);
+  --notion-tag-red-text: #A03434;
+  --notion-tag-purple-bg: rgba(232, 226, 240, 0.6);
+  --notion-tag-purple-text: #5A3596;
+
   /* Layout & Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.08);
+  --shadow-popover: 0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+
   /* Typography */
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-primary: #191919;
+    --color-bg-secondary: #202020;
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #A0A0A0;
+    
+    --color-border: rgba(255, 255, 255, 0.16);
+    --color-border-light: rgba(255, 255, 255, 0.09);
+
+    --notion-canvas: #191919;
+    --notion-sidebar: #202020;
+    --notion-sidebar-hover: rgba(255, 255, 255, 0.05);
+    --notion-sidebar-active: rgba(255, 255, 255, 0.08);
+    --notion-text: #FFFFFF;
+    --notion-muted: #9B9A97;
+    --notion-subtle: #787774;
+    --notion-border: rgba(255, 255, 255, 0.09);
+    --notion-border-strong: rgba(255, 255, 255, 0.16);
+    --notion-card-bg: #252525;
+    --notion-callout-bg: #252525;
+    --notion-surface: #252525;
+
+    /* Adjusting shadows for dark mode */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -1px rgba(0, 0, 0, 0.5);
+    --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.6);
+    --shadow-popover: 0 12px 32px rgba(0, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.5);
+    
+    /* Semantic Adjustments for Dark Mode */
+    --color-warning-bg: rgba(217, 115, 13, 0.15);
+    --color-error-bg: rgba(224, 62, 62, 0.15);
+    --color-info-bg: rgba(11, 110, 153, 0.15);
+  }
 }
 
 body {
@@ -37,9 +107,10 @@ body {
   color: var(--color-text-primary);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Base Styles */
+/* Base Utility Resets */
 * {
   box-sizing: border-box;
 }
@@ -54,9 +125,11 @@ button {
 a {
   color: var(--color-accent);
   text-decoration: none;
+  transition: opacity 0.15s ease;
 }
 
 a:hover {
+  opacity: 0.8;
   text-decoration: underline;
 }
 
@@ -64,7 +137,7 @@ a:hover {
 @keyframes slideUpFadeIn {
   0% {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   100% {
     opacity: 1;
@@ -73,13 +146,35 @@ a:hover {
 }
 
 .animate-fade-in {
-  animation: slideUpFadeIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: slideUpFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Global Custom Scrollbars for Premium Feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--notion-border-strong);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--notion-subtle);
 }
 
 /* Glassmorphism utility */
 .glass {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.80);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--color-border-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  .glass {
+    background: rgba(30, 30, 30, 0.80);
+  }
 }

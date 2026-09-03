@@ -1,4 +1,12 @@
-import { Sparkles, ShieldCheck, Scale, BookOpen, AlertCircle, ArrowRight } from 'lucide-react';
+import React from 'react';
+import { 
+  Sparkles, 
+  ShieldCheck, 
+  Scale, 
+  BookOpen, 
+  ArrowRight, 
+  FileCode2 
+} from 'lucide-react';
 import './HeroState.css';
 
 interface Scenario {
@@ -12,104 +20,106 @@ interface Scenario {
 const SCENARIOS: Scenario[] = [
   {
     icon: "🌿",
-    category: "Non-Patentability Exclusion",
-    title: "Classical Polyherbal Formulation",
-    prompt: "Can I patent an Ayurvedic formulation combining Ashwagandha, Brahmi, and Shankhpushpi for memory enhancement?",
-    badges: ["Patents Act § 3(p)", "TKDL Prior Art", "Classical Texts"]
+    category: "S. 3(p) TKDL Bar",
+    title: "Classical S. 3(p) Bar",
+    prompt: "Can classical Triphala formulation be patented in India?",
+    badges: ["Patents Act § 3(p)", "Traditional Knowledge"]
   },
   {
     icon: "🧪",
-    category: "Mandatory Regulatory Clearance",
-    title: "Biological Resource ABS Clearance",
-    prompt: "What are the mandatory NBA approvals under Section 6 of Biological Diversity Act for commercializing a proprietary Withania somnifera extract?",
-    badges: ["Bio Diversity Act § 6", "Form I-III Filing", "ABS Royalty"]
+    category: "BDA S. 6 ABS",
+    title: "Proprietary Extract + ABS",
+    prompt: "Is an innovative synergistic formulation of Ashwagandha and Giloy patentable and what ABS approvals are required?",
+    badges: ["Bio Diversity Act § 6", "NBA Clearance"]
   },
   {
-    icon: "⚗️",
-    category: "Enhanced Efficacy Standard",
-    title: "Isolated Curcuminoid Derivative",
-    prompt: "How does the Supreme Court's Novartis standard apply to proving enhanced therapeutic efficacy for a novel curcumin formulation under Section 3(d)?",
-    badges: ["Section 3(d)", "Novartis Precedent", "Therapeutic Efficacy"]
+    icon: "🌍",
+    category: "Bilingual Bridge",
+    title: "Devanagari Query Processing",
+    prompt: "क्या त्रिफला चूर्ण पर भारतीय कानून के तहत पेटेंट मिल सकता है?",
+    badges: ["Hindi Translation", "Cross-lingual Retrieval"]
   },
   {
-    icon: "🏷️",
-    category: "Trademark & Distinctiveness",
-    title: "Classical Formulation Brand Names",
-    prompt: "Can an ASU manufacturer claim exclusive trademark protection over generic Ayurvedic formulation names like Chyawanprash or Triphala?",
-    badges: ["Trade Marks Act § 9", "Dabur v. Emami", "Generic Names"]
+    icon: "🛡️",
+    category: "Out-of-Scope Circuit-Breaker",
+    title: "Domain Abstention Gate",
+    prompt: "How do I train a transformer neural network using backpropagation?",
+    badges: ["Score < 0.65", "Honest Refusal"]
   }
 ];
 
-export const HeroState = ({ onSelectScenario }: { onSelectScenario: (prompt: string) => void }) => {
+export const HeroState: React.FC<{ onSelectScenario: (prompt: string) => void }> = ({ onSelectScenario }) => {
   return (
-    <div className="hero-container animate-fade-in">
-      {/* Top Banner Badge */}
-      <div className="hero-badge">
-        <Sparkles size={14} className="hero-badge-icon" />
-        <span>Smart India Hackathon 2026 · Problem Statement PS-26045</span>
+    <div className="notion-hero-sheet animate-fade-in" aria-label="Legal Research Onboarding Canvas">
+      {/* Notion Document Icon & Title Block */}
+      <div className="hero-document-header">
+        <div className="hero-doc-icon">📜</div>
+        <div className="hero-event-pill">
+          <Sparkles size={13} className="sparkle-icon" />
+          <span>Smart India Hackathon 2026 · Problem Statement SIH26045</span>
+        </div>
+        <h1 className="hero-main-title">
+          Ayurvedic IP & Regulatory Intelligence Workbench
+        </h1>
+        <p className="hero-main-subtitle">
+          Authoritative, citation-grounded statutory analysis across the <strong>Patents Act 1970</strong> (Section 3(p) Traditional Knowledge prior art), the <strong>Biological Diversity Act 2002/2023</strong> (NBA / SBB Access and Benefit Sharing), and Supreme Court precedents.
+        </p>
       </div>
 
-      {/* Main Headline */}
-      <h1 className="hero-title">
-        Citation-Grounded Legal Intelligence for <span className="gradient-text">Ayurveda & Bio-Resources</span>
-      </h1>
-      <p className="hero-subtitle">
-        Statutory compliance verification across Patents Act 1970 § 3(p), National Biodiversity Authority (NBA) Access and Benefit Sharing (ABS) clearances, and TKDL prior art archives.
-      </p>
-
-      {/* Trust & Capability Pillars */}
-      <div className="hero-pillars">
-        <div className="pillar-item">
-          <ShieldCheck size={16} className="pillar-icon success" />
-          <span>Zero Hallucinations (0.65 Confidence Gate)</span>
+      {/* Trust & Provenance Feature Strip */}
+      <div className="hero-provenance-strip">
+        <div className="provenance-chip">
+          <ShieldCheck size={14} className="provenance-icon success" />
+          <span>Calibrated Confidence Gate (0.65 Cutoff)</span>
         </div>
-        <div className="pillar-item">
-          <BookOpen size={16} className="pillar-icon primary" />
-          <span>11 Authentic Government Gazettes</span>
+        <div className="provenance-chip">
+          <BookOpen size={14} className="provenance-icon primary" />
+          <span>11 Official Government Publications (296 Chunks)</span>
         </div>
-        <div className="pillar-item">
-          <Scale size={16} className="pillar-icon warning" />
-          <span>Dual Statutory NBA & Patent Checks</span>
+        <div className="provenance-chip">
+          <Scale size={14} className="provenance-icon warning" />
+          <span>Dual-Flag Patents & Biodiversity Engine</span>
         </div>
-        <div className="pillar-item">
-          <AlertCircle size={16} className="pillar-icon info" />
-          <span>Client-Side DPDP Privacy Scrubbing</span>
+        <div className="provenance-chip">
+          <FileCode2 size={14} className="provenance-icon info" />
+          <span>DPDP Act 2023 Privacy-by-Design</span>
         </div>
       </div>
 
-      {/* Quick-Launch Scenarios Header */}
-      <div className="scenarios-header">
-        <span className="scenarios-label">⚡ Explore Verified Legal Scenarios:</span>
-        <span className="scenarios-hint">Click any brief to inspect full statutory analysis</span>
-      </div>
+      {/* Notion Scenarios Block */}
+      <div className="hero-scenarios-section">
+        <div className="scenarios-section-header">
+          <span className="section-bullet">▶</span>
+          <span className="section-title-text">Select a Verified Legal Research Scenario:</span>
+        </div>
 
-      {/* 2x2 Grid of Scenario Cards */}
-      <div className="scenarios-grid">
-        {SCENARIOS.map((sc, idx) => (
-          <div 
-            key={idx} 
-            className="scenario-card"
-            onClick={() => onSelectScenario(sc.prompt)}
-          >
-            <div className="scenario-card-header">
-              <span className="scenario-card-icon">{sc.icon}</span>
-              <span className="scenario-card-category">{sc.category}</span>
-            </div>
-            <h3 className="scenario-card-title">{sc.title}</h3>
-            <p className="scenario-card-prompt">"{sc.prompt}"</p>
-            <div className="scenario-card-footer">
-              <div className="scenario-badges">
-                {sc.badges.map((b, bIdx) => (
-                  <span key={bIdx} className="scenario-tag">{b}</span>
-                ))}
+        <div className="hero-scenarios-grid">
+          {SCENARIOS.map((sc, idx) => (
+            <button 
+              key={idx} 
+              className="notion-scenario-card"
+              onClick={() => onSelectScenario(sc.prompt)}
+            >
+              <div className="card-top-meta">
+                <span className="card-icon">{sc.icon}</span>
+                <span className="card-category">{sc.category}</span>
               </div>
-              <div className="scenario-action-btn">
-                <span>Run Check</span>
-                <ArrowRight size={14} />
+              <h3 className="card-title">{sc.title}</h3>
+              <p className="card-prompt">"{sc.prompt}"</p>
+              <div className="card-footer-row">
+                <div className="card-tags-group">
+                  {sc.badges.map((b, bIdx) => (
+                    <span key={bIdx} className="card-tag">{b}</span>
+                  ))}
+                </div>
+                <div className="card-run-action">
+                  <span>Run Analysis</span>
+                  <ArrowRight size={13} />
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

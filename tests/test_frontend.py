@@ -196,3 +196,70 @@ def test_abs_detail_source_formatting():
     clean_msg2, src_html2 = format_abs_detail(sample_without_source)
     assert clean_msg2 == "Ashwagandha is a biological resource."
     assert src_html2 == ""
+
+
+def test_notion_workbench_components_exist():
+    required_notion_files = [
+        Path("src/web/src/components/Sidebar.tsx"),
+        Path("src/web/src/components/Sidebar.css"),
+        Path("src/web/src/components/ResearchMemo.tsx"),
+        Path("src/web/src/components/ResearchMemo.css"),
+        Path("src/web/src/components/TrustInspector.tsx"),
+        Path("src/web/src/components/TrustInspector.css"),
+        Path("src/web/src/components/AbstentionCard.tsx"),
+        Path("src/web/src/components/AbstentionCard.css"),
+        Path("src/web/src/components/PromptBar.tsx"),
+        Path("src/web/src/components/PromptBar.css"),
+    ]
+    for p in required_notion_files:
+        assert p.exists(), f"Required Notion workbench file {p} must exist"
+
+
+def test_judge_mode_scenarios_configured_and_non_empty():
+    sidebar_content = Path("src/web/src/components/Sidebar.tsx").read_text(
+        encoding="utf-8"
+    )
+    hero_content = Path("src/web/src/components/HeroState.tsx").read_text(
+        encoding="utf-8"
+    )
+    assert "SCENARIOS" in hero_content
+    assert "Classical S. 3(p) Bar" in hero_content
+    assert "Proprietary Extract + ABS" in hero_content
+    assert "Bilingual Bridge" in hero_content
+    assert "Circuit-Breaker" in hero_content
+    # The 11 Gazettes phrase might be in HeroState or Sidebar. Let's just verify it's in the app somewhere.
+    assert "11 Official" in hero_content or "11 Official" in sidebar_content
+
+
+def test_notion_design_tokens_present():
+    css_content = Path("src/web/src/styles/design_tokens.css").read_text(
+        encoding="utf-8"
+    )
+    assert "--notion-canvas" in css_content
+    assert "--notion-sidebar" in css_content
+    assert "--notion-border" in css_content
+    assert "--font-mono" in css_content
+
+
+def test_trust_inspector_and_export_brief_features():
+    inspector_content = Path("src/web/src/components/TrustInspector.tsx").read_text(
+        encoding="utf-8"
+    )
+    assert "Why This Answer?" in inspector_content
+    assert "Export Research Brief (.md)" in inspector_content
+    assert "Confidence Gate" in inspector_content
+    assert "Grounding Verifier" in inspector_content
+    # Strict privacy check
+    assert "email" not in inspector_content.lower()
+    assert "phone" not in inspector_content.lower()
+    assert "full_name" not in inspector_content.lower()
+
+
+def test_useful_abstention_guidance_content():
+    abstention_content = Path("src/web/src/components/AbstentionCard.tsx").read_text(
+        encoding="utf-8"
+    )
+    assert "HONEST ABSTENTION" in abstention_content
+    assert "Confidence Gate" in abstention_content
+    assert "How to Refine Your Legal Inquiry" in abstention_content
+    assert "Explore Verified In-Scope Topics" in abstention_content
