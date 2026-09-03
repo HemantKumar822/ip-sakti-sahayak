@@ -1,4 +1,5 @@
 import os
+from typing import ClassVar
 
 from dotenv import load_dotenv
 
@@ -10,6 +11,7 @@ class Config:
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "")
     GEMINI_TEMPERATURE: float = float(os.getenv("GEMINI_TEMPERATURE", "0.1"))
     GEMINI_MAX_OUTPUT_TOKENS: int = int(os.getenv("GEMINI_MAX_OUTPUT_TOKENS", "2048"))
+    GEMINI_REQUEST_TIMEOUT: float = float(os.getenv("GEMINI_REQUEST_TIMEOUT", "30.0"))
 
     # Embedding configuration
     EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
@@ -51,6 +53,11 @@ class Config:
     API_HOST: str = os.getenv("API_HOST", os.getenv("APP_HOST", "0.0.0.0"))
     APP_PORT: int = API_PORT
     APP_HOST: str = API_HOST
+    CORS_ORIGINS: ClassVar[list[str]] = [
+        origin.strip()
+        for origin in os.getenv("CORS_ORIGINS", "*").split(",")
+        if origin.strip()
+    ]
 
     # Jurisdiction routing configuration
     DEFAULT_JURISDICTION: str = os.getenv("DEFAULT_JURISDICTION", "India")
@@ -64,6 +71,18 @@ class Config:
         "ABSTENTION_MESSAGE",
         "The system cannot provide a confident advisory based on available legal corpus. Please consult an IP professional.",
     )
+
+    @classmethod
+    def validate(cls) -> None:
+        """Validates that required configuration is present."""
+        if not cls.GEMINI_MODEL:
+            raise RuntimeError(
+                "GEMINI_MODEL is required but not set in configuration or environment variables."
+            )
+        if not cls.CHROMA_COLLECTION_NAME:
+            raise RuntimeError(
+                "CHROMA_COLLECTION_NAME is required but not set in configuration or environment variables."
+            )
 
 
 config = Config()

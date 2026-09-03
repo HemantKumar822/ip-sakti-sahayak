@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from fastapi.testclient import TestClient
 
@@ -7,6 +7,7 @@ from src.main import app
 from src.models.response import Citation, QueryResponse
 
 client = TestClient(app)
+app.state.pipeline = MagicMock()
 
 
 def test_query_endpoint_answered_success():
@@ -37,8 +38,9 @@ def test_query_endpoint_answered_success():
         response_time_ms=150,
     )
 
-    with patch(
-        "src.api.routes.orchestrator.run_pipeline",
+    with patch.object(
+        app.state.pipeline,
+        "run_pipeline",
         new_callable=AsyncMock,
         return_value=mock_response,
     ) as mock_run:
@@ -81,8 +83,9 @@ def test_query_endpoint_abstained_low_confidence():
         response_time_ms=50,
     )
 
-    with patch(
-        "src.api.routes.orchestrator.run_pipeline",
+    with patch.object(
+        app.state.pipeline,
+        "run_pipeline",
         new_callable=AsyncMock,
         return_value=mock_response,
     ):
@@ -103,8 +106,9 @@ def test_query_endpoint_service_error_503():
         "session_id": "abc-789",
     }
 
-    with patch(
-        "src.api.routes.orchestrator.run_pipeline",
+    with patch.object(
+        app.state.pipeline,
+        "run_pipeline",
         new_callable=AsyncMock,
         side_effect=RuntimeError("Fatal pipeline crash"),
     ):
@@ -131,8 +135,15 @@ def test_query_endpoint_empty_payload():
     assert response.status_code == 422
 
 
-def test_lifespan_startup_and_shutdown():
+@patch("src.main.PipelineOrchestrator")
+def test_lifespan_startup_and_shutdown(mock_orchestrator):
     with TestClient(app) as test_client:
         assert app.state.is_ready is True
         res = test_client.get("/health")
         assert res.status_code == 200
+        assert res.json() == {"status": "ok", "version": "0.1.0"}
+
+    # Also test readiness endpoint
+    res_ready = client.get("/ready")
+    # since client (no context manager) won't have is_ready=True after lifespan teardown:
+    assert res_ready.status_code == 503

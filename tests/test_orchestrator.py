@@ -23,8 +23,8 @@ def test_orchestrator_generate_answered_success():
     mock_router = MagicMock()
     mock_router.route.return_value = RouterOutput(
         jurisdiction="India",
-        applicable_laws=["The Patents Act, 1970"],
-        confidence=0.9,
+        corpus_tag="india",
+        status="routed",
     )
 
     mock_retriever = MagicMock()
@@ -52,8 +52,6 @@ def test_orchestrator_generate_answered_success():
     mock_gate.evaluate.return_value = ConfidenceGateOutput(
         decision="generate",
         max_score=0.88,
-        mean_score=0.88,
-        retrieved_count=1,
         chunks=mock_retriever.retrieve.return_value,
     )
 
@@ -113,8 +111,8 @@ def test_orchestrator_abstain_on_low_confidence():
     mock_router = MagicMock()
     mock_router.route.return_value = RouterOutput(
         jurisdiction="India",
-        applicable_laws=[],
-        confidence=0.5,
+        corpus_tag="india",
+        status="routed",
     )
 
     mock_retriever = MagicMock()
@@ -132,8 +130,6 @@ def test_orchestrator_abstain_on_low_confidence():
     mock_gate.evaluate.return_value = ConfidenceGateOutput(
         decision="abstain",
         max_score=0.1,
-        mean_score=0.1,
-        retrieved_count=0,
         chunks=[],
     )
 
@@ -182,8 +178,8 @@ def test_run_pipeline_wrapper_function():
             "src.pipeline.jurisdiction_router.JurisdictionRouter.route",
             return_value=RouterOutput(
                 jurisdiction="India",
-                applicable_laws=["The Patents Act, 1970"],
-                confidence=0.9,
+                corpus_tag="india",
+                status="routed",
             ),
         ),
         patch("src.pipeline.retriever.Retriever.retrieve", return_value=[]),
@@ -198,8 +194,6 @@ def test_run_pipeline_wrapper_function():
             return_value=ConfidenceGateOutput(
                 decision="abstain",
                 max_score=0.1,
-                mean_score=0.1,
-                retrieved_count=0,
                 chunks=[],
             ),
         ),

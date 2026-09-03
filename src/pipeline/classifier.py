@@ -48,6 +48,7 @@ class Classifier:
                 response_schema=ClassifierOutput,
                 temperature=config.GEMINI_TEMPERATURE,
             ),
+            request_options={"timeout": config.GEMINI_REQUEST_TIMEOUT},
         )
         return response.text
 

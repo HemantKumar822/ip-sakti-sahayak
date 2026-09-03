@@ -172,6 +172,7 @@ class AnswerGenerator:
                     generation_config=genai.GenerationConfig(
                         temperature=0.5, max_output_tokens=300
                     ),
+                    request_options={"timeout": config.GEMINI_REQUEST_TIMEOUT},
                 )
             else:
                 response = self.model.generate_content(
@@ -179,6 +180,7 @@ class AnswerGenerator:
                     generation_config=genai.GenerationConfig(
                         temperature=0.5, max_output_tokens=300
                     ),
+                    request_options={"timeout": config.GEMINI_REQUEST_TIMEOUT},
                 )
 
             answer = (
@@ -225,6 +227,7 @@ class AnswerGenerator:
                     temperature=0.3,  # slightly higher temp for conversational tone
                     max_output_tokens=300,
                 ),
+                request_options={"timeout": config.GEMINI_REQUEST_TIMEOUT},
             )
             if response and getattr(response, "text", None):
                 return response.text.strip()
@@ -290,10 +293,16 @@ class AnswerGenerator:
                         {"role": role, "parts": [turn.get("content", "")]}
                     )
                 chat = self.model.start_chat(history=chat_history)
-                response = chat.send_message(full_prompt, generation_config=gen_config)
+                response = chat.send_message(
+                    full_prompt,
+                    generation_config=gen_config,
+                    request_options={"timeout": config.GEMINI_REQUEST_TIMEOUT},
+                )
             else:
                 response = self.model.generate_content(
-                    full_prompt, generation_config=gen_config
+                    full_prompt,
+                    generation_config=gen_config,
+                    request_options={"timeout": config.GEMINI_REQUEST_TIMEOUT},
                 )
 
             if not response or not getattr(response, "text", None):

@@ -141,7 +141,7 @@ class GroundingVerifier:
         unproven_docs: list[str] = []
         for i, cit in enumerate(parsed_citations, start=1):
             doc_id = str(cit.get("doc_id", "")).strip().lower()
-            if allowed_doc_ids and doc_id not in allowed_doc_ids:
+            if not allowed_doc_ids or doc_id not in allowed_doc_ids:
                 unproven_docs.append(f"[{i}] {doc_id}")
 
         if unproven_docs:
