@@ -1,0 +1,26 @@
+.statutory-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background-color: #f0f4f9;
+  border: 1px solid #D0D7DE;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #0969DA;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.statutory-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  background-color: #e6edf4;
+  text-decoration: none;
+}
+
+.statutory-badge-link-icon {
+  opacity: 0.6;
+}

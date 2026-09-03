@@ -1,7 +1,7 @@
 @echo off
 REM ==============================================================================
 REM IP-SAKTI Sahayak: One-Click Startup Script (Windows)
-REM Starts both FastAPI Backend & Streamlit Legal Workbench concurrently
+REM Starts both FastAPI Backend & React Legal Workbench concurrently
 REM ==============================================================================
 
 cd /d "%~dp0"

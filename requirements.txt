@@ -1,6 +1,5 @@
 fastapi
 uvicorn
-streamlit
 chromadb
 pydantic
 python-dotenv

@@ -1,6 +1,6 @@
 # ========================================================
 # IP-SAKTI Sahayak: Production Multi-Stage Containerfile
-# Hardened, non-root execution for FastAPI & Streamlit
+# Hardened, non-root execution for FastAPI Backend
 # ========================================================
 
 FROM python:3.12-slim AS builder
@@ -55,7 +55,7 @@ RUN mkdir -p /app/chroma_db /app/scratch && \
 
 USER appuser
 
-EXPOSE 8000 8501
+EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1

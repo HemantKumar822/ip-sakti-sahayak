@@ -23,12 +23,13 @@ services:
 
   frontend:
     build:
-      context: .
+      context: ./src/web
       dockerfile: Dockerfile
-    command: streamlit run src/frontend/app.py --server.port=8501 --server.address=0.0.0.0 --server.enableCORS=false
+    ports:
+      - "5173:5173"
     environment:
-      - API_HOST=backend
-      - API_PORT=8000
+      - VITE_API_HOST=backend
+      - VITE_API_PORT=8000
     restart: unless-stopped
     depends_on:
       - backend

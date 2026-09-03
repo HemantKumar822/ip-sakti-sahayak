@@ -5,7 +5,8 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)](https://www.python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.31+-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io)
+[![React](https://img.shields.io/badge/React-18+-61DAFB.svg?logo=react&logoColor=black)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-6+-646CFF.svg?logo=vite&logoColor=white)](https://vitejs.dev)
 [![ChromaDB](https://img.shields.io/badge/ChromaDB-Local%20Vector%20Store-FF5722.svg)](https://www.trychroma.com)
 [![Embeddings](https://img.shields.io/badge/Embeddings-BAAI%2Fbge--small--en--v1.5-6B46C1.svg)](https://huggingface.co/BAAI/bge-small-en-v1.5)
 [![Code Coverage](https://img.shields.io/badge/Coverage-91.7%25-brightgreen.svg)](#-test-suite--code-quality)
@@ -63,7 +64,7 @@ graph TD
     classDef gate fill:#fdf4ff,stroke:#d946ef,stroke-width:2px,color:#86198f,rx:8px;
     classDef generator fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#1e40af,rx:8px;
 
-    User([Inventor / Patent Attorney]):::client -->|Natural Language Query| Workbench[Streamlit Legal Workbench :8501]:::client
+    User([Inventor / Patent Attorney]):::client -->|Natural Language Query| Workbench[React Legal Workbench :5173]:::client
     Workbench -->|Async REST POST /api/v1/query| API[FastAPI Pipeline Orchestrator :8000]:::client
 
     subgraph Pipeline [IP-SAKTI Multi-Stage Legal Engine]
@@ -189,7 +190,7 @@ python run.py
 1. Validates `.env` and environment dependencies.
 2. Starts the **FastAPI Backend** on `http://127.0.0.1:8000`.
 3. Verifies backend health (`/health` responds 200 OK).
-4. Starts the **Streamlit Legal Workbench** on `http://127.0.0.1:8501`.
+4. Starts the **React Legal Workbench** on `http://127.0.0.1:5173`.
 5. **Automatically opens your web browser** directly to the workbench!
 6. Cleanly terminates both processes when you press `Ctrl+C`.
 
@@ -202,7 +203,7 @@ The single `run.py` CLI orchestrator provides simple commands for all developmen
 ```bash
 python run.py            # Start full system (Backend + Workbench + Browser)
 python run.py --api      # Start FastAPI backend only (port 8000)
-python run.py --ui       # Start Streamlit workbench only (port 8501)
+python run.py --ui       # Start React workbench only (port 5173)
 python run.py --test     # Run offline unit/integration test suite (0 API calls consumed)
 python run.py --bench    # Run 20-query Golden Set Evaluation Benchmark (calls live API)
 python run.py --ingest   # Download & embed authentic legal documents into ChromaDB
@@ -386,7 +387,7 @@ docker compose up --build -d
 
 ### Stack Components:
 - **`backend`**: Gunicorn running 2 Uvicorn workers on `:8000`.
-- **`frontend`**: Streamlit running in headless production mode on `:8501`.
+- **`frontend`**: React + Vite production server on `:4173` (proxied by NGINX).
 - **`redis`**: Redis 7-alpine with 256MB LRU memory eviction for response caching.
 - **`nginx`**: Alpine reverse proxy with 10 req/s IP rate limiting, gzip compression, security headers, and WebSocket streaming support.
 
@@ -416,10 +417,16 @@ docker compose up --build -d
 │   ├── config.py                      # Strongly-typed environment configuration
 │   ├── api/
 │   │   └── routes.py                  # REST API routes (/health, /api/v1/query)
-│   ├── frontend/
-│   │   ├── app.py                     # Legal Intelligence Workbench UI
+│   ├── web/                           # Modern React + Vite TypeScript Frontend
+│   │   ├── Dockerfile                 # Frontend static/preview containerfile
+│   │   ├── package.json               # Frontend dependencies (React 18, Lucide)
 │   │   ├── design_system.md           # Visual design tokens & specifications
-│   │   └── styles.css                 # Notion tokens, citation badges, stepper styles
+│   │   └── src/
+│   │       ├── App.tsx                # Application shell with legal disclaimer
+│   │       ├── index.css              # Base layout & typography
+│   │       ├── api/client.ts          # Type-safe API client for FastAPI
+│   │       ├── styles/design_tokens.css # Glassmorphism & micro-animations
+│   │       └── components/            # ChatInterface, Callout, StatutoryBadge, Stepper
 │   ├── models/
 │   │   ├── request.py                 # QueryRequest schema
 │   │   └── response.py                # QueryResponse with dual flags (abs & tkdl)
@@ -435,12 +442,11 @@ docker compose up --build -d
 │   │   └── retriever.py               # Hybrid search delegation
 │   ├── privacy/
 │   │   └── pii_strip.py               # Regex PII scrubber & anonymizer
-│   ├── utils/
 │   │   └── resilience.py              # Exponential backoff retry utility
 │   └── vector_store/
 │       ├── base.py                    # VectorStore interface protocol
 │       └── chroma_store.py            # Local ChromaDB client with batch upsert
-└── tests/                             # 160 unit, integration, and UI tests
+└── tests/                             # 162 unit, integration, and UI tests
 ```
 
 ---

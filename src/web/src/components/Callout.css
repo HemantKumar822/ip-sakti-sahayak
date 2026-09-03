@@ -1,0 +1,47 @@
+.callout {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.callout-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.callout-body {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+}
+
+.callout-abs {
+  background-color: var(--color-warning-bg);
+  border-color: var(--color-warning-border);
+}
+.callout-abs .callout-title { color: var(--color-warning); }
+
+.callout-tkdl {
+  background-color: var(--color-info-bg);
+  border-color: rgba(30, 64, 175, 0.2);
+}
+.callout-tkdl .callout-title { color: var(--color-info); }
+
+.callout-error {
+  background-color: var(--color-error-bg);
+  border-color: rgba(224, 62, 62, 0.2);
+}
+.callout-error .callout-title { color: var(--color-error); }
+
+.callout-abstain {
+  background-color: var(--color-bg-secondary);
+}
+.callout-abstain .callout-title { color: var(--color-text-primary); }

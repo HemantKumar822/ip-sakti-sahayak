@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # IP-SAKTI Sahayak: One-Click Startup Script (Git Bash / Linux / macOS)
-# Starts both FastAPI Backend & Streamlit Legal Workbench concurrently
+# Starts both FastAPI Backend & React Legal Workbench concurrently
 # ==============================================================================
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"

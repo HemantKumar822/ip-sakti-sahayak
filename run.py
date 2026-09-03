@@ -2,9 +2,9 @@
 """IP-SAKTI Sahayak: Unified Application Orchestrator & Launcher.
 
 Single command to manage local development, testing, ingestion, and production runs:
-    python run.py            -> Start both FastAPI Backend & Streamlit Workbench
+    python run.py            -> Start both FastAPI Backend & React Workbench
     python run.py --api      -> Start FastAPI Backend only (port 8000)
-    python run.py --ui       -> Start Streamlit Workbench only (port 8501)
+    python run.py --ui       -> Start React Workbench only (port 5173)
     python run.py --test     -> Run pytest regression test suite
     python run.py --bench    -> Run 20-query Golden Set evaluation benchmark
     python run.py --ingest   -> Run statutory corpus ingestion into ChromaDB
@@ -125,31 +125,17 @@ def wait_for_backend(timeout: float = 12.0) -> bool:
 
 
 def start_frontend() -> subprocess.Popen:
-    """Spawns the Streamlit workbench frontend process."""
-    print(f"{CYAN}[2/2] Launching Streamlit Legal Workbench on http://127.0.0.1:8501 ...{RESET}")
+    """Spawns the React (Vite) workbench frontend process."""
+    print(f"{CYAN}[2/2] Launching React Web App on http://localhost:5173 ...{RESET}")
     env = os.environ.copy()
-    env["PYTHONPATH"] = "."
-    cmd = [
-        sys.executable,
-        "-m",
-        "streamlit",
-        "run",
-        "src/frontend/app.py",
-        "--server.port",
-        "8501",
-        "--server.address",
-        "127.0.0.1",
-        "--server.headless",
-        "true",
-        "--browser.gatherUsageStats",
-        "false",
-    ]
-    proc = subprocess.Popen(cmd, env=env)
+    npm_bin = shutil.which("npm") or ("npm.cmd" if sys.platform == "win32" else "npm")
+    cmd = [npm_bin, "run", "dev"]
+    proc = subprocess.Popen(cmd, env=env, cwd="src/web", shell=(sys.platform == "win32"))
     return proc
 
 
 def start_full_stack() -> None:
-    """Starts both FastAPI backend and Streamlit UI with unified process lifecycle management."""
+    """Starts both FastAPI backend and React UI with unified process lifecycle management."""
     print(BANNER)
     ensure_environment()
 
@@ -161,16 +147,15 @@ def start_full_stack() -> None:
 
     print(f"\n{GREEN}{BOLD}{'═' * 70}{RESET}")
     print(f"{GREEN}{BOLD}  🚀 IP-SAKTI Sahayak Legal Workbench is Running!{RESET}")
-    print(f"{DIM}  • Interactive Workbench UI:  {BOLD}http://localhost:8501{RESET}")
+    print(f"{DIM}  • Interactive Workbench UI:  {BOLD}http://localhost:5173{RESET}")
     print(f"{DIM}  • Backend REST API:         {BOLD}http://localhost:8000{RESET}")
     print(f"{DIM}  • Interactive Swagger Docs:  {BOLD}http://localhost:8000/docs{RESET}")
     print(f"{GREEN}{BOLD}{'═' * 70}{RESET}")
     print(f"{YELLOW}Press Ctrl+C at any time to gracefully stop all services.{RESET}\n")
 
-    # Open browser automatically after 1.5s
-    time.sleep(1.5)
+    time.sleep(2.5)
     try:
-        webbrowser.open("http://localhost:8501")
+        webbrowser.open("http://localhost:5173")
     except Exception:
         pass
 
@@ -210,7 +195,7 @@ def main() -> None:
         "--api", action="store_true", help="Start only the FastAPI backend (port 8000)"
     )
     parser.add_argument(
-        "--ui", action="store_true", help="Start only the Streamlit workbench (port 8501)"
+        "--ui", action="store_true", help="Start only the React workbench (port 5173)"
     )
     parser.add_argument(
         "--test", action="store_true", help="Run pytest regression test suite"

@@ -43,19 +43,16 @@ Open the newly created `.env` file and add your `GEMINI_API_KEY`. (If you don't 
 
 ### 4. Running the System
 
-You need to run the API and the Frontend in two separate terminal windows. You do not need to activate the virtual environment manually—the run scripts handle it for you.
+You can run both the FastAPI Backend and the React Web App with a single command:
 
-**Terminal 1: Run the Backend API**
-- **Windows:** `run_api.bat`
-- **Mac/Linux:** `./run_api.sh`
+- **Windows:** `start.bat` or `python run.py`
+- **Mac/Linux:** `./start.sh` or `python run.py`
 
-*(The API will be available at `http://localhost:8000`)*
+*(The React Workbench UI will open automatically at `http://localhost:5173`, and the API at `http://localhost:8000`)*
 
-**Terminal 2: Run the Frontend**
-- **Windows:** `run_frontend.bat`
-- **Mac/Linux:** `./run_frontend.sh`
-
-*(The Streamlit UI will open automatically at `http://localhost:8501`)*
+To run components individually:
+- **Backend Only:** `python run.py --api` (port 8000)
+- **Frontend Only:** `python run.py --ui` (port 5173)
 
 ### 5. Running Tests & Coverage
 To run the automated test suite with coverage reporting:

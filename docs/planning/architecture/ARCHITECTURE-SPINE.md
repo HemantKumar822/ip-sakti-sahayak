@@ -98,12 +98,12 @@ Every request follows a fixed, ordered sequence of single-responsibility stages.
 
 ---
 
-### AD-11: Frontend — Streamlit (MVP)
-**Binds:** The web UI is a Streamlit application
-**Prevents:** React/Next.js, Vue, or raw HTML for MVP
-**Rule:** Frontend communicates with the FastAPI backend via HTTP (not direct Python import) — even though Streamlit can import Python directly, keeping the boundary clean allows Phase 2 to replace Streamlit without touching the API.
-**Rationale:** Fastest path to a working UI for a mixed-skill team; Streamlit handles state, layout, and hot-reload. The API boundary is the architectural invariant; Streamlit is the replaceable leaf.
-**Deferred:** Phase 2 frontend can be Next.js. The FastAPI API spec is the contract — frontend is a detail.
+### AD-11: Frontend — Modern React + TypeScript (Vite)
+**Binds:** The web UI is a modern, responsive React 18 application built with Vite and TypeScript located in `src/web/`.
+**Prevents:** Heavy legacy monolithic UI frameworks or tightly-coupled server-rendered HTML.
+**Rule:** Frontend communicates strictly with the FastAPI backend via HTTP REST (`/api/v1/query`) — keeping the boundary clean and decoupled.
+**Rationale:** Delivers rich glassmorphism, micro-animations, instant statutory badge previews, and type safety, replacing the initial Streamlit MVP leaf without touching the core API contract.
+**[EVOLVED]** — Transitioned from Streamlit MVP to React + Vite workbench for production.
 
 ---
 
@@ -119,7 +119,7 @@ Every request follows a fixed, ordered sequence of single-responsibility stages.
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        USER BROWSER                             │
-│                   (Streamlit Frontend :8501)                    │
+│                  (React Web Workbench :5173)                    │
 └───────────────────────────┬─────────────────────────────────────┘
                             │  HTTP POST /api/v1/query
                             │  {query_text, session_id}
@@ -226,8 +226,14 @@ ip-sakti-sahayak/
 │   └── privacy/
 │       └── pii_strip.py           # PII regex filter (FR-9.2)
 │
-├── frontend/
-│   └── app.py                     # Streamlit UI
+├── web/                           # Modern React + Vite TypeScript Workbench (:5173)
+│   ├── package.json
+│   ├── Dockerfile
+│   └── src/
+│       ├── App.tsx
+│       ├── api/client.ts
+│       ├── styles/design_tokens.css
+│       └── components/            # ChatInterface, StatutoryBadge, Callout, Stepper
 │
 └── tests/
     ├── golden_queries/

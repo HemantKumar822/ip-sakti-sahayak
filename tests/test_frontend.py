@@ -1,163 +1,146 @@
-import ast
+"""Frontend test suite for IP-SAKTI Sahayak React/Vite workbench."""
+
+import re
 from pathlib import Path
 
 
-def test_styles_css_exists_and_contains_all_design_tokens():
-    css_path = Path("src/frontend/styles.css")
-    assert css_path.exists(), "src/frontend/styles.css must exist"
+def test_design_tokens_css_exists_and_contains_all_tokens():
+    css_path = Path("src/web/src/styles/design_tokens.css")
+    assert css_path.exists(), "src/web/src/styles/design_tokens.css must exist"
 
     css_content = css_path.read_text(encoding="utf-8")
 
-    # Verify colors
-    required_colors = [
-        "--color-canvas",
-        "--color-surface",
-        "--color-border",
+    # Verify color palette and semantic tokens
+    required_tokens = [
+        "--color-bg-primary",
+        "--color-bg-secondary",
         "--color-text-primary",
         "--color-text-secondary",
+        "--color-border",
         "--color-accent",
         "--color-success",
         "--color-warning",
+        "--color-warning-bg",
         "--color-error",
+        "--color-error-bg",
+        "--color-info",
+        "--color-info-bg",
     ]
-    for color in required_colors:
-        assert color in css_content, f"CSS variable {color} missing from styles.css"
+    for token in required_tokens:
+        assert (
+            token in css_content
+        ), f"Design token {token} missing from design_tokens.css"
 
-    # Verify typography
-    required_typography = [
-        "--font-sans",
-        "--font-mono",
-        "--text-xs",
-        "--text-sm",
-        "--text-base",
-        "--text-lg",
-        "--text-xl",
-    ]
-    for typo in required_typography:
-        assert typo in css_content, f"CSS variable {typo} missing from styles.css"
-
-    # Verify spacing
-    required_spacing = [
-        "--space-1",
-        "--space-2",
-        "--space-3",
-        "--space-4",
-        "--space-6",
-        "--space-8",
-        "--space-12",
-    ]
-    for space in required_spacing:
-        assert space in css_content, f"CSS variable {space} missing from styles.css"
-
-    # Verify radius
-    required_radius = ["--radius-sm", "--radius-md", "--radius-lg"]
-    for radius in required_radius:
-        assert radius in css_content, f"CSS variable {radius} missing from styles.css"
+    # Verify typography, shadows, and animations
+    assert "--font-family" in css_content
+    assert "@keyframes slideUpFadeIn" in css_content
+    assert ".animate-fade-in" in css_content
+    assert ".glass" in css_content
 
 
 def test_design_system_doc_exists_and_documents_tokens():
-    doc_path = Path("src/frontend/design_system.md")
-    assert doc_path.exists(), "src/frontend/design_system.md must exist"
+    doc_path = Path("src/web/design_system.md")
+    assert doc_path.exists(), "src/web/design_system.md must exist"
 
     content = doc_path.read_text(encoding="utf-8")
-    assert "--color-canvas" in content
+    assert "--color-bg-primary" in content
     assert "--color-text-primary" in content
-    assert "--space-4" in content
-    assert "--radius-sm" in content
+    assert "--color-warning-bg" in content
+    assert "StatutoryBadge.tsx" in content
+    assert "Callout.tsx" in content
+    assert "PipelineStepper.tsx" in content
 
 
-def test_app_py_syntax_and_css_loading():
-    app_path = Path("src/frontend/app.py")
-    assert app_path.exists(), "src/frontend/app.py must exist"
+def test_react_app_structure_and_components_exist():
+    required_files = [
+        Path("src/web/src/App.tsx"),
+        Path("src/web/src/index.css"),
+        Path("src/web/src/api/client.ts"),
+        Path("src/web/src/components/ChatInterface.tsx"),
+        Path("src/web/src/components/StatutoryBadge.tsx"),
+        Path("src/web/src/components/Callout.tsx"),
+        Path("src/web/src/components/PipelineStepper.tsx"),
+    ]
+    for file_path in required_files:
+        assert file_path.exists(), f"Required React file {file_path} must exist"
 
-    app_content = app_path.read_text(encoding="utf-8")
-    # Verify Python syntax validity
-    ast.parse(app_content)
 
-    # Verify CSS loading logic and key UI text
-    assert "styles.css" in app_content
+def test_app_and_chat_interface_content_and_privacy():
+    app_content = Path("src/web/src/App.tsx").read_text(encoding="utf-8")
+    chat_content = Path("src/web/src/components/ChatInterface.tsx").read_text(
+        encoding="utf-8"
+    )
+
+    # Header and Brand
     assert "IP-SAKTI Sahayak" in app_content
-    assert "Ask your Ayurveda IP question" in app_content
     assert "India 🇮🇳" in app_content
-    assert "category-badge" in app_content
-    assert "card-metadata-bar" in app_content
-    assert "citation-marker" in app_content
-    assert "citation-target" in app_content
-    assert "callout-abs" in app_content
-    assert "callout-abstain" in app_content
-    assert "session_id" in app_content
-    assert "messages" in app_content
-    assert "st.chat_input" in app_content
-    assert "st.chat_message" in app_content
 
-    # Verify no personal data collection fields exist
+    # Key chat features
+    assert "Ask your Ayurveda IP question" in chat_content
+    assert "PipelineStepper" in chat_content
+    assert "Callout" in chat_content
+    assert "StatutoryBadge" in chat_content
+    assert "session_id" in chat_content
+
+    # Strict Privacy Check (DPDP compliance: no personal data fields)
     assert "email" not in app_content.lower()
     assert "phone" not in app_content.lower()
     assert "full_name" not in app_content.lower()
+    assert "email" not in chat_content.lower()
+    assert "phone" not in chat_content.lower()
+    assert "full_name" not in chat_content.lower()
 
 
-def test_styles_css_contains_category_badge_and_card_header():
-    css_path = Path("src/frontend/styles.css")
-    css_content = css_path.read_text(encoding="utf-8")
-    assert ".category-badge" in css_content
-    assert ".card-header-row" in css_content
-    assert ".card-metadata-bar" in css_content
-    assert ".citation-marker" in css_content
-    assert ".citation-target" in css_content
-    assert ".callout-abs" in css_content
-    assert ".callout-abstain" in css_content
+def test_callout_component_and_styles():
+    callout_tsx = Path("src/web/src/components/Callout.tsx").read_text(encoding="utf-8")
+    callout_css = Path("src/web/src/components/Callout.css").read_text(encoding="utf-8")
+
+    assert "callout" in callout_tsx
+    assert "callout-abs" in callout_css
+    assert "callout-tkdl" in callout_css
+    assert "callout-error" in callout_css
+    assert "callout-abstain" in callout_css
 
 
-def test_styles_css_contains_abs_callout_and_citations_accordion_styles():
-    css_path = Path("src/frontend/styles.css")
-    css_content = css_path.read_text(encoding="utf-8")
+def test_statutory_badge_component_and_styles():
+    badge_tsx = Path("src/web/src/components/StatutoryBadge.tsx").read_text(
+        encoding="utf-8"
+    )
+    badge_css = Path("src/web/src/components/StatutoryBadge.css").read_text(
+        encoding="utf-8"
+    )
 
-    # Issue #28 ABS Callout styling rules
-    assert "#FFF3CD" in css_content
-    assert "#92400E" in css_content
-    assert ".callout-abs-header" in css_content
-    assert ".callout-abs-title" in css_content
-    assert ".callout-abs-body" in css_content
-    assert ".callout-abs-source" in css_content
-
-    # Issue #27 Citations Accordion styling rules
-    assert "details.citations-accordion" in css_content
-    assert "summary.citations-summary" in css_content
-    assert ".summary-arrow" in css_content
-    assert "transform: rotate(90deg)" in css_content
-    assert ".citations-list" in css_content
-    assert ".citation-row" in css_content
-    assert "border-left: 3px solid var(--color-border)" in css_content
-    assert ".citation-title" in css_content
-    assert ".citation-snippet" in css_content
-    assert ".citation-url" in css_content
-    assert ".citation-meta" in css_content
+    assert "statutory-badge" in badge_tsx
+    assert 'target="_blank"' in badge_tsx
+    assert 'rel="noopener noreferrer"' in badge_tsx
+    assert ".statutory-badge" in badge_css
+    assert ".statutory-badge:hover" in badge_css
 
 
-def test_app_py_contains_notion_abs_and_citations_accordion_elements():
-    app_path = Path("src/frontend/app.py")
-    app_content = app_path.read_text(encoding="utf-8")
+def test_pipeline_stepper_component_and_styles():
+    stepper_tsx = Path("src/web/src/components/PipelineStepper.tsx").read_text(
+        encoding="utf-8"
+    )
+    stepper_css = Path("src/web/src/components/PipelineStepper.css").read_text(
+        encoding="utf-8"
+    )
 
-    # Issue #28 ABS Callout elements
-    assert "ABS Compliance Note" in app_content
-    assert "⚠️" in app_content
-    assert "callout-abs-header" in app_content
-    assert "callout-abs-title" in app_content
-    assert "callout-abs-body" in app_content
+    assert "PII Scrubbed" in stepper_tsx
+    assert "Gate Verified" in stepper_tsx
+    assert ".pipeline-stepper" in stepper_css
+    assert ".stepper-pill" in stepper_css
 
-    # Issue #27 Citations Accordion elements
-    assert 'details class="citations-accordion"' in app_content
-    assert 'summary class="citations-summary"' in app_content
-    assert "summary-arrow" in app_content
-    assert "citations-list" in app_content
-    assert "citation-row" in app_content
-    assert "citation-title" in app_content
-    assert "citation-meta" in app_content
+
+def test_exact_disclaimer_text_in_react_app():
+    app_content = Path("src/web/src/App.tsx").read_text(encoding="utf-8")
+    expected_disclaimer = (
+        "This information is provided for general awareness and does not constitute legal advice. "
+        "Consult a qualified IP attorney for decisions specific to your situation."
+    )
+    assert expected_disclaimer in app_content
 
 
 def test_inline_citation_regex_formatting():
-    import re
-
     def format_inline_citations(text: str) -> str:
         def replace_citation(match: re.Match) -> str:
             raw_nums = match.group(1).split(",")
@@ -186,8 +169,6 @@ def test_inline_citation_regex_formatting():
 
 
 def test_abs_detail_source_formatting():
-    import re
-
     def format_abs_detail(text: str) -> tuple[str, str]:
         source_match = re.search(r"\[Source:\s*([^\]]+)\]", text)
         if source_match:
@@ -207,76 +188,3 @@ def test_abs_detail_source_formatting():
     clean_msg2, src_html2 = format_abs_detail(sample_without_source)
     assert clean_msg2 == "Ashwagandha is a biological resource."
     assert src_html2 == ""
-
-
-def test_styles_css_contains_skeleton_and_error_callout_styles():
-    css_path = Path("src/frontend/styles.css")
-    css_content = css_path.read_text(encoding="utf-8")
-
-    # Issue #29 Skeleton Screen styles
-    assert "@keyframes shimmer" in css_content
-    assert ".skeleton" in css_content
-    assert ".skeleton-card" in css_content
-    assert "animation: shimmer 1.5s infinite" in css_content
-
-    # Issue #30 Abstention Card styles
-    assert "#F7F6F3" in css_content
-    assert ".callout-abstain-header" in css_content
-    assert ".callout-abstain-icon" in css_content
-    assert ".callout-abstain-title" in css_content
-    assert ".callout-abstain-body" in css_content
-    assert ".callout-abstain-suggestions" in css_content
-
-    # Issue #30 Error Card styles
-    assert ".callout-error" in css_content
-    assert "#FEE2E2" in css_content
-    assert "#FCA5A5" in css_content
-    assert "#991B1B" in css_content
-    assert "#7F1D1D" in css_content
-    assert ".callout-error-header" in css_content
-    assert ".callout-error-title" in css_content
-    assert ".callout-error-body" in css_content
-
-
-def test_app_py_contains_skeleton_loading_and_abstention_error_states():
-    app_path = Path("src/frontend/app.py")
-    app_content = app_path.read_text(encoding="utf-8")
-
-    # Issue #29 Skeleton Screen elements
-    assert "skeleton-card" in app_content
-    assert "skeleton" in app_content
-    assert "loading_placeholder" in app_content
-
-    # Issue #30 Abstention Card elements
-    assert "callout-abstain" in app_content
-    assert "💭" in app_content
-    assert "We don't have enough information" in app_content
-    assert "Ayurveda patents" in app_content
-
-    # Issue #30 Error Card elements
-    assert "callout-error" in app_content
-    assert "⚡" in app_content
-    assert "Service temporarily unavailable" in app_content
-
-
-def test_disclaimer_footer_and_responsive_layout_styles():
-    css_path = Path("src/frontend/styles.css")
-    css_content = css_path.read_text(encoding="utf-8")
-
-    # Issue #31 Responsive layout and disclaimer styles
-    assert "max-width: 760px !important;" in css_content
-    assert "font-style: italic;" in css_content
-    assert "@media (max-width: 768px)" in css_content
-    assert "@media (max-width: 480px)" in css_content
-
-
-def test_exact_disclaimer_text_in_app_py():
-    app_path = Path("src/frontend/app.py")
-    app_content = app_path.read_text(encoding="utf-8")
-
-    # Issue #31 Exact Disclaimer Wording
-    expected_disclaimer = (
-        "This information is provided for general awareness and does not constitute legal advice. "
-        "Consult a qualified IP attorney for decisions specific to your situation."
-    )
-    assert expected_disclaimer in app_content
