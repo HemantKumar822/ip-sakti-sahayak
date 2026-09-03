@@ -162,7 +162,7 @@ class PipelineOrchestrator:
                     asyncio.to_thread(self.retriever.retrieve, search_query_str),
                     asyncio.to_thread(self.abs_checker.check, search_query_str),
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("[HYBRID-SEARCH] [%s] External search failure: %s", short_id, e)
                 retrieved_chunks = []
                 abs_out = ABSCheckerOutput(abs_flag=False, abs_detail=None)

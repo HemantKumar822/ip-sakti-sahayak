@@ -16,7 +16,8 @@ def test_default_routing_standard_ayurveda_query():
     ]
 
     for q in queries:
-        result = router.route(QueryContext(raw_query=q, english_keywords="", is_hindi=False))
+        ctx = QueryContext(raw_query=q, english_keywords="", is_hindi=False)
+        result = router.route(ctx)
         assert isinstance(result, RouterOutput)
         assert result.jurisdiction == "India"
         assert result.corpus_tag == "india"
@@ -39,7 +40,8 @@ def test_international_scope_detection():
     ]
 
     for q in international_queries:
-        result = router.route(QueryContext(raw_query=q, english_keywords="", is_hindi=False))
+        ctx = QueryContext(raw_query=q, english_keywords="", is_hindi=False)
+        result = router.route(ctx)
         assert isinstance(result, RouterOutput)
         assert result.jurisdiction == "India"
         assert result.corpus_tag == "india"
@@ -58,7 +60,8 @@ def test_no_false_positives_for_substrings():
     ]
 
     for q in benign_queries:
-        result = router.route(QueryContext(raw_query=q, english_keywords="", is_hindi=False))
+        ctx = QueryContext(raw_query=q, english_keywords="", is_hindi=False)
+        result = router.route(ctx)
         assert result.status == "routed"
         assert result.message is None
 
@@ -67,7 +70,8 @@ def test_empty_and_whitespace_query():
     """Verifies empty or whitespace queries default to routed without international flag."""
     router = JurisdictionRouter()
     for empty_q in ["", "   ", "\n\t"]:
-        result = router.route(QueryContext(raw_query=empty_q, english_keywords="", is_hindi=False))
+        ctx = QueryContext(raw_query=empty_q, english_keywords="", is_hindi=False)
+        result = router.route(ctx)
         assert result.status == "routed"
         assert result.jurisdiction == "India"
         assert result.corpus_tag == "india"
@@ -81,8 +85,9 @@ def test_classifier_output_passthrough():
         confidence=0.95,
         reason="Ancient formulation from Charaka Samhita.",
     )
+    ctx = QueryContext(raw_query="Is Triphala patentable in India?", english_keywords="", is_hindi=False)
     result = router.route(
-        QueryContext(raw_query="Is Triphala patentable in India?", english_keywords="", is_hindi=False),
+        ctx,
         classifier_output=classifier_output,
     )
     assert result.status == "routed"
@@ -92,7 +97,8 @@ def test_classifier_output_passthrough():
 def test_custom_default_jurisdiction():
     """Verifies that a custom default jurisdiction can be injected at initialization."""
     router = JurisdictionRouter(default_jurisdiction="Singapore")
-    result = router.route(QueryContext(raw_query="How to file herbal patents?", english_keywords="", is_hindi=False))
+    ctx = QueryContext(raw_query="How to file herbal patents?", english_keywords="", is_hindi=False)
+    result = router.route(ctx)
     assert result.jurisdiction == "Singapore"
     assert result.status == "routed"
 
@@ -101,6 +107,7 @@ def test_config_default_jurisdiction_injection():
     """Verifies that config.DEFAULT_JURISDICTION is respected when not explicitly passed."""
     with patch("src.pipeline.jurisdiction_router.config.DEFAULT_JURISDICTION", "US"):
         router = JurisdictionRouter()
-        result = router.route(QueryContext(raw_query="How to file herbal patents?", english_keywords="", is_hindi=False))
+        ctx = QueryContext(raw_query="How to file herbal patents?", english_keywords="", is_hindi=False)
+        result = router.route(ctx)
         assert result.jurisdiction == "US"
         assert result.status == "routed"
