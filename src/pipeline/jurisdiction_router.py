@@ -69,12 +69,20 @@ class JurisdictionRouter:
 
     def is_international(self, context: "QueryContext") -> bool:
         """Checks whether the query explicitly references international IP frameworks."""
-        text_to_check = f"{context.raw_query} {context.english_keywords}" if context.english_keywords else context.raw_query
+        text_to_check = (
+            f"{context.raw_query} {context.english_keywords}"
+            if context.english_keywords
+            else context.raw_query
+        )
         if not text_to_check or not text_to_check.strip():
             return False
-        return any(pattern.search(text_to_check) for pattern in INTERNATIONAL_IP_PATTERNS)
+        return any(
+            pattern.search(text_to_check) for pattern in INTERNATIONAL_IP_PATTERNS
+        )
 
-    def route(self, context: "QueryContext", classifier_output: Any = None) -> RouterOutput:
+    def route(
+        self, context: "QueryContext", classifier_output: Any = None
+    ) -> RouterOutput:
         """Routes a query to its legal corpus jurisdiction.
 
         Args:

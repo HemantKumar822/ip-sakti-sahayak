@@ -85,7 +85,9 @@ class PipelineOrchestrator:
         bilingual_res = BilingualNormalizer.expand_query(cleaned_query)
         context = QueryContext(
             raw_query=cleaned_query,
-            english_keywords=bilingual_res.expanded_search_query if bilingual_res.is_hindi else "",
+            english_keywords=(
+                bilingual_res.expanded_search_query if bilingual_res.is_hindi else ""
+            ),
             is_hindi=bilingual_res.is_hindi,
         )
         if context.is_hindi:
@@ -156,14 +158,18 @@ class PipelineOrchestrator:
         else:
 
             # Parallel execution of external checks
-            search_query_str = context.english_keywords if context.is_hindi else context.raw_query
+            search_query_str = (
+                context.english_keywords if context.is_hindi else context.raw_query
+            )
             try:
                 retrieved_chunks, abs_out = await asyncio.gather(
                     asyncio.to_thread(self.retriever.retrieve, search_query_str),
                     asyncio.to_thread(self.abs_checker.check, search_query_str),
                 )
             except Exception as e:  # noqa: BLE001
-                logger.error("[HYBRID-SEARCH] [%s] External search failure: %s", short_id, e)
+                logger.error(
+                    "[HYBRID-SEARCH] [%s] External search failure: %s", short_id, e
+                )
                 retrieved_chunks = []
                 abs_out = ABSCheckerOutput(abs_flag=False, abs_detail=None)
 

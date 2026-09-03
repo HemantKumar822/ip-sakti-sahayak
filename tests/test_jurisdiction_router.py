@@ -85,7 +85,11 @@ def test_classifier_output_passthrough():
         confidence=0.95,
         reason="Ancient formulation from Charaka Samhita.",
     )
-    ctx = QueryContext(raw_query="Is Triphala patentable in India?", english_keywords="", is_hindi=False)
+    ctx = QueryContext(
+        raw_query="Is Triphala patentable in India?",
+        english_keywords="",
+        is_hindi=False,
+    )
     result = router.route(
         ctx,
         classifier_output=classifier_output,
@@ -97,7 +101,9 @@ def test_classifier_output_passthrough():
 def test_custom_default_jurisdiction():
     """Verifies that a custom default jurisdiction can be injected at initialization."""
     router = JurisdictionRouter(default_jurisdiction="Singapore")
-    ctx = QueryContext(raw_query="How to file herbal patents?", english_keywords="", is_hindi=False)
+    ctx = QueryContext(
+        raw_query="How to file herbal patents?", english_keywords="", is_hindi=False
+    )
     result = router.route(ctx)
     assert result.jurisdiction == "Singapore"
     assert result.status == "routed"
@@ -107,7 +113,9 @@ def test_config_default_jurisdiction_injection():
     """Verifies that config.DEFAULT_JURISDICTION is respected when not explicitly passed."""
     with patch("src.pipeline.jurisdiction_router.config.DEFAULT_JURISDICTION", "US"):
         router = JurisdictionRouter()
-        ctx = QueryContext(raw_query="How to file herbal patents?", english_keywords="", is_hindi=False)
+        ctx = QueryContext(
+            raw_query="How to file herbal patents?", english_keywords="", is_hindi=False
+        )
         result = router.route(ctx)
         assert result.jurisdiction == "US"
         assert result.status == "routed"
