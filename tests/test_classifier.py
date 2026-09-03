@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
+from src.models.query_context import QueryContext
 from src.pipeline.classifier import Classifier, ClassifierOutput
 
 
@@ -27,7 +28,7 @@ def test_classifier_proprietary(classifier):
         )
     )
     with patch.object(classifier.model, "generate_content", return_value=mock_response):
-        result = classifier.classify("What is the IP protection for Chyawanprash?")
+        result = classifier.classify(QueryContext(raw_query="What is the IP protection for Chyawanprash?", english_keywords="", is_hindi=False))
         assert isinstance(result, ClassifierOutput)
         assert result.category == "Proprietary Ayurveda"
         assert result.confidence == 0.9
@@ -44,7 +45,7 @@ def test_classifier_classical(classifier):
         )
     )
     with patch.object(classifier.model, "generate_content", return_value=mock_response):
-        result = classifier.classify("How is Triphala traditionally made?")
+        result = classifier.classify(QueryContext(raw_query="How is Triphala traditionally made?", english_keywords="", is_hindi=False))
         assert isinstance(result, ClassifierOutput)
         assert result.category == "Classical Ayurveda"
         assert result.confidence == 0.95
@@ -61,7 +62,7 @@ def test_classifier_unclassifiable(classifier):
         )
     )
     with patch.object(classifier.model, "generate_content", return_value=mock_response):
-        result = classifier.classify("What is the best programming language?")
+        result = classifier.classify(QueryContext(raw_query="What is the best programming language?", english_keywords="", is_hindi=False))
         assert isinstance(result, ClassifierOutput)
         assert result.category == "Unclassifiable"
         assert result.confidence == 0.95
@@ -71,7 +72,7 @@ def test_classifier_api_failure(classifier):
     with patch.object(
         classifier.model, "generate_content", side_effect=Exception("API Timeout")
     ):
-        result = classifier.classify("Does this error out gracefully?")
+        result = classifier.classify(QueryContext(raw_query="Does this error out gracefully?", english_keywords="", is_hindi=False))
         assert isinstance(result, ClassifierOutput)
         assert result.category == "Unclassifiable"
         assert result.confidence == 0.0

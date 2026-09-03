@@ -4,6 +4,7 @@ import google.generativeai as genai
 from pydantic import BaseModel
 
 from src.config import config
+from src.models.query_context import QueryContext
 from src.utils.resilience import retry_with_backoff
 
 logger = logging.getLogger(__name__)
@@ -51,10 +52,10 @@ class Classifier:
         return response.text
 
     @staticmethod
-    def fallback_classify(query: str) -> ClassifierOutput:
+    def fallback_classify(context: QueryContext) -> ClassifierOutput:
         """Deterministic rule-based classification fallback when LLM API is exhausted or unavailable."""
-        q = query.strip().lower()
-        if not q or q in {
+        q = f"{context.raw_query} {context.english_keywords}".strip().lower()
+        if not context.raw_query.strip() or q in {
             "hi",
             "hello",
             "hey",
@@ -136,18 +137,18 @@ class Classifier:
             reason="System encountered an error during classification (fallback heuristic applied).",
         )
 
-    def classify(self, query: str) -> ClassifierOutput:
+    def classify(self, context: QueryContext) -> ClassifierOutput:
         """Classifies a user query into an Ayurveda product category with resilience fallback.
 
         Args:
-            query (str): The user's question.
+            context (QueryContext): The structured query context containing the user's question.
 
         Returns:
             ClassifierOutput: A structured response with category, confidence, and reason.
         """
         try:
             raw_text = self._generate_with_retry(
-                f"{CLASSIFIER_PROMPT}\n\nUser Question: {query}"
+                f"{CLASSIFIER_PROMPT}\n\nUser Question: {context.raw_query}"
             )
             return ClassifierOutput.model_validate_json(raw_text)
         except Exception as e:  # noqa: BLE001
@@ -155,4 +156,4 @@ class Classifier:
                 "Classifier LLM API failed (%s); switching to deterministic fallback heuristic.",
                 e,
             )
-            return self.fallback_classify(query)
+            return self.fallback_classify(context)

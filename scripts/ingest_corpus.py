@@ -6,14 +6,11 @@ and embeds them into persistent ChromaDB with BAAI/bge-small-en-v1.5 embeddings.
 """
 
 import html
-import io
 import json
 import logging
-import os
 import re
 from pathlib import Path
 
-import pypdf
 import requests
 import urllib3
 
@@ -120,9 +117,9 @@ def clean_html(raw_html: str) -> str:
     """Strips HTML markup and extracts plain verbatim text."""
     m = re.search(r'<div class="judgments">([\s\S]*?)</div>\s*<div class="bottom', raw_html)
     text_content = m.group(1) if m else raw_html
-    text_content = re.sub(r"<(script|style)[^>]*>[\s\S]*?</\1>", "", text_content, flags=re.I)
-    text_content = re.sub(r"<br\s*/?>", "\n", text_content, flags=re.I)
-    text_content = re.sub(r"</?(p|div|h[1-6]|tr|table|ul|ol|li|blockquote|section)[^>]*>", "\n", text_content, flags=re.I)
+    text_content = re.sub(r"<(script|style)[^>]*>[\s\S]*?</\1>", "", text_content, flags=re.IGNORECASE)
+    text_content = re.sub(r"<br\s*/?>", "\n", text_content, flags=re.IGNORECASE)
+    text_content = re.sub(r"</?(p|div|h[1-6]|tr|table|ul|ol|li|blockquote|section)[^>]*>", "\n", text_content, flags=re.IGNORECASE)
     text_content = re.sub(r"<[^>]+>", "", text_content)
     text_content = html.unescape(text_content)
     lines = [line.strip() for line in text_content.splitlines()]

@@ -5,6 +5,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from src.config import config
+from src.models.query_context import QueryContext
 
 logger = logging.getLogger(__name__)
 
@@ -66,26 +67,27 @@ class JurisdictionRouter:
             else config.DEFAULT_JURISDICTION
         )
 
-    def is_international(self, query: str) -> bool:
+    def is_international(self, context: "QueryContext") -> bool:
         """Checks whether the query explicitly references international IP frameworks."""
-        if not query or not query.strip():
+        text_to_check = f"{context.raw_query} {context.english_keywords}" if context.english_keywords else context.raw_query
+        if not text_to_check or not text_to_check.strip():
             return False
-        return any(pattern.search(query) for pattern in INTERNATIONAL_IP_PATTERNS)
+        return any(pattern.search(text_to_check) for pattern in INTERNATIONAL_IP_PATTERNS)
 
-    def route(self, query: str, classifier_output: Any = None) -> RouterOutput:
+    def route(self, context: "QueryContext", classifier_output: Any = None) -> RouterOutput:
         """Routes a query to its legal corpus jurisdiction.
 
         Args:
-            query: The user's intellectual property question.
+            context: The QueryContext containing raw query and english keywords.
             classifier_output: Optional output from the upstream Classifier stage.
 
         Returns:
             RouterOutput: Structured routing result with jurisdiction and status tag.
         """
-        if self.is_international(query):
+        if self.is_international(context):
             logger.info(
                 "Query flagged as out-of-scope international IP reference: %s",
-                query,
+                context.raw_query,
             )
             return RouterOutput(
                 jurisdiction=self.default_jurisdiction,

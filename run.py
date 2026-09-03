@@ -107,8 +107,8 @@ def start_backend() -> subprocess.Popen:
 
 def wait_for_backend(timeout: float = 12.0) -> bool:
     """Polls the backend /health endpoint until it responds with HTTP 200."""
-    import urllib.request
     import urllib.error
+    import urllib.request
 
     start_time = time.time()
     url = "http://127.0.0.1:8000/health"
