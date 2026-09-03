@@ -49,8 +49,16 @@ def test_bilingual_expansion_english_unchanged():
     assert result.matched_terms == []
 
 
+import os
+
+import pytest
+
+
 def test_bilingual_retrieval_parity_offline():
     """Verifies that paired English and Hindi queries retrieve the same statutory citations offline."""
+    if not os.path.exists("corpus/embeddings"):
+        pytest.skip("Requires local vector DB (corpus/embeddings)")
+
     retriever = HybridRetriever(vector_store=ChromaStore())
 
     en_query = "Can Triphala be patented under Indian patent law?"
