@@ -56,6 +56,17 @@ Unlike consumer chat apps, this interface is designed for **patent attorneys, tr
 - **Role:** Real-time visual lifecycle tracker illustrating multi-stage verification:
   `[🔒 PII Scrubbed] ➔ [🏷️ Categorized] ➔ [⚖️ Routed] ➔ [⚡ Hybrid Search] ➔ [🛡️ Gate Verified]`
 
+### 5. `HeroState.tsx`
+- **Role:** Onboarding experience displayed when the workbench initializes with zero query history.
+- **Components:** Top event pill badge, authoritative value proposition title and subtitle, 4 trust capability indicators, and 4 interactive, clickable legal scenario brief cards (Classical Ayurveda § 3(p), Biological Resource ABS § 6, Enhanced Efficacy § 3(d), and Trademark distinctiveness).
+- **Interaction:** Clicking any scenario immediately populates the inquiry and triggers analysis.
+
+### 6. `Topbar.tsx`
+- **Role:** Sticky application header with branded seal logo, live legal core status indicator with green pulse, "New Inquiry" session reset button, and jurisdiction indicator.
+
+### 7. `CitationsDrawer.tsx`
+- **Role:** Collapsible evidentiary drawer that reveals detailed quoted snippets, document classifications, retrieval timestamps, and direct links to official government gazette records.
+
 ---
 
 ## ⚖️ Legal Disclaimer

@@ -60,6 +60,9 @@ def test_react_app_structure_and_components_exist():
         Path("src/web/src/components/StatutoryBadge.tsx"),
         Path("src/web/src/components/Callout.tsx"),
         Path("src/web/src/components/PipelineStepper.tsx"),
+        Path("src/web/src/components/Topbar.tsx"),
+        Path("src/web/src/components/HeroState.tsx"),
+        Path("src/web/src/components/CitationsDrawer.tsx"),
     ]
     for file_path in required_files:
         assert file_path.exists(), f"Required React file {file_path} must exist"
@@ -67,13 +70,16 @@ def test_react_app_structure_and_components_exist():
 
 def test_app_and_chat_interface_content_and_privacy():
     app_content = Path("src/web/src/App.tsx").read_text(encoding="utf-8")
+    topbar_content = Path("src/web/src/components/Topbar.tsx").read_text(
+        encoding="utf-8"
+    )
     chat_content = Path("src/web/src/components/ChatInterface.tsx").read_text(
         encoding="utf-8"
     )
 
     # Header and Brand
-    assert "IP-SAKTI Sahayak" in app_content
-    assert "India 🇮🇳" in app_content
+    assert "IP-SAKTI Sahayak" in topbar_content
+    assert "India" in topbar_content
 
     # Key chat features
     assert "Ask your Ayurveda IP question" in chat_content
@@ -89,6 +95,8 @@ def test_app_and_chat_interface_content_and_privacy():
     assert "email" not in chat_content.lower()
     assert "phone" not in chat_content.lower()
     assert "full_name" not in chat_content.lower()
+    assert "email" not in topbar_content.lower()
+    assert "phone" not in topbar_content.lower()
 
 
 def test_callout_component_and_styles():
