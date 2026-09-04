@@ -58,6 +58,7 @@ app.add_middleware(
 app.include_router(system_router)
 app.include_router(api_v1_router, dependencies=[Depends(verify_api_key)])
 app.include_router(admin_router)
+app.include_router(admin_router, prefix="/api/v1")
 
 
 @app.exception_handler(StarletteHTTPException)

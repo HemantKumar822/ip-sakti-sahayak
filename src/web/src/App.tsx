@@ -8,6 +8,7 @@ import { TrustInspector } from './components/TrustInspector';
 import { CitationModal } from './components/CitationModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastContainer } from './components/ToastContainer';
+import { CorpusConsole } from './components/CorpusConsole';
 import './App.css';
 
 function getInitialSessionId(): string {
@@ -200,10 +201,7 @@ function App() {
                 onCitationClick={handleCitationClick}
               />
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: '16px', color: 'var(--color-body-mid)' }}>
-                <h2>Corpus Admin Console</h2>
-                <p>Work in progress. Document ingestion and vector index management will be available here.</p>
-              </div>
+              <CorpusConsole />
             )}
           </main>
 

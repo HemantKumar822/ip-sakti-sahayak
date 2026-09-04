@@ -186,6 +186,73 @@ export async function fetchCorpusStats(): Promise<CorpusStats> {
   return response.json();
 }
 
+export interface DocumentBreakdown {
+  doc_id: string;
+  title: string;
+  document_type: string;
+  chunk_count: number;
+  source_url?: string;
+  date_retrieved?: string;
+  version_or_amendment_date?: string;
+}
+
+export interface CorpusStatusResponse {
+  status: string;
+  collection_name: string;
+  total_chunks: number;
+  document_count: number;
+  documents: string[];
+  document_breakdown?: DocumentBreakdown[];
+}
+
+export interface IngestResponse {
+  status: string;
+  doc_id: string;
+  chunks_ingested: number;
+}
+
+export async function fetchCorpusStatus(): Promise<CorpusStatusResponse> {
+  const adminUrl = API_BASE_URL.replace(/\/api\/v1\/?$/, '') + '/admin/corpus/status';
+  try {
+    const response = await fetch(adminUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': API_KEY,
+      },
+    });
+
+    if (!response.ok) {
+      return await handleResponseError(response, 'Failed to retrieve corpus status');
+    }
+
+    return response.json();
+  } catch (err) {
+    return handleNetworkError(err);
+  }
+}
+
+export async function ingestCorpusDocument(formData: FormData): Promise<IngestResponse> {
+  const adminUrl = API_BASE_URL.replace(/\/api\/v1\/?$/, '') + '/admin/corpus/ingest';
+  try {
+    const response = await fetch(adminUrl, {
+      method: 'POST',
+      headers: {
+        'X-API-Key': API_KEY,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      return await handleResponseError(response, 'Failed to ingest document');
+    }
+
+    return response.json();
+  } catch (err) {
+    return handleNetworkError(err);
+  }
+}
+
 export interface SessionSummary {
   session_id: string;
   preview: string | null;

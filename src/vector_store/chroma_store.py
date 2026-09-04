@@ -1,3 +1,5 @@
+import contextlib
+import json
 import logging
 from pathlib import Path
 from typing import Any, cast
@@ -212,26 +214,96 @@ class ChromaStore(VectorStore):
 
         Returns:
             Dictionary containing collection status, name, total chunk count,
-            unique document count, and sorted list of document IDs.
+            unique document count, and sorted list of document IDs and breakdowns.
         """
         total_chunks = self.count()
         documents: list[str] = []
+        document_breakdown: list[dict[str, Any]] = []
+
+        manifest_by_id: dict[str, dict[str, Any]] = {}
+        manifest_path = Path(config.CORPUS_MANIFEST_PATH)
+        if manifest_path.exists():
+            with (
+                contextlib.suppress(Exception),
+                open(manifest_path, encoding="utf-8") as f,
+            ):
+                manifest_data = json.load(f)
+                if isinstance(manifest_data, list):
+                    for item in manifest_data:
+                        if isinstance(item, dict) and item.get("doc_id"):
+                            manifest_by_id[item["doc_id"]] = item
+
+        chunk_counts: dict[str, int] = {}
+        doc_metas: dict[str, dict[str, Any]] = {}
 
         if total_chunks > 0:
             data = self.collection.get(include=["metadatas"])
             metadatas = data.get("metadatas") or []
-            doc_ids = set()
             for meta in metadatas:
                 if meta and meta.get("doc_id"):
-                    doc_ids.add(str(meta["doc_id"]))
-            documents = sorted(doc_ids)
+                    d_id = str(meta["doc_id"])
+                    chunk_counts[d_id] = chunk_counts.get(d_id, 0) + 1
+                    if d_id not in doc_metas:
+                        doc_metas[d_id] = meta
+            documents = sorted(chunk_counts.keys())
+
+            for d_id in documents:
+                live_meta = doc_metas.get(d_id, {})
+                man_meta = manifest_by_id.get(d_id, {})
+                document_breakdown.append(
+                    {
+                        "doc_id": d_id,
+                        "title": man_meta.get("title")
+                        or live_meta.get("title")
+                        or d_id,
+                        "document_type": man_meta.get("document_type")
+                        or live_meta.get("document_type")
+                        or "statute",
+                        "chunk_count": chunk_counts.get(d_id, 0),
+                        "source_url": man_meta.get("source_url")
+                        or live_meta.get("source_url")
+                        or "",
+                        "date_retrieved": man_meta.get("date_retrieved")
+                        or live_meta.get("date_retrieved")
+                        or "",
+                        "version_or_amendment_date": man_meta.get(
+                            "version_or_amendment_date"
+                        )
+                        or live_meta.get("version_or_amendment_date")
+                        or "",
+                    }
+                )
+        elif manifest_by_id:
+            for d_id, man_meta in manifest_by_id.items():
+                if man_meta.get("chunk_count", 0) > 0:
+                    documents.append(d_id)
+                    document_breakdown.append(
+                        {
+                            "doc_id": d_id,
+                            "title": man_meta.get("title", d_id),
+                            "document_type": man_meta.get("document_type", "statute"),
+                            "chunk_count": man_meta.get("chunk_count", 0),
+                            "source_url": man_meta.get("source_url", ""),
+                            "date_retrieved": man_meta.get("date_retrieved", ""),
+                            "version_or_amendment_date": man_meta.get(
+                                "version_or_amendment_date", ""
+                            ),
+                        }
+                    )
+
+        calc_chunks = (
+            total_chunks
+            if total_chunks > 0
+            else sum(d.get("chunk_count", 0) for d in document_breakdown)
+        )
 
         return {
             "status": "healthy",
             "collection_name": self.collection_name,
-            "total_chunks": total_chunks,
+            "total_chunks": calc_chunks,
             "document_count": len(documents),
-            "documents": documents,
+            "documents": sorted(documents),
+            "document_breakdown": document_breakdown,
         }
 
     def reset(self) -> None:
