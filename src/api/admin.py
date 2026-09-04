@@ -2,13 +2,25 @@
 import logging
 from typing import Any
 
-from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    UploadFile,
+    status,
+)
 
 from ingestion.ingest import ingest_single_document
+from src.api.auth import require_admin
 from src.vector_store.chroma_store import ChromaStore
 
 logger = logging.getLogger("ip_sakti.api.admin")
-router = APIRouter(prefix="/admin", tags=["Admin"])
+router = APIRouter(
+    prefix="/admin", tags=["Admin"], dependencies=[Depends(require_admin)]
+)
 
 
 @router.get(

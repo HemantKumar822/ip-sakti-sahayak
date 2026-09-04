@@ -67,6 +67,9 @@ class Config:
     API_KEYS: ClassVar[list[str]] = [
         k.strip() for k in os.getenv("VALID_API_KEYS", "").split(",") if k.strip()
     ]
+    ADMIN_API_KEYS: ClassVar[list[str]] = [
+        k.strip() for k in os.getenv("VALID_ADMIN_API_KEYS", "").split(",") if k.strip()
+    ]
 
     # Jurisdiction routing configuration
     DEFAULT_JURISDICTION: str = os.getenv("DEFAULT_JURISDICTION", "India")
