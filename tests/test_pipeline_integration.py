@@ -363,11 +363,16 @@ def test_consecutive_queries_performance_under_10_seconds():
 
 def test_pipeline_graceful_503_on_missing_or_invalid_key():
     """Validates that an unconfigured or invalid Gemini key returns HTTP 503 from the API."""
-    client = TestClient(app)
+    client = TestClient(app, headers={"X-API-Key": "test-valid-key"})
 
-    with patch(
-        "src.pipeline.orchestrator.PipelineOrchestrator.run_pipeline",
-        side_effect=RuntimeError("Gemini API key error: Invalid or missing API key"),
+    with (
+        patch(
+            "src.pipeline.orchestrator.PipelineOrchestrator.run_pipeline",
+            side_effect=RuntimeError(
+                "Gemini API key error: Invalid or missing API key"
+            ),
+        ),
+        client,
     ):
         response = client.post(
             "/api/v1/query",

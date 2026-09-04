@@ -3,11 +3,14 @@ import uuid
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.api.admin import router as admin_router
-from src.api.routes import router
+from src.api.auth import verify_api_key
+from src.api.routes import api_v1_router, system_router
 from src.config import config
 from src.pipeline.orchestrator import PipelineOrchestrator
 from src.utils.logger import setup_logging
@@ -32,8 +35,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     app.state.pipeline = None
 
 
-from fastapi.middleware.cors import CORSMiddleware
-
 app = FastAPI(
     title="IP-SAKTI Sahayak API",
     description="Backend API for the IP-SAKTI Sahayak RAG system",
@@ -49,8 +50,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router)
+app.include_router(system_router)
+app.include_router(api_v1_router, dependencies=[Depends(verify_api_key)])
 app.include_router(admin_router)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == 401:
+        detail_msg = (
+            exc.detail if isinstance(exc.detail, str) else "Invalid or missing API key."
+        )
+        return JSONResponse(
+            status_code=401,
+            content={
+                "error": True,
+                "type": "unauthorized",
+                "message": detail_msg,
+            },
+            headers=exc.headers,
+        )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=exc.headers,
+    )
 
 
 @app.exception_handler(Exception)
