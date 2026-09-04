@@ -1,5 +1,5 @@
 import io
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
@@ -41,7 +41,7 @@ def test_ingest_corpus_success():
             
             # Assert ingest_single_document was called
             mock_ingest.assert_called_once()
-            args, kwargs = mock_ingest.call_args
+            _args, kwargs = mock_ingest.call_args
             assert kwargs["file_content"] == dummy_pdf_content
             assert kwargs["metadata"]["doc_id"] == "test_doc_01"
             assert kwargs["metadata"]["title"] == "Test Title"
@@ -68,8 +68,7 @@ def test_ingest_corpus_invalid_file_extension():
 
 
 def test_ingest_corpus_zero_chunks():
-    with patch("src.api.admin.ChromaStore"):
-        with patch("src.api.admin.ingest_single_document", return_value=0):
+    with patch("src.api.admin.ChromaStore"), patch("src.api.admin.ingest_single_document", return_value=0):
             dummy_pdf_content = b"%PDF-1.4\n%...\n"
             file = io.BytesIO(dummy_pdf_content)
             
