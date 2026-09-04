@@ -8,16 +8,18 @@ from src.models.response import QueryResponse
 from src.models.session import SessionDetailResponse, SessionTurnResponse
 
 logger = logging.getLogger("ip_sakti.api.routes")
-router = APIRouter()
+
+system_router = APIRouter(tags=["System"])
+api_v1_router = APIRouter(prefix="/api/v1", tags=["Query"])
 
 
-@router.get("/health", summary="Health check", tags=["System"])
+@system_router.get("/health", summary="Health check", tags=["System"])
 async def health_check() -> dict[str, str]:
     """Health check endpoint to verify that the API server is alive."""
     return {"status": "ok", "version": "0.1.0"}
 
 
-@router.get("/ready", summary="Readiness check", tags=["System"])
+@system_router.get("/ready", summary="Readiness check", tags=["System"])
 async def ready_check(request: Request, response: Response) -> dict[str, str]:
     """Readiness check endpoint to verify that the application is fully loaded and connected."""
     is_ready = getattr(request.app.state, "is_ready", False)
@@ -28,8 +30,8 @@ async def ready_check(request: Request, response: Response) -> dict[str, str]:
     return {"status": "ready"}
 
 
-@router.get(
-    "/api/v1/sessions/{session_id}",
+@api_v1_router.get(
+    "/sessions/{session_id}",
     response_model=SessionDetailResponse,
     summary="Retrieve session history",
     tags=["Session"],
@@ -76,8 +78,8 @@ async def get_session_history(
     )
 
 
-@router.post(
-    "/api/v1/query",
+@api_v1_router.post(
+    "/query",
     response_model=QueryResponse,
     summary="Submit IPR query",
     tags=["Query"],
@@ -148,3 +150,8 @@ async def process_query(payload: QueryRequest, request: Request) -> QueryRespons
             status_code=503,
             detail="Service temporarily unavailable",
         ) from exc
+
+
+router = APIRouter()
+router.include_router(system_router)
+router.include_router(api_v1_router)

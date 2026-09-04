@@ -4,8 +4,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
+from src.config import config
 from src.main import app
 from src.pipeline.orchestrator import PipelineOrchestrator
+
+
+@pytest.fixture(autouse=True)
+def setup_test_api_keys(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Configures default valid test API keys for test execution."""
+    monkeypatch.setattr(config, "API_KEYS", ["test-valid-key", "test-secondary-key"])
 
 
 @pytest.fixture
@@ -23,6 +30,7 @@ def client(mock_orchestrator: MagicMock) -> Generator[TestClient, None, None]:
     Startup lifecycle hooks are executed cleanly with PipelineOrchestrator
     patched so no external vector stores or models are initialized during testing.
     SQLiteSessionStore uses an isolated in-memory database.
+    Includes default valid X-API-Key header.
     """
     from src.session.sqlite_store import SQLiteSessionStore
 
@@ -30,7 +38,7 @@ def client(mock_orchestrator: MagicMock) -> Generator[TestClient, None, None]:
     with (
         patch("src.main.PipelineOrchestrator", return_value=mock_orchestrator),
         patch("src.main.SQLiteSessionStore", return_value=in_memory_store),
-        TestClient(app) as test_client,
+        TestClient(app, headers={"X-API-Key": "test-valid-key"}) as test_client,
     ):
         yield test_client
 
