@@ -273,34 +273,11 @@ class ChromaStore(VectorStore):
                         or "",
                     }
                 )
-        elif manifest_by_id:
-            for d_id, man_meta in manifest_by_id.items():
-                if man_meta.get("chunk_count", 0) > 0:
-                    documents.append(d_id)
-                    document_breakdown.append(
-                        {
-                            "doc_id": d_id,
-                            "title": man_meta.get("title", d_id),
-                            "document_type": man_meta.get("document_type", "statute"),
-                            "chunk_count": man_meta.get("chunk_count", 0),
-                            "source_url": man_meta.get("source_url", ""),
-                            "date_retrieved": man_meta.get("date_retrieved", ""),
-                            "version_or_amendment_date": man_meta.get(
-                                "version_or_amendment_date", ""
-                            ),
-                        }
-                    )
-
-        calc_chunks = (
-            total_chunks
-            if total_chunks > 0
-            else sum(d.get("chunk_count", 0) for d in document_breakdown)
-        )
 
         return {
             "status": "healthy",
             "collection_name": self.collection_name,
-            "total_chunks": calc_chunks,
+            "total_chunks": total_chunks,
             "document_count": len(documents),
             "documents": sorted(documents),
             "document_breakdown": document_breakdown,
