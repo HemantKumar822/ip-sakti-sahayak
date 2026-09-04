@@ -115,6 +115,20 @@ class HybridRetriever:
         # 2. Fetch BM25 sparse results
         sparse_results = self.bm25.search(query=query.strip(), top_k=candidate_count)
 
+        # If metadata filter is specified, filter sparse results to maintain consistency
+        if where and sparse_results:
+            filtered_sparse = []
+            for item in sparse_results:
+                meta = item.get("metadata") or {}
+                matches = True
+                for k, v in where.items():
+                    if item.get(k) != v and meta.get(k) != v:
+                        matches = False
+                        break
+                if matches:
+                    filtered_sparse.append(item)
+            sparse_results = filtered_sparse
+
         # If sparse has no results (e.g. not indexed or mock store), return dense
         if not sparse_results:
             return dense_results[:top_k]
