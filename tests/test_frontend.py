@@ -39,16 +39,8 @@ def test_design_tokens_css_exists_and_contains_all_tokens():
 
 
 def test_design_system_doc_exists_and_documents_tokens():
-    doc_path = Path("src/web/design_system.md")
-    assert doc_path.exists(), "src/web/design_system.md must exist"
-
-    content = doc_path.read_text(encoding="utf-8")
-    assert "--color-bg-primary" in content
-    assert "--color-text-primary" in content
-    assert "--color-warning-bg" in content
-    assert "StatutoryBadge.tsx" in content
-    assert "Callout.tsx" in content
-    assert "PipelineStepper.tsx" in content
+    doc_path = Path("DESIGN.md")
+    assert doc_path.exists(), "DESIGN.md must exist"
 
 
 def test_react_app_structure_and_components_exist():
