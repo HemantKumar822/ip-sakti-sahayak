@@ -10,6 +10,7 @@ from src.api.admin import router as admin_router
 from src.api.routes import router
 from src.config import config
 from src.pipeline.orchestrator import PipelineOrchestrator
+from src.session import SQLiteSessionStore
 from src.utils.logger import setup_logging
 
 setup_logging()
@@ -24,11 +25,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     config.validate()
     # Application startup initialization (e.g. embedding model & vector store pre-warming)
     app.state.pipeline = PipelineOrchestrator()
+    app.state.session_store = SQLiteSessionStore()
     app.state.is_ready = True
     yield
     # Application shutdown / resource cleanup
     logger.info("Shutting down IP-SAKTI Sahayak API server...")
     app.state.is_ready = False
+    if getattr(app.state, "session_store", None) is not None:
+        app.state.session_store.close()
+    app.state.session_store = None
     app.state.pipeline = None
 
 

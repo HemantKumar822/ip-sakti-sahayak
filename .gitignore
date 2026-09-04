@@ -16,6 +16,10 @@ node_modules/
 htmlcov/
 .coverage
 coverage.xml
+*.db
+*.sqlite3
+*.db-wal
+*.db-shm
 
 # Tool-specific agent configs (BMAD installation files)
 .agent/
