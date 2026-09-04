@@ -190,7 +190,7 @@ class PipelineOrchestrator:
             # 6. Answer Generation vs Abstention
             if (
                 gate_out.decision == "generate"
-                and category_out.category != "Unclassifiable"
+                and category_out.category != "General Non-Legal"
             ):
                 logger.info(
                     "[CONF-GATE] [%s] Decision: PASSED (score: %.3f >= %.2f threshold)",

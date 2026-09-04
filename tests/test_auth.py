@@ -1,4 +1,5 @@
 import os
+import uuid
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -115,7 +116,7 @@ def test_query_valid_x_api_key_header_returns_200(unauthenticated_client: TestCl
             headers={"X-API-Key": "test-valid-key"},
             json={
                 "query_text": "Is Triphala patentable?",
-                "session_id": "test-session-valid-x-api",
+                "session_id": f"test-session-valid-x-api-{uuid.uuid4().hex[:8]}",
             },
         )
         assert response.status_code == 200
@@ -153,7 +154,7 @@ def test_query_valid_bearer_token_returns_200(unauthenticated_client: TestClient
             headers={"Authorization": "Bearer test-secondary-key"},
             json={
                 "query_text": "Is Triphala patentable?",
-                "session_id": "test-session-valid-bearer",
+                "session_id": f"test-session-valid-bearer-{uuid.uuid4().hex[:8]}",
             },
         )
         assert response.status_code == 200
@@ -190,7 +191,7 @@ def test_query_secondary_valid_key(unauthenticated_client: TestClient):
             headers={"X-API-Key": "test-secondary-key"},
             json={
                 "query_text": "Is Triphala patentable?",
-                "session_id": "test-session-secondary",
+                "session_id": f"test-session-secondary-{uuid.uuid4().hex[:8]}",
             },
         )
         assert response.status_code == 200

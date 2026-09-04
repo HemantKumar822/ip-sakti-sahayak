@@ -65,7 +65,7 @@ def test_classifier_unclassifiable(classifier):
     mock_response = MockGenerateContentResponse(
         json.dumps(
             {
-                "category": "Unclassifiable",
+                "category": "General Non-Legal",
                 "confidence": 0.95,
                 "reason": "Not related to Ayurveda.",
             }
@@ -79,7 +79,7 @@ def test_classifier_unclassifiable(classifier):
         )
         result = classifier.classify(ctx)
         assert isinstance(result, ClassifierOutput)
-        assert result.category == "Unclassifiable"
+        assert result.category == "General Non-Legal"
         assert result.confidence == 0.95
 
 
@@ -94,7 +94,7 @@ def test_classifier_api_failure(classifier):
         )
         result = classifier.classify(ctx)
         assert isinstance(result, ClassifierOutput)
-        assert result.category == "Unclassifiable"
+        assert result.category == "General Non-Legal"
         assert result.confidence == 0.0
         assert "error" in result.reason.lower()
 

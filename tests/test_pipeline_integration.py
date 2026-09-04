@@ -1,6 +1,7 @@
 import asyncio
 import json
 import time
+import uuid
 from pathlib import Path
 from unittest.mock import patch
 
@@ -183,7 +184,8 @@ def test_golden_queries_accuracy_and_hallucination_gate(
         ):
             response = asyncio.run(
                 orchestrator.run_pipeline(
-                    query_text=query_text, session_id=f"test-{query_item['id']}"
+                    query_text=query_text,
+                    session_id=f"test-{query_item['id']}-{uuid.uuid4().hex[:8]}",
                 )
             )
 
@@ -351,7 +353,8 @@ def test_consecutive_queries_performance_under_10_seconds():
             start = time.perf_counter()
             resp = asyncio.run(
                 orchestrator.run_pipeline(
-                    query_text=query, session_id=f"perf-session-{idx}"
+                    query_text=query,
+                    session_id=f"perf-session-{idx}-{uuid.uuid4().hex[:8]}",
                 )
             )
             duration = time.perf_counter() - start
@@ -378,7 +381,7 @@ def test_pipeline_graceful_503_on_missing_or_invalid_key():
             "/api/v1/query",
             json={
                 "query_text": "Can I patent an Ayurvedic herbal extract?",
-                "session_id": "test-error-session",
+                "session_id": f"test-error-session-{uuid.uuid4().hex[:8]}",
             },
         )
         assert response.status_code == 503

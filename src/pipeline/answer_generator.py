@@ -213,11 +213,11 @@ class AnswerGenerator:
             A string containing a context-aware polite refusal, or the static fallback message if the LLM fails.
         """
         refusal_prompt = (
-            "You are the IP-SAKTI Sahayak legal AI assistant.\n"
+            "You are IP-SAKTI Sahayak, an elite Intellectual Property and Traditional Knowledge legal assistant.\n"
             f'The user asked: "{query}"\n\n'
-            "We do not have legal documents in our corpus to answer this. "
-            "Write a brief (1-2 sentences), polite refusal explaining that you can only answer questions related to Ayurveda patents, ABS compliance, and traditional knowledge, and therefore cannot help with this query. "
-            "Do NOT attempt to answer the question itself."
+            "This query is completely outside the scope of Indian Intellectual Property, Ayurveda, or statutory compliance. "
+            "Write a brief (1-2 sentences), polite refusal explaining that as the IP-SAKTI Sahayak, you are specifically designed to assist with IP strategy, patentability, ABS compliance, and traditional knowledge, and therefore cannot answer this question. "
+            "Do NOT attempt to answer the question itself under any circumstances."
         )
 
         try:

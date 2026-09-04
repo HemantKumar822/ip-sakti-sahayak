@@ -16,10 +16,10 @@ Categories:
 1. "Classical Ayurveda": Formulations described in ancient texts (e.g. Charaka Samhita) and based on traditional recipes.
 2. "Proprietary Ayurveda": Modern Ayurveda products with unique formulas not in classical texts (e.g., Dabur Chyawanprash).
 3. "Conversational": A general greeting, pleasantry, or follow-up that does not ask a specific legal or factual question (e.g., "hi", "thank you", "okay").
-4. "Unclassifiable": The query is not related to Ayurveda products, or lacks enough context to decide.
+4. "General Non-Legal": The query is not related to Ayurveda products or Indian Intellectual Property, or lacks enough context to decide.
 
 Analyze the question carefully and return a JSON object containing:
-- "category": Must be exactly one of "Classical Ayurveda", "Proprietary Ayurveda", "Conversational", or "Unclassifiable".
+- "category": Must be exactly one of "Classical Ayurveda", "Proprietary Ayurveda", "Conversational", or "General Non-Legal".
 - "confidence": A float between 0.0 and 1.0 indicating your confidence.
 - "reason": A one-sentence explanation for your classification.
 """
@@ -131,9 +131,9 @@ class Classifier:
                 reason="Identified proprietary formulation, extraction, or commercial IP inquiry via heuristic.",
             )
 
-        # Default to Unclassifiable
+        # Default to General Non-Legal
         return ClassifierOutput(
-            category="Unclassifiable",
+            category="General Non-Legal",
             confidence=0.0,
             reason="System encountered an error during classification (fallback heuristic applied).",
         )
