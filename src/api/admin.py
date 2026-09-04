@@ -1,3 +1,4 @@
+# ruff: noqa: B008, BLE001
 from typing import Any
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
@@ -33,7 +34,7 @@ async def ingest_corpus(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to read uploaded file: {str(e)}",
+            detail=f"Failed to read uploaded file: {e!s}",
         )
 
     if not content:
@@ -62,7 +63,7 @@ async def ingest_corpus(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Ingestion failed: {str(e)}",
+            detail=f"Ingestion failed: {e!s}",
         )
 
     if chunks_ingested == 0:
