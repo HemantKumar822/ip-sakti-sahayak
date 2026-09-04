@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 
@@ -14,13 +14,13 @@ router = APIRouter(prefix="/admin", tags=["Admin"])
     description="Upload a PDF document to be parsed, chunked, and upserted into the ChromaDB vector store.",
 )
 async def ingest_corpus(
-    file: UploadFile = File(...),
-    doc_id: str = Form(...),
-    title: str = Form(None),
-    document_type: str = Form("statute"),
-    source_url: str = Form(""),
-    date_retrieved: str = Form(""),
-    version_or_amendment_date: str = Form(""),
+    file: Annotated[UploadFile, File(...)],
+    doc_id: Annotated[str, Form(...)],
+    title: Annotated[str | None, Form(None)] = None,
+    document_type: Annotated[str, Form()] = "statute",
+    source_url: Annotated[str, Form()] = "",
+    date_retrieved: Annotated[str, Form()] = "",
+    version_or_amendment_date: Annotated[str, Form()] = "",
 ) -> dict[str, Any]:
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(
@@ -30,10 +30,10 @@ async def ingest_corpus(
 
     try:
         content = await file.read()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to read uploaded file: {str(e)}",
+            detail=f"Failed to read uploaded file: {e!s}",
         )
 
     if not content:
@@ -59,10 +59,10 @@ async def ingest_corpus(
             metadata=metadata,
             vector_store=store,
         )
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Ingestion failed: {str(e)}",
+            detail=f"Ingestion failed: {e!s}",
         )
 
     if chunks_ingested == 0:
