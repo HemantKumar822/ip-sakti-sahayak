@@ -19,6 +19,8 @@ interface ChatInterfaceProps {
   setLastResponse: React.Dispatch<React.SetStateAction<QueryResponse | null>>;
   currentQuery: string;
   setCurrentQuery: React.Dispatch<React.SetStateAction<string>>;
+  sessionId: string;
+  onReset?: () => void;
   onCitationClick?: (citation: Citation, index: number) => void;
 }
 
@@ -28,12 +30,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   setLastResponse,
   currentQuery,
   setCurrentQuery,
+  sessionId,
+  onReset,
   onCitationClick,
 }) => {
   const [loading, setLoading] = useState(false);
 
-  // Client-side anonymous session identifier (DPDP Act 2023 compliance)
-  const sessionId = useMemo(() => crypto.randomUUID(), []);
+  const userTurnCount = useMemo(
+    () => messages.filter((m) => m.role === 'user').length,
+    [messages]
+  );
+  const isTurnLimitReached = userTurnCount >= 6;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -173,6 +180,24 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               </div>
             )}
             
+            {/* Turn limit warning banner if 6 turns completed */}
+            {isTurnLimitReached && (
+              <div className="session-limit-callout animate-fade-in" role="alert">
+                <div className="limit-callout-header">
+                  <span className="limit-callout-icon">⏱️</span>
+                  <strong>Session Turn Limit Reached (6 of 6 turns)</strong>
+                </div>
+                <p className="limit-callout-body">
+                  To prevent legal context drift and maintain high citation accuracy, each session is limited to 6 interactive turns. Please start a new research note for subsequent inquiries.
+                </p>
+                {onReset && (
+                  <button className="limit-reset-btn" onClick={onReset} type="button">
+                    Start Fresh Session
+                  </button>
+                )}
+              </div>
+            )}
+
             {/* Invisible div to auto-scroll to bottom */}
             <div ref={messagesEndRef} />
           </div>
@@ -181,9 +206,20 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
       {/* Notion Command Prompt Bar docked at bottom */}
       <div className="prompt-bar-docked">
+        <div className="prompt-meta-row">
+          <span className="turn-counter-badge" title="Maximum 6 conversation turns per legal research session">
+            Turn {userTurnCount} / 6
+          </span>
+          {isTurnLimitReached && (
+            <span className="turn-limit-warning-text">
+              Limit reached. Click &quot;Start Fresh Session&quot; to begin a new session.
+            </span>
+          )}
+        </div>
         <PromptBar
           onSubmitQuery={handleSendText}
           loading={loading}
+          disabled={isTurnLimitReached}
         />
       </div>
     </div>

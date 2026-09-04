@@ -159,3 +159,104 @@ def test_readiness_probe_unstarted(unstarted_client: TestClient) -> None:
     res_unready = unstarted_client.get("/ready")
     assert res_unready.status_code == 503
     assert res_unready.json() == {"status": "not_ready"}
+
+
+def test_get_session_endpoint_success_and_not_found(client: TestClient) -> None:
+    session_id = "sess-api-test-01"
+    # 404 before any turns exist
+    res_404 = client.get(f"/api/v1/sessions/{session_id}")
+    assert res_404.status_code == 404
+    assert f"Session '{session_id}' not found." in res_404.json()["detail"]
+
+    # Save turn via store directly
+    store = client.app.state.session_store
+    store.save_turn(session_id, "user", "What is ABS?")
+    store.save_turn(
+        session_id,
+        "assistant",
+        "ABS stands for Access and Benefit Sharing.",
+        citations=[{"doc_id": "bda-2002", "section": "Section 6"}],
+    )
+
+    res_200 = client.get(f"/api/v1/sessions/{session_id}")
+    assert res_200.status_code == 200
+    data = res_200.json()
+    assert data["session_id"] == session_id
+    assert data["total_turns"] == 2
+    assert len(data["turns"]) == 2
+    assert data["turns"][0]["role"] == "user"
+    assert data["turns"][0]["content"] == "What is ABS?"
+    assert data["turns"][1]["role"] == "assistant"
+    assert data["turns"][1]["citations"][0]["doc_id"] == "bda-2002"
+
+
+def test_query_persists_turns_and_enforces_6_turn_limit(client: TestClient) -> None:
+    session_id = "sess-limit-test-01"
+    mock_response = QueryResponse(
+        status="answered",
+        category="Classical Ayurveda",
+        jurisdiction="India",
+        answer="Under Section 3(p), classical formulations cannot be patented.",
+        citations=[],
+        abs_flag=False,
+        abs_detail=None,
+        confidence_score=0.9,
+        abstention_message=None,
+        disclaimer=config.DISCLAIMER_TEXT,
+        response_time_ms=100,
+    )
+
+    with patch.object(
+        client.app.state.pipeline,
+        "run_pipeline",
+        new_callable=AsyncMock,
+        return_value=mock_response,
+    ):
+        # Submit 6 queries - all should succeed
+        for i in range(6):
+            payload = {
+                "query_text": f"Question turn {i + 1}",
+                "session_id": session_id,
+            }
+            res = client.post("/api/v1/query", json=payload)
+            assert res.status_code == 200
+
+        # Verify 12 total turns (6 user + 6 assistant) persisted
+        store = client.app.state.session_store
+        assert store.count_turns(session_id, role="user") == 6
+        assert store.count_turns(session_id, role="assistant") == 6
+        assert store.count_turns(session_id) == 12
+
+        # 7th query must be rejected with 400
+        payload_7 = {
+            "query_text": "Question turn 7 (exceeds limit)",
+            "session_id": session_id,
+        }
+        res_7 = client.post("/api/v1/query", json=payload_7)
+        assert res_7.status_code == 400
+        assert (
+            "Session turn limit (6) reached. Please start a new session."
+            in res_7.json()["detail"]
+        )
+
+
+def test_query_request_validation_length_constraints(client: TestClient) -> None:
+    # Query text exceeding 4000 characters
+    long_query = "A" * 4001
+    res_long = client.post(
+        "/api/v1/query",
+        json={"query_text": long_query, "session_id": "test-valid-len"},
+    )
+    assert res_long.status_code == 422
+
+    # Conversation history exceeding 6 items
+    too_many_turns = [{"role": "user", "content": f"msg {i}"} for i in range(7)]
+    res_history = client.post(
+        "/api/v1/query",
+        json={
+            "query_text": "Valid query",
+            "session_id": "test-valid-len",
+            "conversation_history": too_many_turns,
+        },
+    )
+    assert res_history.status_code == 422

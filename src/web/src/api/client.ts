@@ -74,3 +74,37 @@ export async function submitQuery(request: QueryRequest): Promise<QueryResponse>
 
   return response.json();
 }
+
+export interface SessionTurn {
+  id: number;
+  role: 'user' | 'assistant';
+  content: string;
+  citations?: Citation[] | null;
+  response_metadata?: QueryResponse | null;
+  created_at?: string;
+}
+
+export interface SessionDetail {
+  session_id: string;
+  turns: SessionTurn[];
+  total_turns: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export async function fetchSession(sessionId: string): Promise<SessionDetail> {
+  const response = await fetch(`${API_BASE_URL}/sessions/${encodeURIComponent(sessionId)}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to retrieve session');
+  }
+
+  return response.json();
+}
+
