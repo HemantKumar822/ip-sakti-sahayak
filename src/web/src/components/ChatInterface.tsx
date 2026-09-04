@@ -123,12 +123,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         Contract anchors: Preserving Callout, StatutoryBadge, and PipelineStepper
         so component tree remains fully typed and tested.
       */}
-      <div style={{ display: 'none' }}>
-        <Callout type="abs" title="ABS">ABS Clearance</Callout>
-        <StatutoryBadge citation={{ doc_id: 'patents-act-1970' }} />
-        <PipelineStepper category="Classical Ayurveda" jurisdiction="India" />
-        <span>Ask your Ayurveda IP question session_id={sessionId}</span>
-      </div>
+
 
       <div className="workbench-canvas-content">
         {messages.length === 0 && !loading ? (
