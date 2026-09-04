@@ -117,3 +117,32 @@ export async function fetchSession(sessionId: string): Promise<SessionDetail> {
   return response.json();
 }
 
+export interface SessionSummary {
+  session_id: string;
+  preview: string | null;
+  total_turns: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export async function fetchSessions(limit: number = 50): Promise<SessionSummary[]> {
+  const response = await fetch(`${API_BASE_URL}/sessions?limit=${limit}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': API_KEY,
+    },
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      throw new Error('API Key Required / Unauthorized: Please check your configuration.');
+    }
+    throw new Error(err.message || err.detail || 'Failed to retrieve sessions');
+  }
+
+  return response.json();
+}
+
+

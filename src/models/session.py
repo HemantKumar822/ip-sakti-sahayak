@@ -45,3 +45,25 @@ class SessionDetailResponse(BaseModel):
         default=None,
         description="Timestamp of most recent activity in session",
     )
+
+
+class SessionSummaryResponse(BaseModel):
+    """Summary of a stored session for history navigation."""
+
+    session_id: str = Field(..., description="Unique anonymous session identifier")
+    preview: str | None = Field(
+        default=None,
+        description="Text preview snippet of the first user inquiry",
+    )
+    total_turns: int = Field(
+        ...,
+        description="Total number of conversation turns recorded in the session",
+    )
+    created_at: str | None = Field(
+        default=None,
+        description="Timestamp when session was created",
+    )
+    updated_at: str | None = Field(
+        default=None,
+        description="Timestamp of most recent activity in session",
+    )

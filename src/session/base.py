@@ -78,5 +78,16 @@ class AbstractSessionStore(ABC):
         """
 
     @abstractmethod
+    def list_sessions(self, limit: int = 50) -> list[dict[str, Any]]:
+        """Retrieves list of recent sessions with preview and turn count.
+
+        Args:
+            limit: Maximum number of recent sessions to retrieve.
+
+        Returns:
+            List of session summary dicts sorted by updated_at descending.
+        """
+
+    @abstractmethod
     def close(self) -> None:
         """Closes any underlying database connections or pools."""
