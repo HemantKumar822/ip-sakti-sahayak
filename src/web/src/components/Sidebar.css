@@ -116,8 +116,178 @@
 }
 
 /* --------------------------------------------------------------------------
+   Active Session Archive Section
+   -------------------------------------------------------------------------- */
+.sidebar-archive-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+  margin-top: 4px;
+}
+
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-mono-eyebrow, 0.05em);
+  text-transform: uppercase;
+  color: var(--color-body-mid);
+  font-size: 0.7rem;
+}
+
+.section-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-header-icon {
+  color: var(--color-body-mid);
+}
+
+.section-header-title {
+  font-weight: 500;
+}
+
+.session-count-badge {
+  background: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  color: var(--color-body-mid);
+  border-radius: var(--radius-pill);
+  padding: 1px 7px;
+  font-size: 0.65rem;
+}
+
+.session-list-scrollable {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding-right: 2px;
+  flex: 1;
+  min-height: 0;
+}
+
+.session-list-scrollable::-webkit-scrollbar {
+  width: 4px;
+}
+
+.session-list-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.session-list-scrollable::-webkit-scrollbar-thumb {
+  background: var(--color-hairline);
+  border-radius: var(--radius-pill);
+}
+
+.session-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 24px 12px;
+  text-align: center;
+  color: var(--color-body-mid);
+  border: 1px dashed var(--color-hairline);
+  border-radius: var(--radius-card);
+  margin-top: 8px;
+}
+
+.empty-icon {
+  color: var(--color-body-mid);
+  opacity: 0.6;
+}
+
+.empty-sub {
+  font-size: 0.68rem;
+  color: var(--color-body-mid);
+  opacity: 0.75;
+}
+
+.session-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background-color: var(--color-canvas-card);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.session-card:hover {
+  background-color: var(--color-card-hover);
+  border-color: var(--color-hairline-strong);
+}
+
+.session-card:focus-visible {
+  outline: 1px solid var(--color-ink);
+  outline-offset: 1px;
+}
+
+.session-card.active {
+  background-color: var(--color-card-hover);
+  border-color: var(--color-accent, #ff7a17);
+}
+
+.session-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+}
+
+.session-turn-pill {
+  color: var(--color-body-mid);
+  background: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  font-size: 0.62rem;
+}
+
+.session-card.active .session-turn-pill {
+  color: var(--color-ink);
+  border-color: rgba(255, 122, 23, 0.4);
+}
+
+.session-time-text {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-body-mid);
+  font-size: 0.65rem;
+}
+
+.session-preview-snippet {
+  font-size: 0.78rem;
+  color: var(--color-body);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+
+.session-card.active .session-preview-snippet {
+  color: var(--color-ink);
+}
+
+/* --------------------------------------------------------------------------
    Sidebar Footer & Compliance
    -------------------------------------------------------------------------- */
+
 .sidebar-footer {
   margin-top: auto;
   padding-top: 12px;

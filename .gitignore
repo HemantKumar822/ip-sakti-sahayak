@@ -2,11 +2,14 @@
 corpus/embeddings/
 corpus/raw/
 __pycache__/
-*.pyc
-*.pyo
+**/__pycache__/
+*.py[cod]
+*$py.class
 .DS_Store
 *.egg-info/
 dist/
+**/dist/
+src/web/dist/
 build/
 .venv/
 venv/
@@ -15,11 +18,13 @@ node_modules/
 .mypy_cache/
 htmlcov/
 .coverage
+.coverage.*
 coverage.xml
 *.db
 *.sqlite3
 *.db-wal
 *.db-shm
+
 
 # Tool-specific agent configs (BMAD installation files)
 .agent/

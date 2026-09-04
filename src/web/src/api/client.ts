@@ -1,4 +1,6 @@
 // src/api/client.ts
+import { toast } from '../utils/toast';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://127.0.0.1:8000/api/v1' : '/api/v1');
 const API_KEY = import.meta.env.VITE_API_KEY || '';
 
@@ -54,30 +56,76 @@ function scrubPII(text: string): string {
   return scrubbed;
 }
 
+async function handleResponseError(response: Response, defaultMessage: string): Promise<never> {
+  const err = await response.json().catch(() => ({}));
+  const detail = err.message || err.detail;
+
+  if (response.status === 429) {
+    toast.warning(
+      'Rate Limit Reached (429)',
+      detail || 'Gemini API quota exceeded. Please pause a moment before submitting another inquiry.'
+    );
+    throw new Error(detail || 'Gemini API Rate Limit reached (429). Please pause before retrying.');
+  }
+
+  if (response.status === 503) {
+    toast.error(
+      'Service Unavailable (503)',
+      detail || 'Backend reasoning service is currently experiencing downtime or high load.'
+    );
+    throw new Error(detail || 'Service temporarily unavailable (503).');
+  }
+
+  if (response.status === 401) {
+    toast.error(
+      'Authentication Required (401)',
+      'API Key Required / Unauthorized: Please check your configuration in .env.'
+    );
+    throw new Error('API Key Required / Unauthorized: Please check your configuration.');
+  }
+
+  const message = detail || defaultMessage;
+  throw new Error(message);
+}
+
+function handleNetworkError(error: unknown): never {
+  const isNetworkFailure =
+    (typeof navigator !== 'undefined' && !navigator.onLine) ||
+    (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('Network') || error.message.includes('failed')));
+
+  if (isNetworkFailure) {
+    toast.error(
+      'Network Disconnection',
+      'Unable to connect to the backend server. Please check your network connection.'
+    );
+  }
+  throw error;
+}
+
 export async function submitQuery(request: QueryRequest): Promise<QueryResponse> {
   const safeRequest = {
     ...request,
     query_text: scrubPII(request.query_text),
   };
 
-  const response = await fetch(`${API_BASE_URL}/query`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': API_KEY,
-    },
-    body: JSON.stringify(safeRequest),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/query`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': API_KEY,
+      },
+      body: JSON.stringify(safeRequest),
+    });
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    if (response.status === 401) {
-      throw new Error('API Key Required / Unauthorized: Please check your configuration.');
+    if (!response.ok) {
+      return await handleResponseError(response, 'Service temporarily unavailable');
     }
-    throw new Error(err.message || err.detail || 'Service temporarily unavailable');
-  }
 
-  return response.json();
+    return response.json();
+  } catch (err) {
+    return handleNetworkError(err);
+  }
 }
 
 export interface SessionTurn {
@@ -98,23 +146,23 @@ export interface SessionDetail {
 }
 
 export async function fetchSession(sessionId: string): Promise<SessionDetail> {
-  const response = await fetch(`${API_BASE_URL}/sessions/${encodeURIComponent(sessionId)}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': API_KEY,
-    },
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/sessions/${encodeURIComponent(sessionId)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': API_KEY,
+      },
+    });
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    if (response.status === 401) {
-      throw new Error('API Key Required / Unauthorized: Please check your configuration.');
+    if (!response.ok) {
+      return await handleResponseError(response, 'Failed to retrieve session');
     }
-    throw new Error(err.message || err.detail || 'Failed to retrieve session');
-  }
 
-  return response.json();
+    return response.json();
+  } catch (err) {
+    return handleNetworkError(err);
+  }
 }
 
 export interface CorpusStats {
@@ -138,3 +186,30 @@ export async function fetchCorpusStats(): Promise<CorpusStats> {
   return response.json();
 }
 
+export interface SessionSummary {
+  session_id: string;
+  preview: string | null;
+  total_turns: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export async function fetchSessions(limit: number = 50): Promise<SessionSummary[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/sessions?limit=${limit}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': API_KEY,
+      },
+    });
+
+    if (!response.ok) {
+      return await handleResponseError(response, 'Failed to retrieve sessions');
+    }
+
+    return response.json();
+  } catch (err) {
+    return handleNetworkError(err);
+  }
+}

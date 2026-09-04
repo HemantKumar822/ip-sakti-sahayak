@@ -5,6 +5,7 @@ DPDP Act 2023 privacy-by-design compliance, API client integration, and formatti
 """
 
 import re
+import subprocess
 from pathlib import Path
 
 
@@ -120,6 +121,9 @@ def test_react_app_structure_and_components_exist():
         Path("src/web/src/components/AbstentionCard.tsx"),
         Path("src/web/src/components/PromptBar.tsx"),
         Path("src/web/src/components/CitationsDrawer.tsx"),
+        Path("src/web/src/components/ErrorBoundary.tsx"),
+        Path("src/web/src/components/ToastContainer.tsx"),
+        Path("src/web/src/utils/toast.ts"),
     ]
     for file_path in required_files:
         assert file_path.exists(), f"Required React file {file_path} must exist"
@@ -334,3 +338,126 @@ def test_api_client_contract():
     assert "/query" in client_content
     assert "QueryResponse" in client_content
     assert "QueryRequest" in client_content
+
+
+def test_error_boundary_component_and_reset_contract():
+    """Verify ErrorBoundary component, x.ai styling, and Reset Workspace fallback action."""
+    eb_tsx = Path("src/web/src/components/ErrorBoundary.tsx")
+    eb_css = Path("src/web/src/components/ErrorBoundary.css")
+    app_tsx = Path("src/web/src/App.tsx")
+
+    assert eb_tsx.exists(), "ErrorBoundary.tsx must exist"
+    assert eb_css.exists(), "ErrorBoundary.css must exist"
+
+    tsx_content = eb_tsx.read_text(encoding="utf-8")
+    css_content = eb_css.read_text(encoding="utf-8")
+    app_content = app_tsx.read_text(encoding="utf-8")
+
+    # Contract checks
+    assert "class ErrorBoundary" in tsx_content
+    assert "getDerivedStateFromError" in tsx_content
+    assert "componentDidCatch" in tsx_content
+    assert "Reset Workspace" in tsx_content
+    assert "Reload Page" in tsx_content
+    assert "SYSTEM FAULT // RECOVERY WORKBENCH" in tsx_content
+    assert 'role="alert"' in tsx_content
+
+    # Wrapped in App.tsx
+    assert "ErrorBoundary" in app_content
+    assert "<ErrorBoundary" in app_content
+    assert "</ErrorBoundary>" in app_content
+
+    # x.ai Design Tokens
+    assert "--color-canvas" in css_content
+    assert "--color-card" in css_content
+    assert "--color-hairline" in css_content
+    assert "--radius-pill" in css_content
+    assert "box-shadow: none" in css_content
+
+
+def test_toast_system_and_interceptors():
+    """Verify ToastContainer, toast dispatcher, and API client 429/503/network error interception."""
+    toast_tsx = Path("src/web/src/components/ToastContainer.tsx")
+    toast_css = Path("src/web/src/components/Toast.css")
+    toast_ts = Path("src/web/src/utils/toast.ts")
+    client_ts = Path("src/web/src/api/client.ts")
+    app_tsx = Path("src/web/src/App.tsx")
+
+    assert toast_tsx.exists(), "ToastContainer.tsx must exist"
+    assert toast_css.exists(), "Toast.css must exist"
+    assert toast_ts.exists(), "toast.ts must exist"
+
+    tsx_content = toast_tsx.read_text(encoding="utf-8")
+    css_content = toast_css.read_text(encoding="utf-8")
+    util_content = toast_ts.read_text(encoding="utf-8")
+    client_content = client_ts.read_text(encoding="utf-8")
+    app_content = app_tsx.read_text(encoding="utf-8")
+
+    # Toast Container semantics and network status listeners
+    assert "ToastContainer" in tsx_content
+    assert 'role="region"' in tsx_content
+    assert 'aria-live="polite"' in tsx_content
+    assert "window.addEventListener('offline'" in tsx_content
+    assert "window.addEventListener('online'" in tsx_content
+    assert "ToastContainer" in app_content
+    assert "<ToastContainer />" in app_content
+
+    # Toast dispatcher methods
+    assert "export const toast" in util_content
+    assert "warning:" in util_content
+    assert "error:" in util_content
+    assert "info:" in util_content
+    assert "ip-sakti-toast" in util_content
+
+    # API Client interception for 429, 503, and network errors
+    assert "response.status === 429" in client_content
+    assert "response.status === 503" in client_content
+    assert "toast.warning" in client_content
+    assert "toast.error" in client_content
+    assert (
+        "Network Disconnection" in client_content
+        or "isNetworkFailure" in client_content
+    )
+
+    # x.ai CSS Tokens
+    assert "--color-card" in css_content
+    assert "--color-hairline" in css_content
+    assert "box-shadow: none" in css_content
+
+
+def test_gitignore_hygiene_and_no_tracked_cache_artifacts():
+    """Verify repository hygiene in .gitignore and confirm no cached or build files are tracked."""
+    gitignore_path = Path(".gitignore")
+    assert gitignore_path.exists(), ".gitignore must exist"
+    gitignore_content = gitignore_path.read_text(encoding="utf-8")
+
+    # Explicit entries required by Story 18.3
+    required_ignores = [
+        ".coverage",
+        "coverage.xml",
+        "htmlcov/",
+        "src/web/dist/",
+        "**/dist/",
+        "__pycache__/",
+    ]
+    for pattern in required_ignores:
+        assert pattern in gitignore_content, f"Expected {pattern} in .gitignore"
+
+    # Verify no tracked cache or build files in git
+    res = subprocess.run(
+        ["git", "ls-files"], capture_output=True, text=True, check=True
+    )
+    tracked_files = res.stdout.splitlines()
+    forbidden_patterns = [
+        re.compile(r"(^|/)\.coverage(\..*)?$"),
+        re.compile(r"(^|/)coverage\.xml$"),
+        re.compile(r"(^|/)htmlcov(/|$)"),
+        re.compile(r"(^|/)src/web/dist(/|$)"),
+        re.compile(r"(^|/)__pycache__(/|$)"),
+        re.compile(r"\.py[cod]$"),
+    ]
+    for f in tracked_files:
+        for pat in forbidden_patterns:
+            assert not pat.search(
+                f
+            ), f"Found forbidden tracked artifact in git index: {f}"

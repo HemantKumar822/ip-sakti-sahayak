@@ -6,6 +6,8 @@ import { Topbar } from './components/Topbar';
 import { ChatInterface } from './components/ChatInterface';
 import { TrustInspector } from './components/TrustInspector';
 import { CitationModal } from './components/CitationModal';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { ToastContainer } from './components/ToastContainer';
 import './App.css';
 
 function getInitialSessionId(): string {
@@ -66,7 +68,8 @@ function App() {
     async function hydrate() {
       try {
         const session = await fetchSession(sessionId);
-        if (!isCancelled && session && session.turns && session.turns.length > 0) {
+        if (isCancelled) return;
+        if (session && session.turns && session.turns.length > 0) {
           const restored: Message[] = session.turns.map((t) => ({
             role: t.role,
             content: t.content,
@@ -89,18 +92,30 @@ function App() {
           const lastAssist = [...restored].reverse().find((m) => m.role === 'assistant');
           if (lastAssist?.responseMetadata) {
             setLastResponse(lastAssist.responseMetadata);
+          } else {
+            setLastResponse(null);
           }
 
           const lastUser = [...restored].reverse().find((m) => m.role === 'user');
           if (lastUser) {
             setCurrentQuery(lastUser.content);
+          } else {
+            setCurrentQuery('');
           }
+        } else {
+          setMessages([]);
+          setLastResponse(null);
+          setCurrentQuery('');
         }
       } catch (err: any) {
         if (err.message && err.message.includes('API Key Required')) {
           setAuthError(true);
         }
-        // Session not found or fresh session; leave empty
+        if (!isCancelled) {
+          setMessages([]);
+          setLastResponse(null);
+          setCurrentQuery('');
+        }
       }
     }
 
@@ -134,81 +149,87 @@ function App() {
   }, []);
 
   return (
-    <div className="workbench-root">
-      {authError && (
-        <div className="auth-error-banner animate-fade-in" role="alert" style={{
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, 
-          backgroundColor: '#ef4444', color: 'white', padding: '1rem', textAlign: 'center', fontWeight: 'bold'
-        }}>
-          API Key Required / Unauthorized: Please check your configuration in .env (VITE_API_KEY).
-        </div>
-      )}
-      
-      {/* Notion Topbar with Breadcrumbs and Inspector Toggle */}
-      <Topbar 
-        onReset={handleReset} 
-        hasMessages={messages.length > 0} 
-        onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
-        onToggleInspector={() => setIsInspectorOpen(prev => !prev)}
-        isInspectorOpen={isInspectorOpen}
-        activeCategory={lastResponse?.category}
-        activeView={activeView}
-        onViewChange={setActiveView}
-      />
+    <ErrorBoundary onReset={handleReset}>
+      <div className="workbench-root">
+        <ToastContainer />
+        {authError && (
+          <div className="auth-error-banner animate-fade-in" role="alert" style={{
+            position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, 
+            backgroundColor: '#ef4444', color: 'white', padding: '1rem', textAlign: 'center', fontWeight: 'bold'
+          }}>
+            API Key Required / Unauthorized: Please check your configuration in .env (VITE_API_KEY).
+          </div>
+        )}
+        
+        {/* Notion Topbar with Breadcrumbs and Inspector Toggle */}
+        <Topbar 
+          onReset={handleReset} 
+          hasMessages={messages.length > 0} 
+          onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+          onToggleInspector={() => setIsInspectorOpen(prev => !prev)}
+          isInspectorOpen={isInspectorOpen}
+          activeCategory={lastResponse?.category}
+          activeView={activeView}
+          onViewChange={setActiveView}
+        />
 
-      <div className="workbench-layout">
-        {/* Left Column: Navigation */}
-        <div className={`workbench-sidebar ${isSidebarOpen ? '' : 'collapsed'}`}>
-          <Sidebar
-            onNewNote={handleReset}
-          />
-        </div>
-
-        {/* Center Column: Active View */}
-        <main className="workbench-center">
-          {activeView === 'workbench' ? (
-            <ChatInterface 
-              messages={messages} 
-              setMessages={setMessages}
-              lastResponse={lastResponse}
-              setLastResponse={setLastResponse}
-              currentQuery={currentQuery}
-              setCurrentQuery={setCurrentQuery}
-              sessionId={sessionId}
-              onReset={handleReset}
-              onAuthError={() => setAuthError(true)}
-              onCitationClick={handleCitationClick}
+        <div className="workbench-layout">
+          {/* Left Column: Navigation */}
+          <div className={`workbench-sidebar ${isSidebarOpen ? '' : 'collapsed'}`}>
+            <Sidebar
+              onNewNote={handleReset}
+              activeSessionId={sessionId}
+              onSelectSession={setSessionId}
+              refreshTrigger={messages.length}
             />
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: '16px', color: 'var(--color-body-mid)' }}>
-              <h2>Corpus Admin Console</h2>
-              <p>Work in progress. Document ingestion and vector index management will be available here.</p>
-            </div>
-          )}
-        </main>
+          </div>
 
-        {/* Right Column: Trust & Telemetry Inspector ("Why This Answer?") */}
-        <div className={`workbench-inspector ${isInspectorOpen && activeView === 'workbench' ? '' : 'hidden'}`}>
-          <TrustInspector
-            query={currentQuery}
-            response={lastResponse}
-            onClose={() => setIsInspectorOpen(false)}
-          />
+          {/* Center Column: Active View */}
+          <main className="workbench-center">
+            {activeView === 'workbench' ? (
+              <ChatInterface 
+                messages={messages} 
+                setMessages={setMessages}
+                lastResponse={lastResponse}
+                setLastResponse={setLastResponse}
+                currentQuery={currentQuery}
+                setCurrentQuery={setCurrentQuery}
+                sessionId={sessionId}
+                onReset={handleReset}
+                onAuthError={() => setAuthError(true)}
+                onCitationClick={handleCitationClick}
+              />
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: '16px', color: 'var(--color-body-mid)' }}>
+                <h2>Corpus Admin Console</h2>
+                <p>Work in progress. Document ingestion and vector index management will be available here.</p>
+              </div>
+            )}
+          </main>
+
+          {/* Right Column: Trust & Telemetry Inspector ("Why This Answer?") */}
+          <div className={`workbench-inspector ${isInspectorOpen && activeView === 'workbench' ? '' : 'hidden'}`}>
+            <TrustInspector
+              query={currentQuery}
+              response={lastResponse}
+              onClose={() => setIsInspectorOpen(false)}
+            />
+          </div>
         </div>
+
+        {/* Statutory Legal Disclaimer */}
+        <footer className="workbench-footer-disclaimer">
+          This information is provided for general awareness and does not constitute legal advice. Consult a qualified IP attorney for decisions specific to your situation.
+        </footer>
+
+        {/* Overlays */}
+        <CitationModal 
+          citation={selectedCitation}
+          isOpen={isCitationModalOpen}
+          onClose={() => setIsCitationModalOpen(false)}
+        />
       </div>
-
-      {/* Statutory Legal Disclaimer */}
-      <footer className="workbench-footer-disclaimer">
-        This information is provided for general awareness and does not constitute legal advice. Consult a qualified IP attorney for decisions specific to your situation.
-      </footer>
-
-      {/* Overlays */}
-      <CitationModal 
-        citation={selectedCitation}
-        isOpen={isCitationModalOpen}
-        onClose={() => setIsCitationModalOpen(false)}
-      />
-    </div>
+    </ErrorBoundary>
   );
 }
 
