@@ -69,3 +69,25 @@ async def verify_api_key(
         )
 
     return key
+
+
+async def require_admin(
+    request: Request,
+    api_key: str = Security(verify_api_key)
+) -> str:
+    """FastAPI security dependency to verify Admin privileges.
+
+    Checks the already validated API key against the ADMIN_API_KEYS configured list.
+    """
+    if not is_valid_api_key(api_key, config.ADMIN_API_KEYS):
+        client_host = request.client.host if request.client else "unknown"
+        logger.warning(
+            "Forbidden admin access to '%s' from %s",
+            request.url.path,
+            client_host,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required for this resource.",
+        )
+    return api_key

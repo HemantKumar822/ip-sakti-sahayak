@@ -22,6 +22,7 @@ interface ChatInterfaceProps {
   sessionId: string;
   onReset?: () => void;
   onCitationClick?: (citation: Citation, index: number) => void;
+  onAuthError?: () => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -33,6 +34,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   sessionId,
   onReset,
   onCitationClick,
+  onAuthError,
 }) => {
   const [loading, setLoading] = useState(false);
 
@@ -81,6 +83,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         },
       ]);
     } catch (error: any) {
+      if (error.message && error.message.includes('API Key Required')) {
+        if (onAuthError) {
+          onAuthError();
+        }
+        setLoading(false);
+        return;
+      }
       const errorMsg = error.message || 'Service temporarily unavailable';
       const fallbackResponse: QueryResponse = {
         status: 'abstained',

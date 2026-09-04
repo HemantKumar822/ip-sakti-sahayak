@@ -4,7 +4,9 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from src.main import app
+from src.api.auth import require_admin
 
+app.dependency_overrides[require_admin] = lambda: "test_admin_key"
 client = TestClient(app)
 
 

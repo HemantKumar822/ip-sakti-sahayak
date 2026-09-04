@@ -22,7 +22,7 @@ def test_query_missing_api_key_returns_401(unauthenticated_client: TestClient):
         "/api/v1/query",
         json={
             "query_text": "Is Triphala patentable in India?",
-            "session_id": "test-session",
+            "session_id": "test-session-missing-key",
         },
     )
     assert response.status_code == 401
@@ -42,7 +42,7 @@ def test_query_invalid_x_api_key_returns_401(unauthenticated_client: TestClient)
         headers={"X-API-Key": "wrong-secret-key"},
         json={
             "query_text": "Is Triphala patentable in India?",
-            "session_id": "test-session",
+            "session_id": "test-session-invalid-x-api",
         },
     )
     assert response.status_code == 401
@@ -61,7 +61,7 @@ def test_query_invalid_bearer_token_returns_401(unauthenticated_client: TestClie
         headers={"Authorization": "Bearer invalid-token"},
         json={
             "query_text": "Is Triphala patentable in India?",
-            "session_id": "test-session",
+            "session_id": "test-session-invalid-bearer",
         },
     )
     assert response.status_code == 401
@@ -78,7 +78,7 @@ def test_query_empty_bearer_token_returns_401(unauthenticated_client: TestClient
     response = unauthenticated_client.post(
         "/api/v1/query",
         headers={"Authorization": "Bearer"},
-        json={"query_text": "Test query", "session_id": "test-session"},
+        json={"query_text": "Test query", "session_id": "test-session-empty-bearer"},
     )
     assert response.status_code == 401
     data = response.json()
@@ -115,7 +115,7 @@ def test_query_valid_x_api_key_header_returns_200(unauthenticated_client: TestCl
             headers={"X-API-Key": "test-valid-key"},
             json={
                 "query_text": "Is Triphala patentable?",
-                "session_id": "test-session",
+                "session_id": "test-session-valid-x-api",
             },
         )
         assert response.status_code == 200
@@ -153,7 +153,7 @@ def test_query_valid_bearer_token_returns_200(unauthenticated_client: TestClient
             headers={"Authorization": "Bearer test-secondary-key"},
             json={
                 "query_text": "Is Triphala patentable?",
-                "session_id": "test-session",
+                "session_id": "test-session-valid-bearer",
             },
         )
         assert response.status_code == 200
@@ -190,7 +190,7 @@ def test_query_secondary_valid_key(unauthenticated_client: TestClient):
             headers={"X-API-Key": "test-secondary-key"},
             json={
                 "query_text": "Is Triphala patentable?",
-                "session_id": "test-session",
+                "session_id": "test-session-secondary",
             },
         )
         assert response.status_code == 200

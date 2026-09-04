@@ -75,6 +75,19 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
             },
             headers=exc.headers,
         )
+    if exc.status_code == 403:
+        detail_msg = (
+            exc.detail if isinstance(exc.detail, str) else "Forbidden."
+        )
+        return JSONResponse(
+            status_code=403,
+            content={
+                "error": True,
+                "type": "forbidden",
+                "message": detail_msg,
+            },
+            headers=exc.headers,
+        )
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail},

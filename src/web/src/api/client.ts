@@ -1,5 +1,6 @@
 // src/api/client.ts
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://127.0.0.1:8000/api/v1' : '/api/v1');
+const API_KEY = import.meta.env.VITE_API_KEY || '';
 
 export interface Message {
   role: 'user' | 'assistant';
@@ -63,13 +64,17 @@ export async function submitQuery(request: QueryRequest): Promise<QueryResponse>
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'X-API-Key': API_KEY,
     },
     body: JSON.stringify(safeRequest),
   });
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
-    throw new Error(err.detail || 'Service temporarily unavailable');
+    if (response.status === 401) {
+      throw new Error('API Key Required / Unauthorized: Please check your configuration.');
+    }
+    throw new Error(err.message || err.detail || 'Service temporarily unavailable');
   }
 
   return response.json();
@@ -97,12 +102,16 @@ export async function fetchSession(sessionId: string): Promise<SessionDetail> {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
+      'X-API-Key': API_KEY,
     },
   });
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
-    throw new Error(err.detail || 'Failed to retrieve session');
+    if (response.status === 401) {
+      throw new Error('API Key Required / Unauthorized: Please check your configuration.');
+    }
+    throw new Error(err.message || err.detail || 'Failed to retrieve session');
   }
 
   return response.json();

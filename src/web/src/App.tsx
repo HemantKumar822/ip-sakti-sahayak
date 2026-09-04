@@ -33,6 +33,7 @@ function App() {
   const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(
     typeof window !== 'undefined' ? window.innerWidth > 1100 : true
   );
+  const [authError, setAuthError] = useState<boolean>(false);
 
   // Sync active session ID to URL and localStorage
   useEffect(() => {
@@ -86,7 +87,10 @@ function App() {
             setCurrentQuery(lastUser.content);
           }
         }
-      } catch {
+      } catch (err: any) {
+        if (err.message && err.message.includes('API Key Required')) {
+          setAuthError(true);
+        }
         // Session not found or fresh session; leave empty
       }
     }
@@ -117,6 +121,14 @@ function App() {
 
   return (
     <div className="workbench-root">
+      {authError && (
+        <div className="auth-error-banner animate-fade-in" role="alert" style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, 
+          backgroundColor: '#ef4444', color: 'white', padding: '1rem', textAlign: 'center', fontWeight: 'bold'
+        }}>
+          API Key Required / Unauthorized: Please check your configuration in .env (VITE_API_KEY).
+        </div>
+      )}
       {/* Notion Topbar with Breadcrumbs and Inspector Toggle */}
       <Topbar 
         onReset={handleReset} 
@@ -146,6 +158,7 @@ function App() {
             setCurrentQuery={setCurrentQuery}
             sessionId={sessionId}
             onReset={handleReset}
+            onAuthError={() => setAuthError(true)}
           />
         </main>
 
