@@ -5,7 +5,11 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from src.config import config
 from src.models.request import QueryRequest
 from src.models.response import QueryResponse
-from src.models.session import SessionDetailResponse, SessionTurnResponse
+from src.models.session import (
+    SessionDetailResponse,
+    SessionSummaryResponse,
+    SessionTurnResponse,
+)
 
 logger = logging.getLogger("ip_sakti.api.routes")
 
@@ -28,6 +32,36 @@ async def ready_check(request: Request, response: Response) -> dict[str, str]:
         return {"status": "not_ready"}
 
     return {"status": "ready"}
+
+
+@api_v1_router.get(
+    "/sessions",
+    response_model=list[SessionSummaryResponse],
+    summary="List stored sessions",
+    tags=["Session"],
+)
+async def list_sessions(
+    request: Request, limit: int = 50
+) -> list[SessionSummaryResponse]:
+    """Retrieve list of recent sessions with preview snippets and turn counts."""
+    session_store = getattr(request.app.state, "session_store", None)
+    if session_store is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Session store service unavailable",
+        )
+
+    raw_sessions = session_store.list_sessions(limit=limit)
+    return [
+        SessionSummaryResponse(
+            session_id=s["session_id"],
+            preview=s.get("preview"),
+            total_turns=s.get("total_turns", 0),
+            created_at=s.get("created_at"),
+            updated_at=s.get("updated_at"),
+        )
+        for s in raw_sessions
+    ]
 
 
 @api_v1_router.get(

@@ -106,3 +106,36 @@ def test_session_store_disk_persistence_and_wal():
         assert turns[0]["content"] == "Question 1"
         assert turns[1]["content"] == "Answer 1"
         store2.close()
+
+
+def test_session_store_list_sessions():
+    store = SQLiteSessionStore(":memory:")
+    assert store.list_sessions() == []
+
+    # Create session 1
+    s1 = "sess-alpha"
+    store.save_turn(s1, "user", "Alpha inquiry regarding patentability")
+    store.save_turn(s1, "assistant", "Alpha legal analysis")
+
+    # Create session 2
+    s2 = "sess-beta"
+    store.save_turn(s2, "user", "Beta inquiry on NBA approval")
+    store.save_turn(s2, "assistant", "Beta advisory notes")
+
+    sessions = store.list_sessions(limit=10)
+    assert len(sessions) == 2
+    # Most recently updated first
+    assert sessions[0]["session_id"] == s2
+    assert sessions[0]["preview"] == "Beta inquiry on NBA approval"
+    assert sessions[0]["total_turns"] == 2
+
+    assert sessions[1]["session_id"] == s1
+    assert sessions[1]["preview"] == "Alpha inquiry regarding patentability"
+    assert sessions[1]["total_turns"] == 2
+
+    # Test limit parameter
+    limited = store.list_sessions(limit=1)
+    assert len(limited) == 1
+    assert limited[0]["session_id"] == s2
+
+    store.close()

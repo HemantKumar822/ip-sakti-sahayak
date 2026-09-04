@@ -57,7 +57,8 @@ function App() {
     async function hydrate() {
       try {
         const session = await fetchSession(sessionId);
-        if (!isCancelled && session && session.turns && session.turns.length > 0) {
+        if (isCancelled) return;
+        if (session && session.turns && session.turns.length > 0) {
           const restored: Message[] = session.turns.map((t) => ({
             role: t.role,
             content: t.content,
@@ -80,18 +81,30 @@ function App() {
           const lastAssist = [...restored].reverse().find((m) => m.role === 'assistant');
           if (lastAssist?.responseMetadata) {
             setLastResponse(lastAssist.responseMetadata);
+          } else {
+            setLastResponse(null);
           }
 
           const lastUser = [...restored].reverse().find((m) => m.role === 'user');
           if (lastUser) {
             setCurrentQuery(lastUser.content);
+          } else {
+            setCurrentQuery('');
           }
+        } else {
+          setMessages([]);
+          setLastResponse(null);
+          setCurrentQuery('');
         }
       } catch (err: any) {
         if (err.message && err.message.includes('API Key Required')) {
           setAuthError(true);
         }
-        // Session not found or fresh session; leave empty
+        if (!isCancelled) {
+          setMessages([]);
+          setLastResponse(null);
+          setCurrentQuery('');
+        }
       }
     }
 
@@ -144,6 +157,9 @@ function App() {
         <div className={`workbench-sidebar ${isSidebarOpen ? '' : 'collapsed'}`}>
           <Sidebar
             onNewNote={handleReset}
+            activeSessionId={sessionId}
+            onSelectSession={setSessionId}
+            refreshTrigger={messages.length}
           />
         </div>
 

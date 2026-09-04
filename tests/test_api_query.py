@@ -190,6 +190,23 @@ def test_get_session_endpoint_success_and_not_found(client: TestClient) -> None:
     assert data["turns"][1]["citations"][0]["doc_id"] == "bda-2002"
 
 
+def test_list_sessions_endpoint(client: TestClient) -> None:
+    store = client.app.state.session_store
+    s_id = "sess-list-api-test"
+    store.save_turn(s_id, "user", "How does Section 3(p) apply to turmeric?")
+    store.save_turn(s_id, "assistant", "Turmeric is documented in TKDL.")
+
+    res = client.get("/api/v1/sessions")
+    assert res.status_code == 200
+    items = res.json()
+    assert isinstance(items, list)
+    matching = [s for s in items if s["session_id"] == s_id]
+    assert len(matching) == 1
+    assert matching[0]["preview"] == "How does Section 3(p) apply to turmeric?"
+    assert matching[0]["total_turns"] == 2
+    assert matching[0]["updated_at"] is not None
+
+
 def test_query_persists_turns_and_enforces_6_turn_limit(client: TestClient) -> None:
     session_id = "sess-limit-test-01"
     mock_response = QueryResponse(

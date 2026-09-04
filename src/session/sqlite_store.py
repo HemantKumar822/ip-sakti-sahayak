@@ -234,6 +234,42 @@ class SQLiteSessionStore(AbstractSessionStore):
             conn.commit()
             return deleted
 
+    def list_sessions(self, limit: int = 50) -> list[dict[str, Any]]:
+        """Retrieves list of recent sessions with preview and turn count.
+
+        Args:
+            limit: Maximum number of recent sessions to retrieve.
+
+        Returns:
+            List of session summary dicts sorted by updated_at descending.
+        """
+        with self._lock:
+            conn = self._get_connection()
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT s.session_id, s.created_at, s.updated_at,
+                       (SELECT content FROM turns t WHERE t.session_id = s.session_id AND t.role = 'user' ORDER BY t.id ASC LIMIT 1) AS preview,
+                       (SELECT COUNT(*) FROM turns t WHERE t.session_id = s.session_id) AS total_turns
+                FROM sessions s
+                WHERE (SELECT COUNT(*) FROM turns t WHERE t.session_id = s.session_id) > 0
+                ORDER BY s.updated_at DESC
+                LIMIT ?;
+                """,
+                (limit,),
+            )
+            rows = cursor.fetchall()
+            return [
+                {
+                    "session_id": row["session_id"],
+                    "created_at": row["created_at"],
+                    "updated_at": row["updated_at"],
+                    "preview": row["preview"],
+                    "total_turns": row["total_turns"],
+                }
+                for row in rows
+            ]
+
     def close(self) -> None:
         """Closes the active database connection."""
         with self._lock:
