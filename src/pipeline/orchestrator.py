@@ -168,13 +168,9 @@ class PipelineOrchestrator:
                 )
             except Exception as e:
                 logger.critical(
-                    "[HYBRID-SEARCH] [%s] Critical infrastructure failure: %s",
-                    short_id,
-                    e,
+                    "[HYBRID-SEARCH] [%s] Critical infrastructure failure: %s", short_id, e
                 )
-                raise RuntimeError(
-                    "Vector database or retrieval infrastructure is unreachable."
-                ) from e
+                raise RuntimeError("Vector database or retrieval infrastructure is unreachable.") from e
 
             logger.info(
                 "[HYBRID-SEARCH] [%s] Retrieved %d chunks | ABS: %s | TKDL: %s",
