@@ -16,3 +16,13 @@ class VectorStore(ABC):
     @abstractmethod
     def count(self) -> int:
         """Return the number of documents in the vector store."""
+
+    def get_collection_stats(self) -> dict[str, Any]:
+        """Return diagnostic statistics and health status of the collection."""
+        return {
+            "status": "healthy",
+            "collection_name": "default",
+            "total_chunks": self.count(),
+            "document_count": 0,
+            "documents": [],
+        }

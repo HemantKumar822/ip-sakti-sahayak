@@ -210,3 +210,34 @@ def test_chroma_store_embedding_function_fallback(monkeypatch):
     )
     assert store.count() == 0
     assert store.embedding_function is not None
+
+
+def test_get_collection_stats_empty(ephemeral_chroma_store):
+    stats = ephemeral_chroma_store.get_collection_stats()
+    assert stats["status"] == "healthy"
+    assert stats["collection_name"] == ephemeral_chroma_store.collection_name
+    assert stats["total_chunks"] == 0
+    assert stats["document_count"] == 0
+    assert stats["documents"] == []
+
+
+def test_get_collection_stats_populated(ephemeral_chroma_store):
+    docs = [
+        "Chunk 1 of statute A",
+        "Chunk 2 of statute A",
+        "Chunk 1 of policy B",
+    ]
+    metas = [
+        {"doc_id": "statute_a", "title": "Statute A"},
+        {"doc_id": "statute_a", "title": "Statute A"},
+        {"doc_id": "policy_b", "title": "Policy B"},
+    ]
+    ids = ["statute_a#1", "statute_a#2", "policy_b#1"]
+    ephemeral_chroma_store.add(documents=docs, metadatas=metas, ids=ids)
+
+    stats = ephemeral_chroma_store.get_collection_stats()
+    assert stats["status"] == "healthy"
+    assert stats["collection_name"] == ephemeral_chroma_store.collection_name
+    assert stats["total_chunks"] == 3
+    assert stats["document_count"] == 2
+    assert stats["documents"] == ["policy_b", "statute_a"]
