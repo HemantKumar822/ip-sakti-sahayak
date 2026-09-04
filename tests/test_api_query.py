@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 from fastapi.testclient import TestClient
 
@@ -6,11 +6,8 @@ from src.config import config
 from src.main import app
 from src.models.response import Citation, QueryResponse
 
-client = TestClient(app)
-app.state.pipeline = MagicMock()
 
-
-def test_query_endpoint_answered_success():
+def test_query_endpoint_answered_success(client: TestClient) -> None:
     payload = {
         "query_text": "Can I patent a classical Triphala formulation in India?",
         "session_id": "abc-123",
@@ -39,7 +36,7 @@ def test_query_endpoint_answered_success():
     )
 
     with patch.object(
-        app.state.pipeline,
+        client.app.state.pipeline,
         "run_pipeline",
         new_callable=AsyncMock,
         return_value=mock_response,
@@ -63,7 +60,7 @@ def test_query_endpoint_answered_success():
         assert data["response_time_ms"] == 150
 
 
-def test_query_endpoint_abstained_low_confidence():
+def test_query_endpoint_abstained_low_confidence(client: TestClient) -> None:
     payload = {
         "query_text": "What is the patent status of quantum computing semiconductor?",
         "session_id": "abc-456",
@@ -84,7 +81,7 @@ def test_query_endpoint_abstained_low_confidence():
     )
 
     with patch.object(
-        app.state.pipeline,
+        client.app.state.pipeline,
         "run_pipeline",
         new_callable=AsyncMock,
         return_value=mock_response,
@@ -100,14 +97,14 @@ def test_query_endpoint_abstained_low_confidence():
         assert data["disclaimer"] == config.DISCLAIMER_TEXT
 
 
-def test_query_endpoint_service_error_503():
+def test_query_endpoint_service_error_503(client: TestClient) -> None:
     payload = {
         "query_text": "Trigger a server failure.",
         "session_id": "abc-789",
     }
 
     with patch.object(
-        app.state.pipeline,
+        client.app.state.pipeline,
         "run_pipeline",
         new_callable=AsyncMock,
         side_effect=RuntimeError("Fatal pipeline crash"),
@@ -118,32 +115,47 @@ def test_query_endpoint_service_error_503():
         assert data["detail"] == "Service temporarily unavailable"
 
 
-def test_query_endpoint_missing_query_text():
+def test_query_endpoint_missing_query_text(client: TestClient) -> None:
     payload = {"session_id": "abc-123"}
     response = client.post("/api/v1/query", json=payload)
     assert response.status_code == 422
 
 
-def test_query_endpoint_missing_session_id():
+def test_query_endpoint_missing_session_id(client: TestClient) -> None:
     payload = {"query_text": "Can I patent an Ayurveda formulation?"}
     response = client.post("/api/v1/query", json=payload)
     assert response.status_code == 422
 
 
-def test_query_endpoint_empty_payload():
+def test_query_endpoint_empty_payload(client: TestClient) -> None:
     response = client.post("/api/v1/query", json={})
     assert response.status_code == 422
 
 
-@patch("src.main.PipelineOrchestrator")
-def test_lifespan_startup_and_shutdown(mock_orchestrator):
-    with TestClient(app) as test_client:
-        assert app.state.is_ready is True
-        res = test_client.get("/health")
-        assert res.status_code == 200
-        assert res.json() == {"status": "ok", "version": "0.1.0"}
+def test_lifespan_startup_and_shutdown() -> None:
+    """Verifies that lifespan startup and shutdown hooks transition app.state cleanly."""
+    with (
+        patch("src.main.PipelineOrchestrator"),
+        TestClient(app) as test_client,
+    ):
+        assert test_client.app.state.is_ready is True
+        res_health = test_client.get("/health")
+        assert res_health.status_code == 200
+        assert res_health.json() == {"status": "ok", "version": "0.1.0"}
 
-    # Also test readiness endpoint
-    res_ready = client.get("/ready")
-    # since client (no context manager) won't have is_ready=True after lifespan teardown:
-    assert res_ready.status_code == 503
+        res_ready = test_client.get("/ready")
+        assert res_ready.status_code == 200
+        assert res_ready.json() == {"status": "ready"}
+
+    # After exiting the with-context, lifespan shutdown has executed
+    unstarted = TestClient(app)
+    res_unready = unstarted.get("/ready")
+    assert res_unready.status_code == 503
+    assert res_unready.json() == {"status": "not_ready"}
+
+
+def test_readiness_probe_unstarted(unstarted_client: TestClient) -> None:
+    """Verifies that an unstarted client outside of lifespan context reports 503 not_ready."""
+    res_unready = unstarted_client.get("/ready")
+    assert res_unready.status_code == 503
+    assert res_unready.json() == {"status": "not_ready"}
