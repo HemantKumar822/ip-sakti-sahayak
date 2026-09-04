@@ -1,5 +1,5 @@
 /* ==========================================================================
-   IP-SAKTI Sahayak — Useful Abstention Card Styles
+   IP-SAKTI Sahayak — x.ai Abstention Card Styles
    ========================================================================== */
 
 .abstention-card-container {
@@ -8,11 +8,11 @@
   gap: 18px;
   width: 100%;
   padding: 24px;
-  background-color: var(--notion-canvas);
-  border: 1px solid var(--notion-border-strong);
-  border-radius: 8px;
-  box-shadow: var(--shadow-sm);
-  color: var(--notion-text);
+  background-color: var(--color-card);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-none);
+  color: var(--color-ink);
 }
 
 /* --------------------------------------------------------------------------
@@ -23,7 +23,7 @@
   align-items: flex-start;
   gap: 12px;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--notion-border);
+  border-bottom: 1px solid var(--color-hairline);
 }
 
 .abstention-icon-box {
@@ -32,8 +32,8 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 8px;
-  background-color: var(--notion-tag-red-bg);
+  border-radius: var(--radius-card);
+  background-color: var(--color-error-subtle);
   color: var(--color-error);
   flex-shrink: 0;
 }
@@ -55,15 +55,15 @@
 .abstention-title {
   margin: 0;
   font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--notion-text);
+  font-weight: 600;
+  color: var(--color-ink);
   letter-spacing: -0.01em;
 }
 
 .abstention-query-ref {
   margin: 0;
   font-size: 0.8rem;
-  color: var(--notion-muted);
+  color: var(--color-muted);
   font-style: italic;
 }
 
@@ -75,15 +75,15 @@
   flex-direction: column;
   gap: 12px;
   padding: 14px 16px;
-  background-color: var(--notion-sidebar);
-  border: 1px solid var(--notion-border);
-  border-radius: 6px;
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
 }
 
 .abstention-reason-main {
   margin: 0;
   font-size: 0.88rem;
-  color: var(--notion-text);
+  color: var(--color-ink);
   line-height: 1.5;
 }
 
@@ -92,14 +92,14 @@
   align-items: flex-start;
   gap: 8px;
   font-size: 0.82rem;
-  color: var(--notion-muted);
+  color: var(--color-muted);
   line-height: 1.4;
   padding-top: 8px;
-  border-top: 1px dashed var(--notion-border);
+  border-top: 1px dashed var(--color-hairline);
 }
 
 .detail-icon {
-  color: var(--color-accent);
+  color: var(--color-ink);
   margin-top: 2px;
   flex-shrink: 0;
 }
@@ -109,7 +109,7 @@
   flex-direction: column;
   gap: 6px;
   padding-top: 8px;
-  border-top: 1px dashed var(--notion-border);
+  border-top: 1px dashed var(--color-hairline);
 }
 
 .gauge-meta-row {
@@ -120,29 +120,29 @@
 }
 
 .gauge-label {
-  font-weight: 600;
-  color: var(--notion-muted);
+  font-weight: 500;
+  color: var(--color-muted);
 }
 
 .gauge-score-text {
   font-family: var(--font-mono);
   font-size: 0.76rem;
-  color: var(--notion-text);
+  color: var(--color-ink);
 }
 
 .gauge-track {
   position: relative;
   width: 100%;
-  height: 10px;
-  background-color: rgba(55, 53, 47, 0.08);
-  border-radius: 5px;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
   overflow: visible;
 }
 
 .gauge-fill {
   height: 100%;
   background-color: var(--color-error);
-  border-radius: 5px;
+  border-radius: 4px;
   transition: width 0.4s ease-out;
 }
 
@@ -162,7 +162,7 @@
   transform: translateX(-50%);
   font-size: 0.65rem;
   font-family: var(--font-mono);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--color-success);
   white-space: nowrap;
 }
@@ -170,7 +170,7 @@
 .gauge-note {
   margin: 0;
   font-size: 0.74rem;
-  color: var(--notion-muted);
+  color: var(--color-muted);
   font-style: italic;
 }
 
@@ -187,7 +187,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--notion-text);
+  color: var(--color-ink);
 }
 
 .guidance-heading h3 {
@@ -203,7 +203,7 @@
   flex-direction: column;
   gap: 6px;
   font-size: 0.82rem;
-  color: var(--notion-text);
+  color: var(--color-ink);
   line-height: 1.45;
 }
 
@@ -221,8 +221,8 @@
   align-items: center;
   gap: 6px;
   font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--notion-muted);
+  font-weight: 500;
+  color: var(--color-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -242,26 +242,31 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 8px 12px;
-  background-color: var(--notion-sidebar);
-  border: 1px solid var(--notion-border);
-  border-radius: 6px;
+  padding: 8px 14px;
+  background-color: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-pill);
   font-size: 0.78rem;
-  color: var(--notion-text);
+  color: var(--color-ink);
   text-align: left;
   transition: all 0.12s ease;
+  cursor: pointer;
 }
 
 .in-scope-topic-chip:hover {
-  background-color: var(--notion-tag-blue-bg);
-  color: var(--notion-tag-blue-text);
-  border-color: rgba(35, 131, 226, 0.3);
+  background-color: var(--color-card-hover);
+  color: var(--color-ink);
+  border-color: var(--color-hairline-strong);
   transform: translateY(-1px);
 }
 
 .topic-arrow {
-  color: var(--color-accent);
+  color: var(--color-muted);
   flex-shrink: 0;
+}
+
+.in-scope-topic-chip:hover .topic-arrow {
+  color: var(--color-ink);
 }
 
 /* --------------------------------------------------------------------------
@@ -271,26 +276,26 @@
   display: flex;
   justify-content: flex-start;
   padding-top: 10px;
-  border-top: 1px solid var(--notion-border);
+  border-top: 1px solid var(--color-hairline);
 }
 
 .abstention-reset-btn {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
-  background-color: var(--notion-canvas);
-  border: 1px solid var(--notion-border-strong);
-  border-radius: 6px;
+  padding: 8px 16px;
+  background-color: var(--color-card);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-pill);
   font-size: 0.8rem;
   font-weight: 500;
-  color: var(--notion-text);
-  box-shadow: var(--shadow-sm);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-none);
   transition: all 0.15s ease;
+  cursor: pointer;
 }
 
 .abstention-reset-btn:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  background-color: var(--notion-sidebar-hover);
+  border-color: var(--color-ink);
+  background-color: var(--color-card-hover);
 }

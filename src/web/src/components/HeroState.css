@@ -1,5 +1,5 @@
 /* ==========================================================================
-   IP-SAKTI Sahayak — Notion Hero Document Sheet Styles
+   IP-SAKTI Sahayak — x.ai Hero Document Sheet Styles
    ========================================================================== */
 
 .notion-hero-sheet {
@@ -8,7 +8,7 @@
   gap: 24px;
   width: 100%;
   max-width: 800px;
-  color: var(--notion-text);
+  color: var(--color-ink);
 }
 
 /* --------------------------------------------------------------------------
@@ -30,33 +30,34 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 8px;
-  background-color: var(--notion-tag-orange-bg);
-  color: var(--notion-tag-orange-text);
+  padding: 4px 10px;
+  background-color: var(--color-warning-subtle);
+  color: var(--color-warning);
   font-size: 0.72rem;
-  font-weight: 600;
-  border-radius: 4px;
+  font-weight: 500;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(245, 158, 11, 0.2);
   width: fit-content;
 }
 
 .hero-main-title {
   margin: 0;
   font-size: 1.8rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.025em;
-  color: var(--notion-text);
+  color: var(--color-ink);
 }
 
 .hero-main-subtitle {
   margin: 0;
   font-size: 0.94rem;
-  color: var(--notion-muted);
+  color: var(--color-muted);
   line-height: 1.6;
 }
 
 .hero-main-subtitle strong {
-  color: var(--notion-text);
+  color: var(--color-ink);
   font-weight: 600;
 }
 
@@ -67,10 +68,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 10px 12px;
-  background-color: var(--notion-sidebar);
-  border: 1px solid var(--notion-border);
-  border-radius: 6px;
+  padding: 10px 14px;
+  background-color: var(--color-card);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
 }
 
 .provenance-chip {
@@ -79,7 +80,7 @@
   gap: 6px;
   font-size: 0.74rem;
   font-weight: 500;
-  color: var(--notion-text);
+  color: var(--color-ink);
 }
 
 .provenance-icon.success { color: var(--color-success); }
@@ -101,8 +102,8 @@
   align-items: center;
   gap: 6px;
   font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--notion-muted);
+  font-weight: 500;
+  color: var(--color-muted);
   letter-spacing: 0.02em;
 }
 
@@ -122,19 +123,21 @@
   flex-direction: column;
   gap: 8px;
   padding: 14px 16px;
-  background-color: var(--notion-canvas);
-  border: 1px solid var(--notion-border-strong);
-  border-radius: 6px;
+  background-color: var(--color-card);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
   text-align: left;
   transition: all 0.16s ease;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-none);
+  color: var(--color-ink);
+  cursor: pointer;
 }
 
 .notion-scenario-card:hover {
-  border-color: var(--color-accent);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  background-color: #FAFAFA;
+  border-color: var(--color-hairline-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-none);
+  background-color: var(--color-card-hover);
 }
 
 .card-top-meta {
@@ -149,24 +152,24 @@
 
 .card-category {
   font-size: 0.68rem;
-  font-weight: 600;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--notion-muted);
+  color: var(--color-muted);
 }
 
 .card-title {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--notion-text);
+  color: var(--color-ink);
   letter-spacing: -0.01em;
 }
 
 .card-prompt {
   margin: 0;
   font-size: 0.82rem;
-  color: var(--notion-muted);
+  color: var(--color-muted);
   line-height: 1.45;
   flex: 1;
 }
@@ -177,7 +180,7 @@
   justify-content: space-between;
   gap: 8px;
   padding-top: 8px;
-  border-top: 1px solid var(--notion-border);
+  border-top: 1px solid var(--color-hairline);
 }
 
 .card-tags-group {
@@ -188,10 +191,10 @@
 
 .card-tag {
   font-size: 0.65rem;
-  padding: 1px 5px;
-  background-color: var(--notion-tag-gray-bg);
-  color: var(--notion-tag-gray-text);
-  border-radius: 3px;
+  padding: 2px 6px;
+  background-color: var(--color-badge-bg);
+  color: var(--color-badge-text);
+  border-radius: var(--radius-sm);
   font-weight: 500;
 }
 
@@ -200,7 +203,11 @@
   align-items: center;
   gap: 4px;
   font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--color-accent);
+  font-weight: 500;
+  color: var(--color-ink);
   white-space: nowrap;
+}
+
+.notion-scenario-card:hover .card-run-action {
+  color: var(--color-accent);
 }

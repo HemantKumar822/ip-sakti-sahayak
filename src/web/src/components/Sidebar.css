@@ -1,5 +1,5 @@
 /* ==========================================================================
-   IP-SAKTI Sahayak — Notion Sidebar Navigation Styles
+   IP-SAKTI Sahayak — x.ai Intelligence Terminal Sidebar Navigation Styles
    ========================================================================== */
 
 .sidebar-container {
@@ -10,8 +10,8 @@
   padding: 16px 14px;
   gap: 16px;
   font-size: 0.85rem;
-  color: var(--notion-text);
-  background: var(--notion-sidebar);
+  color: var(--color-ink);
+  background: var(--color-canvas-card);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -24,7 +24,7 @@
   flex-direction: column;
   gap: 10px;
   padding-bottom: 12px;
-  border-bottom: 1px solid var(--notion-border);
+  border-bottom: 1px solid var(--color-hairline);
 }
 
 .sidebar-brand {
@@ -40,8 +40,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(120, 119, 116, 0.1);
-  border-radius: 6px;
+  background-color: var(--color-canvas-soft);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-sm);
 }
 
 .brand-text-group {
@@ -50,16 +51,19 @@
 }
 
 .brand-title {
-  font-weight: 600;
+  font-weight: 400;
   font-size: 0.95rem;
-  color: var(--notion-text);
+  color: var(--color-ink);
   letter-spacing: -0.01em;
 }
 
 .brand-subtitle {
   font-size: 0.72rem;
-  color: var(--notion-muted);
+  color: var(--color-body-mid);
   font-weight: 400;
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-mono-eyebrow);
+  text-transform: uppercase;
 }
 
 /* --------------------------------------------------------------------------
@@ -75,22 +79,23 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 8px 10px;
+  padding: 8px 14px;
   background-color: transparent;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  font-weight: 500;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-pill);
+  font-weight: 400;
   font-size: 0.82rem;
-  color: var(--notion-text);
+  color: var(--color-ink);
   transition: all 0.15s ease;
 }
 
 .new-note-btn:hover:not(:disabled) {
-  background-color: var(--notion-sidebar-hover);
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: var(--color-ink);
 }
 
 .new-note-btn:active:not(:disabled) {
-  background-color: var(--notion-sidebar-active);
+  background-color: rgba(255, 255, 255, 0.12);
   transform: scale(0.98);
 }
 
@@ -102,12 +107,12 @@
 .btn-shortcut {
   margin-left: auto;
   font-size: 0.68rem;
-  color: var(--notion-muted);
+  color: var(--color-body-mid);
   font-family: var(--font-mono);
-  background: var(--notion-canvas);
-  padding: 2px 5px;
-  border-radius: 3px;
-  border: 1px solid var(--notion-border);
+  background: var(--color-canvas);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-hairline);
 }
 
 /* --------------------------------------------------------------------------
@@ -116,7 +121,7 @@
 .sidebar-footer {
   margin-top: auto;
   padding-top: 12px;
-  border-top: 1px solid var(--notion-border);
+  border-top: 1px solid var(--color-hairline);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -126,10 +131,10 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  padding: 6px 8px;
-  background-color: rgba(15, 123, 108, 0.06);
-  border: 1px solid rgba(15, 123, 108, 0.15);
-  border-radius: 5px;
+  padding: 8px 10px;
+  background-color: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-sm);
 }
 
 .privacy-shield-icon {
@@ -144,14 +149,14 @@
 }
 
 .privacy-title {
-  font-weight: 600;
+  font-weight: 400;
   font-size: 0.72rem;
   color: var(--color-success);
 }
 
 .privacy-sub {
   font-size: 0.65rem;
-  color: var(--notion-muted);
+  color: var(--color-body-mid);
   line-height: 1.2;
 }
 
@@ -160,5 +165,5 @@
   align-items: center;
   gap: 6px;
   font-size: 0.68rem;
-  color: var(--notion-muted);
+  color: var(--color-body-mid);
 }
