@@ -1,0 +1,452 @@
+[
+  {
+    "id": 1,
+    "query_text": "Can Triphala churna be patented as a novel medicine under Indian patent law?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(p)"],
+    "expected_abs_flag": false,
+    "description": "Classical formulation excluded under Section 3(p) as traditional knowledge"
+  },
+  {
+    "id": 2,
+    "query_text": "Is an ancient Ayurvedic formulation of Chyawanprash patentable in India?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(p)"],
+    "expected_abs_flag": false,
+    "description": "Classical recipe from ancient Ayurvedic treatises"
+  },
+  {
+    "id": 3,
+    "query_text": "Can an Ayurvedic practitioner patent the traditional recipe of Trikatu Churna?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(p)"],
+    "expected_abs_flag": false,
+    "description": "Traditional knowledge exclusion under Section 3(p)"
+  },
+  {
+    "id": 4,
+    "query_text": "How does Section 3(p) of the Indian Patents Act bar patenting of classical formulations?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(p)"],
+    "expected_abs_flag": false,
+    "description": "Statutory analysis of Section 3(p) traditional knowledge bar"
+  },
+  {
+    "id": 5,
+    "query_text": "Can classical formulations cited in Charaka Samhita be granted patent protection in India?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(p)", "TKDL"],
+    "expected_abs_flag": false,
+    "description": "Classical textbook references as prior art"
+  },
+  {
+    "id": 6,
+    "query_text": "Is Sitopaladi Churna patentable as an inventive combination in India?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(p)"],
+    "expected_abs_flag": false,
+    "description": "Traditional Ayurvedic powder preparation"
+  },
+  {
+    "id": 7,
+    "query_text": "Does prior art in the Traditional Knowledge Digital Library (TKDL) invalidate patent claims on Turmeric wound healing?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["TKDL"],
+    "expected_abs_flag": false,
+    "description": "TKDL defensive prior art citation"
+  },
+  {
+    "id": 8,
+    "query_text": "Can a patent be granted for the classical therapeutic use of Neem for antifungal treatment?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(p)", "TKDL"],
+    "expected_abs_flag": false,
+    "description": "Classical Neem medicinal use defensive TKDL documentation"
+  },
+  {
+    "id": 9,
+    "query_text": "What is the statutory role of TKDL in opposing foreign patent applications on Ashwagandha?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["TKDL"],
+    "expected_abs_flag": false,
+    "description": "Defensive protection framework of TKDL internationally"
+  },
+  {
+    "id": 10,
+    "query_text": "Is an ancient formulation from Sushruta Samhita patentable under Indian law?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(p)"],
+    "expected_abs_flag": false,
+    "description": "Sushruta Samhita textual prior art exclusion"
+  },
+  {
+    "id": 11,
+    "query_text": "Does Section 3(p) consider traditional Ayurvedic knowledge an aggregation or duplicate of known properties?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(p)"],
+    "expected_abs_flag": false,
+    "description": "Statutory definition of traditional knowledge duplication"
+  },
+  {
+    "id": 12,
+    "query_text": "Can a traditional herbal decoction of Dashamoola be protected by a product patent?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(p)"],
+    "expected_abs_flag": false,
+    "description": "Classical ten-root decoction exclusion"
+  },
+  {
+    "id": 13,
+    "query_text": "Is the traditional formulation of Brahmi Ghrita eligible for an Indian patent?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(p)"],
+    "expected_abs_flag": false,
+    "description": "Traditional medicated ghee preparation"
+  },
+  {
+    "id": 14,
+    "query_text": "How does the Indian Patent Office evaluate traditional Ayurvedic combinations against Section 3(p)?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(p)"],
+    "expected_abs_flag": false,
+    "description": "Patent examination guidelines for Section 3(p)"
+  },
+  {
+    "id": 15,
+    "query_text": "Can an unaltered classical preparation of Shankhpushpi syrup be patented?",
+    "expected_category": "Classical Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(p)"],
+    "expected_abs_flag": false,
+    "description": "Traditional single-herb formulation bar"
+  },
+  {
+    "id": 16,
+    "query_text": "Can a synergistic composition of Withanolide-A and Curcumin with demonstrated enhanced efficacy overcome Section 3(d)?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Synergistic combination overcoming Section 3(d) enhancement requirement"
+  },
+  {
+    "id": 17,
+    "query_text": "What therapeutic efficacy data is required under Section 3(d) for a novel herbal derivative?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Efficacy threshold requirements for known substances under 3(d)"
+  },
+  {
+    "id": 18,
+    "query_text": "Can a modified bioavailable nano-formulation of Boswellia serrata be patented in India?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Novel delivery system and bioavailability proof under 3(d)"
+  },
+  {
+    "id": 19,
+    "query_text": "Does Section 3(d) prevent patenting of a new crystal polymorph of an isolated Ayurvedic compound without proof of enhanced efficacy?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Polymorph and derivative restriction under Section 3(d)"
+  },
+  {
+    "id": 20,
+    "query_text": "Can a company patent an improved, standardized extraction process yielding high-purity Andrographolide?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Novel proprietary extraction process and purification"
+  },
+  {
+    "id": 21,
+    "query_text": "Is a novel proprietary combination of herbal extracts showing synergistic therapeutic action patentable?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Synergistic polyherbal formulation overcoming 3(d) and 3(e)"
+  },
+  {
+    "id": 22,
+    "query_text": "How does an applicant satisfy the enhanced therapeutic efficacy requirement under Section 3(d) for Ayurvedic derivatives?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Comparative biological assay requirements under Section 3(d)"
+  },
+  {
+    "id": 23,
+    "query_text": "Can a novel synthetic analog derived from a Piperine phytochemical scaffold be patented in India?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Synthetic analog requiring Section 3(d) non-obvious efficacy proof"
+  },
+  {
+    "id": 24,
+    "query_text": "What patent claims are allowable for a targeted liposomal drug delivery system loaded with Berberine?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Novel formulation carrier system overcoming known substance hurdle"
+  },
+  {
+    "id": 25,
+    "query_text": "Is a sustained-release formulation of an Ayurvedic polyherbal tablet patentable over the standard formulation?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Sustained release dosage form versus mere physical modification"
+  },
+  {
+    "id": 26,
+    "query_text": "Can a novel formulation combining a modern active pharmaceutical ingredient with an Ayurvedic bioavailability enhancer be patented?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Hybrid synthetic-herbal synergistic composition"
+  },
+  {
+    "id": 27,
+    "query_text": "Does a significant improvement in bioavailability alone satisfy Section 3(d) efficacy requirements?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Legal interpretation of therapeutic efficacy versus bioavailability in India"
+  },
+  {
+    "id": 28,
+    "query_text": "Can a proprietary herbal composition for diabetes showing synergistic glycemic control pass Section 3(e) and Section 3(d)?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Synergy demonstration across Sections 3(d) and 3(e)"
+  },
+  {
+    "id": 29,
+    "query_text": "What evidence is needed to prove non-obviousness and enhanced efficacy for a modified Ayurvedic glycoside under Section 3(d)?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Pharmacological evidence standards under Section 3(d)"
+  },
+  {
+    "id": 30,
+    "query_text": "Can an isolated bioactive fraction from Ashwagandha root showing unique anticancer cytotoxicity be patented?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Section 3(d)"],
+    "expected_abs_flag": false,
+    "description": "Isolated fractions versus whole plant extract under Section 3(d)"
+  },
+  {
+    "id": 31,
+    "query_text": "Does commercial utilization of wild Ashwagandha collected in Madhya Pradesh require prior approval under the Biological Diversity Act, 2002?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Biological Diversity Act, 2002"],
+    "expected_abs_flag": true,
+    "description": "Domestic commercial utilization triggering Access and Benefit Sharing"
+  },
+  {
+    "id": 32,
+    "query_text": "What are the mandatory NBA approval requirements under Section 6 of the Biological Diversity Act, 2002 for patent applications?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Biological Diversity Act, 2002"],
+    "expected_abs_flag": true,
+    "description": "Mandatory Form III filing before patent grant"
+  },
+  {
+    "id": 33,
+    "query_text": "Is an Indian research institute required to seek State Biodiversity Board (SBB) intimation before commercial extraction of biological resources?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Biological Diversity Act, 2002"],
+    "expected_abs_flag": true,
+    "description": "Section 7 intimation requirements for Indian entities"
+  },
+  {
+    "id": 34,
+    "query_text": "What Form must be filed with the National Biodiversity Authority (NBA) for obtaining IP rights involving Indian biological resources?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Biological Diversity Act, 2002"],
+    "expected_abs_flag": true,
+    "description": "NBA Form III application procedure"
+  },
+  {
+    "id": 35,
+    "query_text": "How does Section 3 of the Biological Diversity Act, 2002 restrict non-citizens and foreign companies from accessing Indian bio-resources?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Biological Diversity Act, 2002"],
+    "expected_abs_flag": true,
+    "description": "Section 3 restrictions on foreign entities"
+  },
+  {
+    "id": 36,
+    "query_text": "Are normally traded commodities (NTC) exempt from Access and Benefit Sharing (ABS) obligations under the Biological Diversity Act, 2002?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Biological Diversity Act, 2002"],
+    "expected_abs_flag": true,
+    "description": "Section 40 exemption for normally traded agricultural commodities"
+  },
+  {
+    "id": 37,
+    "query_text": "What penal consequences arise under Section 55 of the Biological Diversity Act, 2002 for patenting biological resources without NBA approval?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Biological Diversity Act, 2002"],
+    "expected_abs_flag": true,
+    "description": "Penal provisions and imprisonment for non-compliance"
+  },
+  {
+    "id": 38,
+    "query_text": "When must an applicant obtain NBA consent: before filing the patent application or prior to grant under the Biological Diversity Act, 2002?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Biological Diversity Act, 2002"],
+    "expected_abs_flag": true,
+    "description": "Timing of Section 6 permission before patent grant"
+  },
+  {
+    "id": 39,
+    "query_text": "Does the export of endemic Ayurvedic medicinal plants for foreign commercial research trigger ABS provisions under the Biological Diversity Act, 2002?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Biological Diversity Act, 2002"],
+    "expected_abs_flag": true,
+    "description": "Export approvals under Section 4 and ABS benefit obligations"
+  },
+  {
+    "id": 40,
+    "query_text": "How is benefit sharing calculated by the National Biodiversity Authority for commercial utilization under the Biological Diversity Act, 2002?",
+    "expected_category": "Proprietary Ayurveda",
+    "expected_status": "answered",
+    "mandatory_citations": ["Biological Diversity Act, 2002"],
+    "expected_abs_flag": true,
+    "description": "ABS monetary benefit percentage schedules on purchase price"
+  },
+  {
+    "id": 41,
+    "query_text": "What is quantum entanglement and how is it used in Shor's algorithm?",
+    "expected_category": "Unclassifiable",
+    "expected_status": "abstained",
+    "mandatory_citations": [],
+    "expected_abs_flag": false,
+    "description": "Out-of-corpus quantum physics question"
+  },
+  {
+    "id": 42,
+    "query_text": "How do I construct a pressurized heavy water nuclear reactor?",
+    "expected_category": "Unclassifiable",
+    "expected_status": "abstained",
+    "mandatory_citations": [],
+    "expected_abs_flag": false,
+    "description": "Out-of-corpus nuclear engineering query"
+  },
+  {
+    "id": 43,
+    "query_text": "What are the trademark registration procedures in the German Federal Patent Court?",
+    "expected_category": "Unclassifiable",
+    "expected_status": "abstained",
+    "mandatory_citations": [],
+    "expected_abs_flag": false,
+    "description": "Out-of-jurisdiction German IP query"
+  },
+  {
+    "id": 44,
+    "query_text": "How does backpropagation calculate gradients in a convolutional neural network?",
+    "expected_category": "Unclassifiable",
+    "expected_status": "abstained",
+    "mandatory_citations": [],
+    "expected_abs_flag": false,
+    "description": "Out-of-corpus machine learning algorithms"
+  },
+  {
+    "id": 45,
+    "query_text": "What are the guidelines for registering a trademark under Japanese trademark law?",
+    "expected_category": "Unclassifiable",
+    "expected_status": "abstained",
+    "mandatory_citations": [],
+    "expected_abs_flag": false,
+    "description": "Out-of-jurisdiction Japanese IP query"
+  },
+  {
+    "id": 46,
+    "query_text": "Can you give me the Python code to implement Dijkstra's shortest path algorithm?",
+    "expected_category": "Unclassifiable",
+    "expected_status": "abstained",
+    "mandatory_citations": [],
+    "expected_abs_flag": false,
+    "description": "Out-of-corpus computer programming query"
+  },
+  {
+    "id": 47,
+    "query_text": "How do aircraft jet turbine engines achieve supersonic propulsion?",
+    "expected_category": "Unclassifiable",
+    "expected_status": "abstained",
+    "mandatory_citations": [],
+    "expected_abs_flag": false,
+    "description": "Out-of-corpus aerospace propulsion question"
+  },
+  {
+    "id": 48,
+    "query_text": "What are the tax filing requirements for LLC corporations in the United States?",
+    "expected_category": "Unclassifiable",
+    "expected_status": "abstained",
+    "mandatory_citations": [],
+    "expected_abs_flag": false,
+    "description": "Out-of-jurisdiction US corporate tax query"
+  },
+  {
+    "id": 49,
+    "query_text": "How do blockchain consensus mechanisms like Proof of Stake validate cryptocurrency blocks?",
+    "expected_category": "Unclassifiable",
+    "expected_status": "abstained",
+    "mandatory_citations": [],
+    "expected_abs_flag": false,
+    "description": "Out-of-corpus cryptocurrency query"
+  },
+  {
+    "id": 50,
+    "query_text": "What is the molecular synthesis route for producing high-explosive TNT compounds?",
+    "expected_category": "Unclassifiable",
+    "expected_status": "abstained",
+    "mandatory_citations": [],
+    "expected_abs_flag": false,
+    "description": "Out-of-corpus hazardous chemistry query"
+  }
+]
