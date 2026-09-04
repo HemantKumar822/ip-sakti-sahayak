@@ -1,7 +1,7 @@
 """Frontend test suite for IP-SAKTI Sahayak React/Vite workbench.
 
-Validates structural component contracts, DPDP Act 2023 privacy-by-design compliance,
-API client integration, design tokens, and formatting utilities without brittle string greps.
+Validates x.ai design specification adherence, structural component contracts,
+DPDP Act 2023 privacy-by-design compliance, API client integration, and formatting utilities without brittle string greps.
 """
 
 import re
@@ -9,50 +9,82 @@ from pathlib import Path
 
 
 def test_design_tokens_css_exists_and_contains_all_tokens():
+    """Verify that design_tokens.css defines the complete x.ai semantic token system."""
     css_path = Path("src/web/src/styles/design_tokens.css")
     assert css_path.exists(), "src/web/src/styles/design_tokens.css must exist"
 
     css_content = css_path.read_text(encoding="utf-8")
 
-    # Verify color palette and semantic tokens
+    # Verify x.ai semantic surface, text, and hairline tokens
     required_tokens = [
-        "--color-bg-primary",
-        "--color-bg-secondary",
-        "--color-text-primary",
-        "--color-text-secondary",
-        "--color-border",
+        "--color-canvas",
+        "--color-card",
+        "--color-card-hover",
+        "--color-ink",
+        "--color-muted",
+        "--color-hairline",
+        "--color-hairline-strong",
         "--color-accent",
         "--color-success",
         "--color-warning",
-        "--color-warning-bg",
         "--color-error",
-        "--color-error-bg",
         "--color-info",
-        "--color-info-bg",
+        "--radius-card",
+        "--radius-pill",
+        "--shadow-none",
     ]
     for token in required_tokens:
         assert (
             token in css_content
         ), f"Design token {token} missing from design_tokens.css"
 
-    # Verify typography, shadows, and animations
-    assert "--font-family" in css_content
-    assert "@keyframes slideUpFadeIn" in css_content
+    # Verify typography, animations, and utility classes
+    assert "--font-sans" in css_content
+    assert "--font-mono" in css_content
+    assert "@keyframes fadeIn" in css_content
     assert ".animate-fade-in" in css_content
-    assert ".glass" in css_content
+
+
+def test_xai_design_tokens_present_and_notion_purged():
+    """Verify exact x.ai color values and confirm complete removal of legacy notion tokens."""
+    css_path = Path("src/web/src/styles/design_tokens.css")
+    css_content = css_path.read_text(encoding="utf-8")
+
+    # Check strict x.ai hex palette in design_tokens.css
+    assert "#0a0a0a" in css_content.lower(), "Canvas must be #0a0a0a"
+    assert "#191919" in css_content.lower(), "Card surface must be #191919"
+    assert "#ffffff" in css_content.lower(), "Ink text must be #ffffff"
+    assert "#212327" in css_content.lower(), "Hairline border must be #212327"
+    assert "9999px" in css_content, "Pill radius must be 9999px"
+    assert (
+        "box-shadow: none" in css_content
+    ), "x.ai specification requires zero drop shadows"
+
+    # Purge check: Ensure zero legacy --notion- tokens across all CSS files in src/web/src
+    web_src = Path("src/web/src")
+    css_files = list(web_src.rglob("*.css"))
+    assert len(css_files) > 0, "Expected CSS stylesheets in src/web/src"
+
+    for css_file in css_files:
+        file_text = css_file.read_text(encoding="utf-8")
+        assert (
+            "--notion-" not in file_text
+        ), f"Found obsolete --notion- token in {css_file}"
 
 
 def test_design_system_doc_exists_and_documents_tokens():
-    doc_path = (
-        Path("DESIGN.md")
-        if Path("DESIGN.md").exists()
-        else Path("src/web/design_system.md")
-    )
-    assert doc_path.exists(), "DESIGN.md or design_system.md must exist"
+    """Verify DESIGN.md exists in repository root and documents official x.ai design specs."""
+    doc_path = Path("DESIGN.md")
+    assert doc_path.exists(), "DESIGN.md must exist in root"
 
     content = doc_path.read_text(encoding="utf-8")
-    assert "--color-bg-primary" in content or "#0a0a0a" in content
-    assert "--color-text-primary" in content or "#ffffff" in content
+    assert "#0a0a0a" in content
+    assert "#191919" in content
+    assert "#ffffff" in content
+    assert "#212327" in content
+    assert "9999px" in content
+    assert "Universal Sans" in content or "Inter" in content
+    assert "GeistMono" in content or "Geist Mono" in content
 
 
 def test_no_hidden_dom_appeasement_hacks_across_components():
@@ -63,6 +95,7 @@ def test_no_hidden_dom_appeasement_hacks_across_components():
 
     for tsx_file in tsx_files:
         content = tsx_file.read_text(encoding="utf-8")
+        # Check for inline style hidden hacks: display: 'none' or display: "none"
         match = re.search(r"display\s*:\s*['\"]none['\"]", content)
         assert (
             not match
@@ -70,6 +103,7 @@ def test_no_hidden_dom_appeasement_hacks_across_components():
 
 
 def test_react_app_structure_and_components_exist():
+    """Verify that all core React application and component files exist."""
     required_files = [
         Path("src/web/src/App.tsx"),
         Path("src/web/src/index.css"),
@@ -79,7 +113,12 @@ def test_react_app_structure_and_components_exist():
         Path("src/web/src/components/Callout.tsx"),
         Path("src/web/src/components/PipelineStepper.tsx"),
         Path("src/web/src/components/Topbar.tsx"),
+        Path("src/web/src/components/Sidebar.tsx"),
         Path("src/web/src/components/HeroState.tsx"),
+        Path("src/web/src/components/ResearchMemo.tsx"),
+        Path("src/web/src/components/TrustInspector.tsx"),
+        Path("src/web/src/components/AbstentionCard.tsx"),
+        Path("src/web/src/components/PromptBar.tsx"),
         Path("src/web/src/components/CitationsDrawer.tsx"),
     ]
     for file_path in required_files:
@@ -87,6 +126,7 @@ def test_react_app_structure_and_components_exist():
 
 
 def test_app_and_chat_interface_content_and_privacy():
+    """Verify component composition, brand headers, and DPDP privacy compliance."""
     app_content = Path("src/web/src/App.tsx").read_text(encoding="utf-8")
     topbar_content = Path("src/web/src/components/Topbar.tsx").read_text(
         encoding="utf-8"
@@ -99,25 +139,26 @@ def test_app_and_chat_interface_content_and_privacy():
     assert "IP-SAKTI Sahayak" in topbar_content
     assert "India" in topbar_content
 
-    # Key chat features: authentic component composition
+    # ChatInterface component composition
     assert "HeroState" in chat_content
     assert "ResearchMemo" in chat_content
     assert "AbstentionCard" in chat_content
     assert "PromptBar" in chat_content
     assert "sessionId" in chat_content
 
-    # Strict Privacy Check (DPDP compliance: no personal data fields)
-    assert "email" not in app_content.lower()
-    assert "phone" not in app_content.lower()
-    assert "full_name" not in app_content.lower()
-    assert "email" not in chat_content.lower()
-    assert "phone" not in chat_content.lower()
-    assert "full_name" not in chat_content.lower()
-    assert "email" not in topbar_content.lower()
-    assert "phone" not in topbar_content.lower()
+    # Strict Privacy Check (DPDP Act 2023 compliance: no personal data fields)
+    for sensitive in ["email", "phone", "full_name"]:
+        assert sensitive not in app_content.lower(), f"{sensitive} found in App.tsx"
+        assert (
+            sensitive not in chat_content.lower()
+        ), f"{sensitive} found in ChatInterface.tsx"
+        assert (
+            sensitive not in topbar_content.lower()
+        ), f"{sensitive} found in Topbar.tsx"
 
 
 def test_callout_component_and_styles():
+    """Verify statutory Callout component contract and style variants."""
     callout_tsx = Path("src/web/src/components/Callout.tsx").read_text(encoding="utf-8")
     callout_css = Path("src/web/src/components/Callout.css").read_text(encoding="utf-8")
 
@@ -129,6 +170,7 @@ def test_callout_component_and_styles():
 
 
 def test_statutory_badge_component_and_styles():
+    """Verify StatutoryBadge anchor security and external link attributes."""
     badge_tsx = Path("src/web/src/components/StatutoryBadge.tsx").read_text(
         encoding="utf-8"
     )
@@ -144,6 +186,7 @@ def test_statutory_badge_component_and_styles():
 
 
 def test_pipeline_stepper_component_and_styles():
+    """Verify PipelineStepper component stages and styles."""
     stepper_tsx = Path("src/web/src/components/PipelineStepper.tsx").read_text(
         encoding="utf-8"
     )
@@ -158,6 +201,7 @@ def test_pipeline_stepper_component_and_styles():
 
 
 def test_exact_disclaimer_text_in_react_app():
+    """Verify exact legal awareness disclaimer in App.tsx."""
     app_content = Path("src/web/src/App.tsx").read_text(encoding="utf-8")
     expected_disclaimer = (
         "This information is provided for general awareness and does not constitute legal advice. "
@@ -167,6 +211,8 @@ def test_exact_disclaimer_text_in_react_app():
 
 
 def test_inline_citation_regex_formatting():
+    """Verify inline citation bracket parsing into anchor markers."""
+
     def format_inline_citations(text: str) -> str:
         def replace_citation(match: re.Match) -> str:
             raw_nums = match.group(1).split(",")
@@ -195,6 +241,8 @@ def test_inline_citation_regex_formatting():
 
 
 def test_abs_detail_source_formatting():
+    """Verify ABS source pattern extraction from detail strings."""
+
     def format_abs_detail(text: str) -> tuple[str, str]:
         source_match = re.search(r"\[Source:\s*([^\]]+)\]", text)
         if source_match:
@@ -216,8 +264,9 @@ def test_abs_detail_source_formatting():
     assert src_html2 == ""
 
 
-def test_notion_workbench_components_exist():
-    required_notion_files = [
+def test_workbench_components_exist():
+    """Verify existence of all workbench components and companion style sheets."""
+    required_files = [
         Path("src/web/src/components/Sidebar.tsx"),
         Path("src/web/src/components/Sidebar.css"),
         Path("src/web/src/components/ResearchMemo.tsx"),
@@ -229,11 +278,12 @@ def test_notion_workbench_components_exist():
         Path("src/web/src/components/PromptBar.tsx"),
         Path("src/web/src/components/PromptBar.css"),
     ]
-    for p in required_notion_files:
-        assert p.exists(), f"Required Notion workbench file {p} must exist"
+    for p in required_files:
+        assert p.exists(), f"Required workbench file {p} must exist"
 
 
 def test_judge_mode_scenarios_configured_and_non_empty():
+    """Verify that all four required SIH judge scenarios are configured in HeroState."""
     sidebar_content = Path("src/web/src/components/Sidebar.tsx").read_text(
         encoding="utf-8"
     )
@@ -248,14 +298,8 @@ def test_judge_mode_scenarios_configured_and_non_empty():
     assert "11 Official" in hero_content or "11 Official" in sidebar_content
 
 
-def test_notion_design_tokens_present():
-    css_content = Path("src/web/src/styles/design_tokens.css").read_text(
-        encoding="utf-8"
-    )
-    assert "--font-mono" in css_content
-
-
 def test_trust_inspector_and_export_brief_features():
+    """Verify TrustInspector diagnostic metrics and research brief export."""
     inspector_content = Path("src/web/src/components/TrustInspector.tsx").read_text(
         encoding="utf-8"
     )
@@ -270,6 +314,7 @@ def test_trust_inspector_and_export_brief_features():
 
 
 def test_useful_abstention_guidance_content():
+    """Verify AbstentionCard provides actionable guidance and alternative queries."""
     abstention_content = Path("src/web/src/components/AbstentionCard.tsx").read_text(
         encoding="utf-8"
     )
@@ -280,8 +325,12 @@ def test_useful_abstention_guidance_content():
 
 
 def test_api_client_contract():
+    """Verify client.ts API contracts: PII scrubbing, X-API-Key auth, and endpoints."""
     client_content = Path("src/web/src/api/client.ts").read_text(encoding="utf-8")
+
     assert "submitQuery" in client_content
     assert "scrubPII" in client_content
     assert "X-API-Key" in client_content
     assert "/query" in client_content
+    assert "QueryResponse" in client_content
+    assert "QueryRequest" in client_content

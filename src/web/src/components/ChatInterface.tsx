@@ -198,7 +198,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         )}
       </div>
 
-      {/* Notion Command Prompt Bar docked at bottom */}
+      {/* Command Prompt Bar docked at bottom */}
       <div className="prompt-bar-docked">
         <div className="prompt-meta-row">
           <span className="turn-counter-badge" title="Maximum 6 conversation turns per legal research session">

@@ -1,11 +1,11 @@
 /* ==========================================================================
-   IP-SAKTI Sahayak — Notion Topbar Styles
+   IP-SAKTI Sahayak — x.ai Intelligence Terminal Topbar Styles
    ========================================================================== */
 
 .topbar-workbench {
   height: 46px;
-  background-color: var(--notion-canvas);
-  border-bottom: 1px solid var(--notion-border);
+  background-color: var(--color-canvas);
+  border-bottom: 1px solid var(--color-hairline);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -27,25 +27,25 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 4px;
-  color: var(--notion-muted);
+  border-radius: var(--radius-sm);
+  color: var(--color-body-mid);
   transition: all 0.12s ease;
 }
 
 .sidebar-toggle-btn:hover {
-  background-color: var(--notion-sidebar-hover);
-  color: var(--notion-text);
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--color-ink);
 }
 
 /* --------------------------------------------------------------------------
-   Notion Breadcrumbs
+   Terminal Breadcrumbs
    -------------------------------------------------------------------------- */
 .notion-breadcrumbs {
   display: flex;
   align-items: center;
   gap: 4px;
   font-size: 0.82rem;
-  color: var(--notion-muted);
+  color: var(--color-body-mid);
 }
 
 .breadcrumb-item {
@@ -53,31 +53,31 @@
   align-items: center;
   gap: 5px;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   transition: all 0.12s ease;
 }
 
 .breadcrumb-item.brand-link {
-  font-weight: 600;
-  color: var(--notion-text);
+  font-weight: 400;
+  color: var(--color-ink);
   cursor: pointer;
 }
 
 .breadcrumb-item.brand-link:hover {
-  background-color: var(--notion-sidebar-hover);
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 .breadcrumb-item.jurisdiction-link {
-  color: var(--notion-text);
+  color: var(--color-ink);
 }
 
 .breadcrumb-arrow {
-  color: var(--notion-subtle);
+  color: var(--color-body-mid);
 }
 
 .category-current {
   color: var(--color-accent);
-  font-weight: 500;
+  font-weight: 400;
   max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -101,13 +101,14 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 8px;
-  background-color: var(--notion-sidebar);
-  border: 1px solid var(--notion-border);
-  border-radius: 4px;
+  padding: 3px 10px;
+  background-color: var(--color-canvas-card);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-pill);
   font-size: 0.72rem;
-  color: var(--notion-muted);
-  font-weight: 500;
+  color: var(--color-body-mid);
+  font-family: var(--font-mono);
+  letter-spacing: 0.5px;
 }
 
 .indicator-dot {
@@ -116,53 +117,52 @@
   background-color: var(--color-success);
   border-radius: 50%;
   display: inline-block;
-  box-shadow: 0 0 0 2px rgba(15, 123, 108, 0.2);
 }
 
 .topbar-reset-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
-  background-color: var(--notion-sidebar);
-  border: 1px solid var(--notion-border);
-  border-radius: 4px;
+  padding: 4px 12px;
+  background-color: var(--color-canvas-card);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-pill);
   font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--notion-muted);
+  font-weight: 400;
+  color: var(--color-body);
   transition: all 0.12s ease;
 }
 
 .topbar-reset-btn:hover {
-  background-color: var(--notion-sidebar-hover);
-  color: var(--notion-text);
-  border-color: var(--notion-border-strong);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--color-ink);
+  border-color: var(--color-ink);
 }
 
 .inspector-toggle-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
-  background-color: var(--notion-sidebar);
-  border: 1px solid var(--notion-border);
-  border-radius: 5px;
+  padding: 4px 14px;
+  background-color: var(--color-canvas-card);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-pill);
   font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--notion-muted);
+  font-weight: 400;
+  color: var(--color-body);
   transition: all 0.15s ease;
 }
 
 .inspector-toggle-btn:hover {
-  background-color: var(--notion-sidebar-hover);
-  color: var(--notion-text);
-  border-color: var(--color-accent);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--color-ink);
+  border-color: var(--color-ink);
 }
 
 .inspector-toggle-btn.active {
-  background-color: var(--notion-tag-blue-bg);
-  color: var(--notion-tag-blue-text);
-  border-color: rgba(35, 131, 226, 0.3);
+  background-color: rgba(255, 255, 255, 0.12);
+  color: var(--color-ink);
+  border-color: var(--color-ink);
 }
 
 .panel-right-icon {
