@@ -208,3 +208,94 @@ def test_answer_generator_none_chunks(answer_generator):
     assert isinstance(res, GeneratorOutput)
     assert res.citations == []
     assert res.disclaimer == config.DISCLAIMER_TEXT
+
+
+def test_answer_generator_timeout_fallback(answer_generator, sample_chunks):
+    with patch.object(
+        answer_generator.model,
+        "generate_content",
+        side_effect=TimeoutError("Gemini Request Timed Out"),
+    ):
+        res = answer_generator.generate(
+            query="Can I patent this?",
+            chunks=sample_chunks,
+        )
+        assert isinstance(res, GeneratorOutput)
+        assert res.citations == []
+        assert res.disclaimer == config.DISCLAIMER_TEXT
+        assert res.answer == config.ABSTENTION_MESSAGE
+
+
+def test_answer_generator_rate_limit_429(answer_generator, sample_chunks):
+    with patch.object(
+        answer_generator.model,
+        "generate_content",
+        side_effect=Exception("429 ResourceExhausted: Quota exceeded"),
+    ):
+        res = answer_generator.generate(
+            query="Can I patent this?",
+            chunks=sample_chunks,
+        )
+        assert isinstance(res, GeneratorOutput)
+        assert res.citations == []
+        assert "high traffic and has hit its API rate limits" in res.answer
+        assert res.disclaimer == config.DISCLAIMER_TEXT
+
+
+def test_answer_generator_unrecoverable_api_key_error(answer_generator, sample_chunks):
+    with (
+        patch.object(
+            answer_generator.model,
+            "generate_content",
+            side_effect=RuntimeError("API key not valid. Please pass a valid API key."),
+        ),
+        pytest.raises(RuntimeError, match="Gemini API key error"),
+    ):
+        answer_generator.generate(
+            query="Can I patent this?",
+            chunks=sample_chunks,
+        )
+
+
+def test_answer_generator_conversation_history_timeout_fallback(
+    answer_generator, sample_chunks
+):
+    from unittest.mock import MagicMock
+
+    mock_chat = MagicMock()
+    mock_chat.send_message.side_effect = TimeoutError("Multi-turn chat timeout")
+    with patch.object(answer_generator.model, "start_chat", return_value=mock_chat):
+        res = answer_generator.generate(
+            query="Can I patent this formulation?",
+            chunks=sample_chunks,
+            conversation_history=[
+                {"role": "user", "content": "Hello"},
+                {"role": "assistant", "content": "How can I help?"},
+            ],
+        )
+        assert isinstance(res, GeneratorOutput)
+        assert res.citations == []
+        assert res.disclaimer == config.DISCLAIMER_TEXT
+
+
+def test_answer_generator_conversational_timeout_fallback(answer_generator):
+    with patch.object(
+        answer_generator.model,
+        "generate_content",
+        side_effect=TimeoutError("Conversational timeout"),
+    ):
+        res = answer_generator.generate_conversational(query="hello")
+        assert isinstance(res, GeneratorOutput)
+        assert "help you with ayurveda ip" in res.answer.lower()
+        assert res.citations == []
+
+
+def test_answer_generator_refusal_timeout_fallback(answer_generator):
+    with patch.object(
+        answer_generator.model,
+        "generate_content",
+        side_effect=TimeoutError("Refusal timeout"),
+    ):
+        refusal = answer_generator.generate_refusal(query="Who won the World Cup?")
+        assert isinstance(refusal, str)
+        assert "cannot assist with this query" in refusal.lower()
