@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchSession } from './api/client';
-import type { Message, QueryResponse } from './api/client';
+import type { Message, QueryResponse, Citation } from './api/client';
 import { Sidebar } from './components/Sidebar';
 import { Topbar } from './components/Topbar';
 import { ChatInterface } from './components/ChatInterface';
 import { TrustInspector } from './components/TrustInspector';
+import { CitationModal } from './components/CitationModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastContainer } from './components/ToastContainer';
 import './App.css';
@@ -29,6 +30,7 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [lastResponse, setLastResponse] = useState<QueryResponse | null>(null);
   const [currentQuery, setCurrentQuery] = useState<string>('');
+  
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(
     typeof window !== 'undefined' ? window.innerWidth > 768 : true
   );
@@ -36,6 +38,13 @@ function App() {
     typeof window !== 'undefined' ? window.innerWidth > 1100 : true
   );
   const [authError, setAuthError] = useState<boolean>(false);
+  
+  // View Toggle State
+  const [activeView, setActiveView] = useState<'workbench' | 'admin'>('workbench');
+  
+  // Citation Modal State
+  const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null);
+  const [isCitationModalOpen, setIsCitationModalOpen] = useState(false);
 
   // Sync active session ID to URL and localStorage
   useEffect(() => {
@@ -134,6 +143,11 @@ function App() {
     }
   }, []);
 
+  const handleCitationClick = useCallback((citation: Citation) => {
+    setSelectedCitation(citation);
+    setIsCitationModalOpen(true);
+  }, []);
+
   return (
     <ErrorBoundary onReset={handleReset}>
       <div className="workbench-root">
@@ -146,6 +160,7 @@ function App() {
             API Key Required / Unauthorized: Please check your configuration in .env (VITE_API_KEY).
           </div>
         )}
+        
         {/* Notion Topbar with Breadcrumbs and Inspector Toggle */}
         <Topbar 
           onReset={handleReset} 
@@ -154,6 +169,8 @@ function App() {
           onToggleInspector={() => setIsInspectorOpen(prev => !prev)}
           isInspectorOpen={isInspectorOpen}
           activeCategory={lastResponse?.category}
+          activeView={activeView}
+          onViewChange={setActiveView}
         />
 
         <div className="workbench-layout">
@@ -167,23 +184,31 @@ function App() {
             />
           </div>
 
-          {/* Center Column: Notion Legal Research Canvas */}
+          {/* Center Column: Active View */}
           <main className="workbench-center">
-            <ChatInterface 
-              messages={messages} 
-              setMessages={setMessages}
-              lastResponse={lastResponse}
-              setLastResponse={setLastResponse}
-              currentQuery={currentQuery}
-              setCurrentQuery={setCurrentQuery}
-              sessionId={sessionId}
-              onReset={handleReset}
-              onAuthError={() => setAuthError(true)}
-            />
+            {activeView === 'workbench' ? (
+              <ChatInterface 
+                messages={messages} 
+                setMessages={setMessages}
+                lastResponse={lastResponse}
+                setLastResponse={setLastResponse}
+                currentQuery={currentQuery}
+                setCurrentQuery={setCurrentQuery}
+                sessionId={sessionId}
+                onReset={handleReset}
+                onAuthError={() => setAuthError(true)}
+                onCitationClick={handleCitationClick}
+              />
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: '16px', color: 'var(--color-body-mid)' }}>
+                <h2>Corpus Admin Console</h2>
+                <p>Work in progress. Document ingestion and vector index management will be available here.</p>
+              </div>
+            )}
           </main>
 
           {/* Right Column: Trust & Telemetry Inspector ("Why This Answer?") */}
-          <div className={`workbench-inspector ${isInspectorOpen ? '' : 'hidden'}`}>
+          <div className={`workbench-inspector ${isInspectorOpen && activeView === 'workbench' ? '' : 'hidden'}`}>
             <TrustInspector
               query={currentQuery}
               response={lastResponse}
@@ -196,6 +221,13 @@ function App() {
         <footer className="workbench-footer-disclaimer">
           This information is provided for general awareness and does not constitute legal advice. Consult a qualified IP attorney for decisions specific to your situation.
         </footer>
+
+        {/* Overlays */}
+        <CitationModal 
+          citation={selectedCitation}
+          isOpen={isCitationModalOpen}
+          onClose={() => setIsCitationModalOpen(false)}
+        />
       </div>
     </ErrorBoundary>
   );

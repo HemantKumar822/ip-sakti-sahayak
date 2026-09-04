@@ -322,7 +322,7 @@ def test_useful_abstention_guidance_content():
     abstention_content = Path("src/web/src/components/AbstentionCard.tsx").read_text(
         encoding="utf-8"
     )
-    assert "HONEST ABSTENTION" in abstention_content
+    assert "SAFETY CIRCUIT-BREAKER" in abstention_content
     assert "Confidence Gate" in abstention_content
     assert "How to Refine Your Legal Inquiry" in abstention_content
     assert "Explore Verified In-Scope Topics" in abstention_content

@@ -37,6 +37,40 @@
   color: var(--color-ink);
 }
 
+.view-toggles {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--color-canvas-card);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-hairline);
+  margin-right: 12px;
+}
+
+.view-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  color: var(--color-body-mid);
+  transition: all 0.15s ease;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.view-toggle-btn:hover {
+  color: var(--color-ink);
+}
+
+.view-toggle-btn.active {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--color-ink);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
 /* --------------------------------------------------------------------------
    Terminal Breadcrumbs
    -------------------------------------------------------------------------- */

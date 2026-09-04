@@ -50,11 +50,11 @@ export const AbstentionCard: React.FC<AbstentionCardProps> = ({
     <div className="abstention-card-container animate-fade-in" aria-label="Transparent Abstention Advisory">
       {/* Abstention Banner Header */}
       <div className="abstention-header">
-        <div className="abstention-icon-box">
+        <div className="abstention-icon-box" style={{ color: '#dc143c', backgroundColor: 'rgba(220, 20, 60, 0.1)' }}>
           <ShieldAlert size={22} />
         </div>
         <div className="abstention-header-text">
-          <span className="abstention-badge">HONEST ABSTENTION & CIRCUIT-BREAKER</span>
+          <span className="abstention-badge" style={{ color: '#dc143c' }}>SAFETY CIRCUIT-BREAKER</span>
           <h2 className="abstention-title">Authoritative Statutory Evidence Not Established</h2>
           <p className="abstention-query-ref">Query: "{query}"</p>
         </div>

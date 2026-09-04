@@ -165,6 +165,27 @@ export async function fetchSession(sessionId: string): Promise<SessionDetail> {
   }
 }
 
+export interface CorpusStats {
+  total_chunks: number;
+  total_documents: number;
+}
+
+export async function fetchCorpusStats(): Promise<CorpusStats> {
+  const response = await fetch(`${API_BASE_URL}/corpus/stats`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': API_KEY,
+    },
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to retrieve corpus stats');
+  }
+
+  return response.json();
+}
+
 export interface SessionSummary {
   session_id: string;
   preview: string | null;
@@ -192,5 +213,3 @@ export async function fetchSessions(limit: number = 50): Promise<SessionSummary[
     return handleNetworkError(err);
   }
 }
-
-
