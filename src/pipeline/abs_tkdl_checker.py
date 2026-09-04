@@ -56,15 +56,15 @@ class ABSCheckerOutput(BaseModel):
 
 class TKDLSimulatorAPI:
     """Simulates a secure, federated API call to the Traditional Knowledge Digital Library (TKDL).
-    
-    In a real production environment, the TKDL is a highly restricted government database. 
-    This adapter pattern proves the architecture is ready for enterprise API integration 
+
+    In a real production environment, the TKDL is a highly restricted government database.
+    This adapter pattern proves the architecture is ready for enterprise API integration
     by encapsulating the logic and introducing simulated network latency.
     """
-    
+
     def __init__(self, vector_store: VectorStore):
         self.vector_store = vector_store
-        
+
     def _is_abs_document(self, metadata: dict[str, Any], chunk_text: str = "") -> bool:
         doc_id = str(metadata.get("doc_id", "")).lower()
         doc_type = str(
@@ -82,23 +82,27 @@ class TKDLSimulatorAPI:
             "biological diversity" in section or "nba" in section or "tkdl" in section
         )
 
-    def fetch_prior_art(self, query: str, top_k: int, threshold: float) -> ABSCheckerOutput:
+    def fetch_prior_art(
+        self, query: str, top_k: int, threshold: float
+    ) -> ABSCheckerOutput:
         """Simulates an external HTTP request to the TKDL database."""
-        logger.info("[TKDL-SIMULATOR] Initiating secure federated API call to TKDL endpoints...")
-        
+        logger.info(
+            "[TKDL-SIMULATOR] Initiating secure federated API call to TKDL endpoints..."
+        )
+
         # Simulate network latency of hitting an external secure government database
-        time.sleep(0.35) 
-        
+        time.sleep(0.35)
+
         try:
             if self.vector_store.count() == 0:
                 logger.debug("[TKDL-SIMULATOR] Vector store is empty.")
                 return ABSCheckerOutput()
-                
+
             raw_results = self.vector_store.search(
                 query=query.strip(),
                 n_results=top_k,
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(
                 "[TKDL-SIMULATOR] API/Vector store search failed for query '%s': %s",
                 query,
@@ -161,8 +165,10 @@ class TKDLSimulatorAPI:
                 highest_abs_score = max(highest_abs_score, numeric_score)
 
         matching_abs_citations.sort(key=lambda x: x["similarity_score"], reverse=True)
-        
-        logger.info("[TKDL-SIMULATOR] API response received successfully (Latency: 350ms)")
+
+        logger.info(
+            "[TKDL-SIMULATOR] API response received successfully (Latency: 350ms)"
+        )
 
         if highest_abs_score >= threshold and matching_abs_citations:
             top_match = matching_abs_citations[0]
@@ -244,7 +250,7 @@ class ABSTKDLChecker:
             threshold if threshold is not None else config.ABS_THRESHOLD
         )
         self.top_k: int = top_k if top_k is not None else config.RETRIEVAL_TOP_K
-        
+
         # Instantiate the simulated federated API adapter
         self.tkdl_api = TKDLSimulatorAPI(self.vector_store)
 
@@ -271,7 +277,9 @@ class ABSTKDLChecker:
             return ABSCheckerOutput()
 
         # Delegate entirely to the simulated API
-        return self.tkdl_api.fetch_prior_art(query=query, top_k=limit, threshold=self.threshold)
+        return self.tkdl_api.fetch_prior_art(
+            query=query, top_k=limit, threshold=self.threshold
+        )
 
 
 # Alias for concise import
