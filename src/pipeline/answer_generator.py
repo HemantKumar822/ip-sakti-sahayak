@@ -1,12 +1,14 @@
+"""Citation-grounded answer generation engine for IP-SAKTI Sahayak."""
+
 import json
 import logging
 import os
 from typing import Any
 
-import google.generativeai as genai
 from pydantic import BaseModel, Field
 
 from src.config import config
+from src.pipeline.providers import BaseLLMClient, get_llm_client
 
 logger = logging.getLogger("ip_sakti.pipeline.answer_generator")
 
@@ -60,15 +62,17 @@ class AnswerGenerator:
         manifest_path: str | None = None,
         temperature: float | None = None,
         max_output_tokens: int | None = None,
+        llm_client: BaseLLMClient | None = None,
     ) -> None:
-        """Initializes the Answer Generator with Gemini configuration.
+        """Initializes the Answer Generator with provider configuration.
 
         Args:
-            api_key: Gemini API key.
-            model_name: Gemini model name.
+            api_key: Optional API key override.
+            model_name: Optional model name override.
             manifest_path: Path to corpus manifest JSON.
             temperature: LLM generation temperature.
             max_output_tokens: Max output token limit.
+            llm_client: Optional pre-configured BaseLLMClient instance.
         """
         self.api_key = api_key if api_key is not None else config.GEMINI_API_KEY
         self.model_name = model_name if model_name is not None else config.GEMINI_MODEL
@@ -81,12 +85,32 @@ class AnswerGenerator:
             if max_output_tokens is not None
             else config.GEMINI_MAX_OUTPUT_TOKENS
         )
-        if self.max_output_tokens <= 2048 and "2.5" in self.model_name:
+        if (
+            self.model_name
+            and "2.5" in self.model_name
+            and self.max_output_tokens <= 2048
+        ):
             self.max_output_tokens = 8192
 
-        if self.api_key:
-            genai.configure(api_key=self.api_key)
-        self.model = genai.GenerativeModel(self.model_name)
+        if llm_client is not None:
+            self.client = llm_client
+        else:
+            if config.LLM_PROVIDER == "gemini":
+                self.client = get_llm_client(
+                    "gemini",
+                    api_key=self.api_key,
+                    model_name=self.model_name,
+                    temperature=self.temperature,
+                    max_output_tokens=self.max_output_tokens,
+                )
+            else:
+                self.client = get_llm_client(
+                    temperature=self.temperature,
+                    max_output_tokens=self.max_output_tokens,
+                )
+
+        # Expose model attribute for backward compatibility with existing test mocks
+        self.model = getattr(self.client, "model", self.client)
 
     def _get_known_manifest_doc_ids(self) -> set[str]:
         """Loads all valid doc_ids from the corpus manifest if available."""
@@ -159,37 +183,20 @@ class AnswerGenerator:
         )
 
         try:
-            if conversation_history:
-                chat_history = []
-                for turn in conversation_history:
-                    role = "user" if turn.get("role") == "user" else "model"
-                    chat_history.append(
-                        {"role": role, "parts": [turn.get("content", "")]}
-                    )
-                chat = self.model.start_chat(history=chat_history)
-                response = chat.send_message(
-                    prompt,
-                    generation_config=genai.GenerationConfig(
-                        temperature=0.5, max_output_tokens=300
-                    ),
-                    request_options={"timeout": config.GEMINI_REQUEST_TIMEOUT},
-                )
-            else:
-                response = self.model.generate_content(
-                    prompt,
-                    generation_config=genai.GenerationConfig(
-                        temperature=0.5, max_output_tokens=300
-                    ),
-                    request_options={"timeout": config.GEMINI_REQUEST_TIMEOUT},
-                )
-
-            answer = (
-                response.text.strip()
-                if response and getattr(response, "text", None)
+            answer = self.client.generate_chat(
+                prompt=prompt,
+                conversation_history=conversation_history,
+                temperature=0.5,
+                max_tokens=300,
+                timeout=config.GEMINI_REQUEST_TIMEOUT,
+            )
+            answer_text = (
+                str(answer).strip()
+                if answer
                 else "Hello! How can I help you with Ayurveda IP today?"
             )
             return GeneratorOutput(
-                answer=answer,
+                answer=answer_text,
                 citations=[],
                 abs_flag=False,
                 disclaimer=config.DISCLAIMER_TEXT,
@@ -221,16 +228,14 @@ class AnswerGenerator:
         )
 
         try:
-            response = self.model.generate_content(
+            res = self.client.generate_text(
                 refusal_prompt,
-                generation_config=genai.GenerationConfig(
-                    temperature=0.3,  # slightly higher temp for conversational tone
-                    max_output_tokens=300,
-                ),
-                request_options={"timeout": config.GEMINI_REQUEST_TIMEOUT},
+                temperature=0.3,
+                max_tokens=300,
+                timeout=config.GEMINI_REQUEST_TIMEOUT,
             )
-            if response and getattr(response, "text", None):
-                return response.text.strip()
+            if res and res.strip():
+                return res.strip()
             return config.ABSTENTION_MESSAGE
         except Exception as e:  # noqa: BLE001
             logger.warning(
@@ -256,6 +261,7 @@ class AnswerGenerator:
             chunks: List of retrieved legal corpus chunks from Retriever / Confidence Gate.
             product_category: Classified Ayurveda category.
             abs_flag: Whether ABS clearance is flagged for the query.
+            conversation_history: Optional previous multi-turn conversation messages.
 
         Returns:
             GeneratorOutput with answer, citations, abs_flag, and mandatory disclaimer.
@@ -278,38 +284,29 @@ class AnswerGenerator:
         )
 
         try:
-            gen_config = genai.GenerationConfig(
-                response_mime_type="application/json",
-                response_schema=GeneratorOutput,
-                temperature=self.temperature,
-                max_output_tokens=self.max_output_tokens,
-            )
-
             if conversation_history:
-                chat_history = []
-                for turn in conversation_history:
-                    role = "user" if turn.get("role") == "user" else "model"
-                    chat_history.append(
-                        {"role": role, "parts": [turn.get("content", "")]}
-                    )
-                chat = self.model.start_chat(history=chat_history)
-                response = chat.send_message(
-                    full_prompt,
-                    generation_config=gen_config,
-                    request_options={"timeout": config.GEMINI_REQUEST_TIMEOUT},
+                result = self.client.generate_chat(
+                    prompt=full_prompt,
+                    conversation_history=conversation_history,
+                    temperature=self.temperature,
+                    max_tokens=self.max_output_tokens,
+                    timeout=config.GEMINI_REQUEST_TIMEOUT,
+                    response_schema=GeneratorOutput,
                 )
             else:
-                response = self.model.generate_content(
-                    full_prompt,
-                    generation_config=gen_config,
-                    request_options={"timeout": config.GEMINI_REQUEST_TIMEOUT},
+                result = self.client.generate_structured(
+                    prompt=full_prompt,
+                    response_schema=GeneratorOutput,
+                    temperature=self.temperature,
+                    max_tokens=self.max_output_tokens,
+                    timeout=config.GEMINI_REQUEST_TIMEOUT,
                 )
 
-            if not response or not getattr(response, "text", None):
-                logger.warning("AnswerGenerator: Empty response from Gemini.")
+            if not result or not isinstance(result, GeneratorOutput):
+                logger.warning(
+                    "AnswerGenerator: Empty or invalid response from LLM provider."
+                )
                 return self._fallback_abstention(abs_flag=abs_flag)
-
-            result = GeneratorOutput.model_validate_json(response.text)
 
             # Enforce exact mandatory disclaimer text
             result.disclaimer = config.DISCLAIMER_TEXT

@@ -13,6 +13,18 @@ class Config:
     GEMINI_MAX_OUTPUT_TOKENS: int = int(os.getenv("GEMINI_MAX_OUTPUT_TOKENS", "2048"))
     GEMINI_REQUEST_TIMEOUT: float = float(os.getenv("GEMINI_REQUEST_TIMEOUT", "30.0"))
 
+    # LLM Provider configuration ('gemini' or 'openrouter')
+    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "gemini").strip().lower()
+
+    # OpenRouter configuration
+    OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
+    OPENROUTER_MODEL: str = os.getenv(
+        "OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct"
+    )
+    OPENROUTER_BASE_URL: str = os.getenv(
+        "OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"
+    )
+
     # Embedding configuration
     EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
 
@@ -87,9 +99,13 @@ class Config:
     @classmethod
     def validate(cls) -> None:
         """Validates that required configuration is present."""
-        if not cls.GEMINI_MODEL:
+        if cls.LLM_PROVIDER == "gemini" and not cls.GEMINI_MODEL:
             raise RuntimeError(
-                "GEMINI_MODEL is required but not set in configuration or environment variables."
+                "GEMINI_MODEL is required when LLM_PROVIDER is 'gemini' but not set in configuration or environment variables."
+            )
+        if cls.LLM_PROVIDER == "openrouter" and not cls.OPENROUTER_MODEL:
+            raise RuntimeError(
+                "OPENROUTER_MODEL is required when LLM_PROVIDER is 'openrouter' but not set in configuration or environment variables."
             )
         if not cls.CHROMA_COLLECTION_NAME:
             raise RuntimeError(

@@ -1,10 +1,12 @@
+"""Product category classifier for Ayurveda and Traditional Knowledge queries."""
+
 import logging
 
-import google.generativeai as genai
 from pydantic import BaseModel
 
 from src.config import config
 from src.models.query_context import QueryContext
+from src.pipeline.providers import BaseLLMClient, get_llm_client
 from src.utils.resilience import retry_with_backoff
 
 logger = logging.getLogger(__name__)
@@ -32,25 +34,21 @@ class ClassifierOutput(BaseModel):
 
 
 class Classifier:
-    def __init__(self):
-        """Initializes the Classifier and configures the Gemini API."""
-        genai.configure(api_key=config.GEMINI_API_KEY)
-        model_name = config.GEMINI_MODEL
-        self.model = genai.GenerativeModel(model_name)
+    def __init__(self, llm_client: BaseLLMClient | None = None) -> None:
+        """Initializes the Classifier and configures the LLM provider."""
+        self.client: BaseLLMClient = llm_client or get_llm_client()
+        # Expose model attribute for backward compatibility with existing test mocks
+        self.model = getattr(self.client, "model", self.client)
 
     @retry_with_backoff(max_retries=2, initial_delay=1.0)
-    def _generate_with_retry(self, prompt: str) -> str:
-        """Invokes Gemini API with exponential backoff retry on rate limits."""
-        response = self.model.generate_content(
+    def _generate_with_retry(self, prompt: str) -> ClassifierOutput:
+        """Invokes LLM provider with exponential backoff retry on rate limits."""
+        return self.client.generate_structured(
             prompt,
-            generation_config=genai.GenerationConfig(
-                response_mime_type="application/json",
-                response_schema=ClassifierOutput,
-                temperature=config.GEMINI_TEMPERATURE,
-            ),
-            request_options={"timeout": config.GEMINI_REQUEST_TIMEOUT},
+            response_schema=ClassifierOutput,
+            temperature=config.GEMINI_TEMPERATURE,
+            timeout=config.GEMINI_REQUEST_TIMEOUT,
         )
-        return response.text
 
     @staticmethod
     def fallback_classify(context: QueryContext) -> ClassifierOutput:
@@ -148,10 +146,9 @@ class Classifier:
             ClassifierOutput: A structured response with category, confidence, and reason.
         """
         try:
-            raw_text = self._generate_with_retry(
+            return self._generate_with_retry(
                 f"{CLASSIFIER_PROMPT}\n\nUser Question: {context.raw_query}"
             )
-            return ClassifierOutput.model_validate_json(raw_text)
         except Exception as e:  # noqa: BLE001
             logger.warning(
                 "Classifier LLM API failed (%s); switching to deterministic fallback heuristic.",
