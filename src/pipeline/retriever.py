@@ -81,6 +81,7 @@ class Retriever:
             return []
 
         raw_results = None
+        raw_results_from_hybrid = False
         if use_hybrid:
             try:
                 if self.hybrid_retriever is None:
@@ -92,6 +93,8 @@ class Retriever:
                 raw_results = self.hybrid_retriever.retrieve(
                     query=query.strip(), top_k=limit, where=where
                 )
+                if raw_results is not None:
+                    raw_results_from_hybrid = True
             except Exception as e:  # noqa: BLE001
                 logger.warning(
                     "Hybrid retrieval delegation failed (%s); falling back to dense search.",
@@ -183,8 +186,10 @@ class Retriever:
                 }
             )
 
-        # Sort results by similarity_score descending
-        formatted_chunks.sort(key=lambda x: x["similarity_score"], reverse=True)
+        # Sort results by similarity_score descending only if dense fallback was used;
+        # if hybrid retrieval succeeded, preserve the fused RRF ranking.
+        if not raw_results_from_hybrid:
+            formatted_chunks.sort(key=lambda x: x["similarity_score"], reverse=True)
 
         logger.info(
             "Retriever retrieved %d chunks for query '%s'",
