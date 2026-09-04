@@ -7,6 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from src.api.routes import router
+from src.api.admin import router as admin_router
 from src.config import config
 from src.pipeline.orchestrator import PipelineOrchestrator
 from src.utils.logger import setup_logging
@@ -49,6 +50,7 @@ app.add_middleware(
 )
 
 app.include_router(router)
+app.include_router(admin_router)
 
 
 @app.exception_handler(Exception)

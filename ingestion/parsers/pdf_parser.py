@@ -205,7 +205,7 @@ def chunk_text(
 
 
 def parse_document(
-    file_path: Path | str,
+    file_path: Path | str | bytes | io.BytesIO,
     metadata: dict[str, Any],
     min_tokens: int = 300,
     max_tokens: int = 600,
@@ -213,7 +213,7 @@ def parse_document(
     """Parses a document file (PDF or text) and generates structured chunks with metadata.
 
     Args:
-        file_path: Path to the raw document file.
+        file_path: Path to the raw document file, raw bytes, or BytesIO buffer.
         metadata: Document metadata dictionary from manifest (must contain doc_id).
         min_tokens: Minimum target tokens per chunk (default: 300).
         max_tokens: Maximum tokens per chunk (default: 600).
@@ -225,27 +225,30 @@ def parse_document(
     Raises:
         ParseError: If the document is missing, empty, or fails to parse.
     """
-    path = Path(file_path)
-    if not path.exists():
-        raise ParseError(f"Document file does not exist: {path}")
-
-    if path.stat().st_size == 0:
-        raise ParseError(f"Document file is empty (0 bytes): {path}")
-
     doc_id = metadata.get("doc_id")
     if not doc_id:
         raise ParseError("Document metadata is missing required 'doc_id' field.")
 
-    logger.info("Parsing document '%s' from %s...", doc_id, path)
+    logger.info("Parsing document '%s'...", doc_id)
 
-    # Extract text according to file extension
-    if path.suffix.lower() == ".pdf":
-        text = extract_text_from_pdf(path)
+    # Extract text according to file type
+    if isinstance(file_path, (bytes, io.BytesIO)):
+        text = extract_text_from_pdf(file_path)
     else:
-        try:
-            text = path.read_text(encoding="utf-8")
-        except UnicodeDecodeError:
-            text = path.read_text(encoding="latin-1")
+        path = Path(file_path)
+        if not path.exists():
+            raise ParseError(f"Document file does not exist: {path}")
+
+        if path.stat().st_size == 0:
+            raise ParseError(f"Document file is empty (0 bytes): {path}")
+
+        if path.suffix.lower() == ".pdf":
+            text = extract_text_from_pdf(path)
+        else:
+            try:
+                text = path.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                text = path.read_text(encoding="latin-1")
 
     if not text or not text.strip():
         raise ParseError(f"Document '{doc_id}' contains no readable text content.")
