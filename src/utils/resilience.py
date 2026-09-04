@@ -40,12 +40,10 @@ def retry_with_backoff(
             @functools.wraps(func)
             async def async_wrapper(*args, **kwargs) -> Any:
                 delay = initial_delay
-                last_err = None
                 for attempt in range(max_retries + 1):
                     try:
                         return await func(*args, **kwargs)
                     except Exception as e:
-                        last_err = e
                         if attempt < max_retries and predicate(e):
                             sleep_time = delay * (
                                 1 + random.random() * 0.5 if jitter else 1.0
@@ -62,8 +60,6 @@ def retry_with_backoff(
                             delay *= backoff_factor
                         else:
                             raise
-                if last_err:
-                    raise last_err
 
             return async_wrapper
         else:
@@ -71,12 +67,10 @@ def retry_with_backoff(
             @functools.wraps(func)
             def sync_wrapper(*args, **kwargs) -> Any:
                 delay = initial_delay
-                last_err = None
                 for attempt in range(max_retries + 1):
                     try:
                         return func(*args, **kwargs)
                     except Exception as e:
-                        last_err = e
                         if attempt < max_retries and predicate(e):
                             sleep_time = delay * (
                                 1 + random.random() * 0.5 if jitter else 1.0
@@ -93,8 +87,6 @@ def retry_with_backoff(
                             delay *= backoff_factor
                         else:
                             raise
-                if last_err:
-                    raise last_err
 
             return sync_wrapper
 
