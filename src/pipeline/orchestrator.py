@@ -166,12 +166,11 @@ class PipelineOrchestrator:
                     asyncio.to_thread(self.retriever.retrieve, search_query_str),
                     asyncio.to_thread(self.abs_checker.check, search_query_str),
                 )
-            except Exception as e:  # noqa: BLE001
-                logger.error(
-                    "[HYBRID-SEARCH] [%s] External search failure: %s", short_id, e
+            except Exception as e:
+                logger.critical(
+                    "[HYBRID-SEARCH] [%s] Critical infrastructure failure: %s", short_id, e
                 )
-                retrieved_chunks = []
-                abs_out = ABSCheckerOutput(abs_flag=False, abs_detail=None)
+                raise RuntimeError("Vector database or retrieval infrastructure is unreachable.") from e
 
             logger.info(
                 "[HYBRID-SEARCH] [%s] Retrieved %d chunks | ABS: %s | TKDL: %s",
