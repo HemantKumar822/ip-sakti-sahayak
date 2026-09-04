@@ -1,3 +1,4 @@
+import io
 import json
 import logging
 from pathlib import Path
@@ -9,6 +10,83 @@ from src.vector_store.base import VectorStore
 from src.vector_store.chroma_store import ChromaStore
 
 logger = logging.getLogger("ip_sakti.ingestion.ingest")
+
+
+def ingest_single_document(
+    file_content: Path | str | bytes | io.BytesIO,
+    metadata: dict[str, Any],
+    vector_store: VectorStore,
+) -> int:
+    """Ingests a single document into the vector database.
+
+    Args:
+        file_content: Document payload (file path, bytes, or buffer).
+        metadata: Document metadata dictionary (must contain doc_id).
+        vector_store: Initialized VectorStore instance.
+
+    Returns:
+        Number of chunks ingested.
+    """
+    doc_id = metadata.get("doc_id")
+    if not doc_id:
+        logger.error("Missing doc_id in metadata.")
+        return 0
+
+    try:
+        chunks = parse_document(file_content, metadata)
+    except ParseError as pe:
+        logger.warning("Could not parse document '%s': %s", doc_id, pe)
+        return 0
+    except (ValueError, TypeError, OSError, RuntimeError) as e:
+        logger.error("Unexpected error parsing '%s': %s", doc_id, e)
+        return 0
+
+    docs_list: list[str] = []
+    metas_list: list[dict[str, Any]] = []
+    ids_list: list[str] = []
+
+    for chunk in chunks:
+        c_id = chunk.get("chunk_id", 0)
+        text = chunk.get("chunk_text", "").strip()
+        if not text:
+            continue
+
+        chunk_metadata = {
+            "doc_id": doc_id,
+            "chunk_id": int(c_id),
+            "source_url": str(
+                chunk.get("source_url") or metadata.get("source_url") or ""
+            ),
+            "doc_type": str(
+                chunk.get("document_type") or metadata.get("document_type") or "statute"
+            ),
+            "document_type": str(
+                chunk.get("document_type") or metadata.get("document_type") or "statute"
+            ),
+            "date_retrieved": str(
+                chunk.get("date_retrieved") or metadata.get("date_retrieved") or ""
+            ),
+            "version_or_amendment_date": str(
+                chunk.get("version_or_amendment_date")
+                or metadata.get("version_or_amendment_date")
+                or ""
+            ),
+            "section_heading": str(chunk.get("section_heading") or ""),
+            "title": str(chunk.get("title") or metadata.get("title") or doc_id),
+        }
+
+        unique_id = f"{doc_id}#chunk_{c_id}"
+        docs_list.append(text)
+        metas_list.append(chunk_metadata)
+        ids_list.append(unique_id)
+
+    if docs_list:
+        vector_store.add(documents=docs_list, metadatas=metas_list, ids=ids_list)
+        logger.info("Successfully ingested %d chunks for '%s'", len(docs_list), doc_id)
+        return len(docs_list)
+    else:
+        logger.warning("Document '%s' produced 0 chunks after parsing", doc_id)
+        return 0
 
 
 def run_ingest(
@@ -102,67 +180,12 @@ def run_ingest(
             doc["chunk_count"] = 0
             continue
 
-        try:
-            chunks = parse_document(target_file, doc)
-        except ParseError as pe:
-            logger.warning("Could not parse document '%s': %s", doc_id, pe)
-            doc["chunk_count"] = 0
-            continue
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
-            logger.error("Unexpected error parsing '%s': %s", doc_id, e)
-            doc["chunk_count"] = 0
-            continue
+        num_chunks = ingest_single_document(target_file, doc, store)
+        doc["chunk_count"] = num_chunks
 
-        docs_list: list[str] = []
-        metas_list: list[dict[str, Any]] = []
-        ids_list: list[str] = []
-
-        for chunk in chunks:
-            c_id = chunk.get("chunk_id", 0)
-            text = chunk.get("chunk_text", "").strip()
-            if not text:
-                continue
-
-            metadata = {
-                "doc_id": doc_id,
-                "chunk_id": int(c_id),
-                "source_url": str(
-                    chunk.get("source_url") or doc.get("source_url") or ""
-                ),
-                "doc_type": str(
-                    chunk.get("document_type") or doc.get("document_type") or "statute"
-                ),
-                "document_type": str(
-                    chunk.get("document_type") or doc.get("document_type") or "statute"
-                ),
-                "date_retrieved": str(
-                    chunk.get("date_retrieved") or doc.get("date_retrieved") or ""
-                ),
-                "version_or_amendment_date": str(
-                    chunk.get("version_or_amendment_date")
-                    or doc.get("version_or_amendment_date")
-                    or ""
-                ),
-                "section_heading": str(chunk.get("section_heading") or ""),
-                "title": str(chunk.get("title") or doc.get("title") or doc_id),
-            }
-
-            unique_id = f"{doc_id}#chunk_{c_id}"
-            docs_list.append(text)
-            metas_list.append(metadata)
-            ids_list.append(unique_id)
-
-        if docs_list:
-            store.add(documents=docs_list, metadatas=metas_list, ids=ids_list)
-            doc["chunk_count"] = len(docs_list)
-            total_chunks_ingested += len(docs_list)
+        if num_chunks > 0:
+            total_chunks_ingested += num_chunks
             documents_processed += 1
-            logger.info(
-                "Successfully ingested %d chunks for '%s'", len(docs_list), doc_id
-            )
-        else:
-            doc["chunk_count"] = 0
-            logger.warning("Document '%s' produced 0 chunks after parsing", doc_id)
 
     # 5. Atomically update manifest.json with chunk_count
     if manifest_file.parent.exists():
