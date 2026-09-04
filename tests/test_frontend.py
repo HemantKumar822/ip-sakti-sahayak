@@ -124,6 +124,8 @@ def test_react_app_structure_and_components_exist():
         Path("src/web/src/components/ErrorBoundary.tsx"),
         Path("src/web/src/components/ToastContainer.tsx"),
         Path("src/web/src/utils/toast.ts"),
+        Path("src/web/src/components/CorpusConsole.tsx"),
+        Path("src/web/src/components/CorpusConsole.css"),
     ]
     for file_path in required_files:
         assert file_path.exists(), f"Required React file {file_path} must exist"
@@ -461,3 +463,80 @@ def test_gitignore_hygiene_and_no_tracked_cache_artifacts():
             assert not pat.search(
                 f
             ), f"Found forbidden tracked artifact in git index: {f}"
+
+
+def test_corpus_console_telemetry_and_gauge():
+    """Verify CorpusConsole renders 296-chunk visual gauge, ChromaDB status, document table, and X-API-Key auth."""
+    console_tsx = Path("src/web/src/components/CorpusConsole.tsx")
+    console_css = Path("src/web/src/components/CorpusConsole.css")
+    app_tsx = Path("src/web/src/App.tsx")
+    client_ts = Path("src/web/src/api/client.ts")
+
+    assert console_tsx.exists(), "CorpusConsole.tsx must exist"
+    assert console_css.exists(), "CorpusConsole.css must exist"
+
+    tsx_content = console_tsx.read_text(encoding="utf-8")
+    css_content = console_css.read_text(encoding="utf-8")
+    app_content = app_tsx.read_text(encoding="utf-8")
+    client_content = client_ts.read_text(encoding="utf-8")
+
+    # API client contracts
+    assert "fetchCorpusStatus" in client_content
+    assert "CorpusStatusResponse" in client_content
+    assert "DocumentBreakdown" in client_content
+
+    # Telemetry and visual gauge assertions (Story 17.1)
+    assert "296" in tsx_content, "Target 296 chunks must be specified"
+    assert "ChromaDB" in tsx_content
+    assert "ip_sakti_legal_corpus" in tsx_content
+    assert "gauge-track" in tsx_content
+    assert "gauge-fill" in tsx_content
+
+    # Authentic legal gazettes data table
+    assert "corpus-data-table" in tsx_content
+    assert "Document Title" in tsx_content
+    assert "Chunks" in tsx_content
+    assert "Retrieval Date" in tsx_content
+    assert "Source" in tsx_content
+
+    # Authentication guard
+    assert "Admin Access Restricted" in tsx_content
+    assert "VITE_API_KEY" in tsx_content
+
+    # Mounted in App.tsx when activeView === 'admin'
+    assert "CorpusConsole" in app_content
+    assert "<CorpusConsole" in app_content
+
+    # x.ai Design Tokens
+    assert "--color-card" in css_content
+    assert "--color-hairline" in css_content
+    assert "--radius-pill" in css_content
+    assert "box-shadow: none" in css_content
+
+
+def test_corpus_console_pdf_ingestion_form():
+    """Verify CorpusConsole drag-and-drop form, metadata inputs, and ingestion submission (Story 17.2)."""
+    console_tsx = Path("src/web/src/components/CorpusConsole.tsx")
+    client_ts = Path("src/web/src/api/client.ts")
+
+    tsx_content = console_tsx.read_text(encoding="utf-8")
+    client_content = client_ts.read_text(encoding="utf-8")
+
+    # API client contract for ingestion
+    assert "ingestCorpusDocument" in client_content
+    assert "POST" in client_content
+    assert "/admin/corpus/ingest" in client_content
+
+    # Drag-and-drop zone and form metadata fields (Story 17.2)
+    assert "dropzone-container" in tsx_content
+    assert "handleDragOver" in tsx_content
+    assert "handleDrop" in tsx_content
+    assert "doc_id" in tsx_content
+    assert "doc_title" in tsx_content or "title" in tsx_content
+    assert "document_type" in tsx_content
+    assert "source_url" in tsx_content
+
+    # Loading states and success toast
+    assert "isSubmitting" in tsx_content
+    assert "toast.success" in tsx_content
+    assert "ingest-submit-btn" in tsx_content
