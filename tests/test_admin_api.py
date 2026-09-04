@@ -79,3 +79,25 @@ def test_ingest_corpus_zero_chunks():
         # Since chunks_ingested == 0, we expect a 400 Bad Request
         assert response.status_code == 400
         assert "0 chunks" in response.json()["detail"]
+
+
+def test_ingest_corpus_triggers_retriever_reload():
+    from unittest.mock import MagicMock
+
+    mock_pipeline = MagicMock()
+    mock_pipeline.retriever.vector_store = MagicMock()
+
+    with patch("src.api.admin.ingest_single_document", return_value=3):
+        dummy_pdf_content = b"%PDF-1.4\n%...\n"
+        file = io.BytesIO(dummy_pdf_content)
+        data = {"doc_id": "test_doc_reload"}
+        files = {"file": ("test.pdf", file, "application/pdf")}
+
+        app.state.pipeline = mock_pipeline
+        try:
+            response = client.post("/admin/corpus/ingest", data=data, files=files)
+            assert response.status_code == 200
+            assert response.json()["chunks_ingested"] == 3
+            mock_pipeline.retriever.reload_hybrid_index.assert_called_once()
+        finally:
+            app.state.pipeline = None

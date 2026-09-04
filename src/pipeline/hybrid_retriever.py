@@ -1,4 +1,5 @@
 import logging
+import threading
 from typing import Any
 
 from src.pipeline.bm25_retriever import BM25Retriever
@@ -31,48 +32,75 @@ class HybridRetriever:
         self.bm25 = bm25_retriever or BM25Retriever()
         self.rrf_k = rrf_k
         self._is_bm25_indexed = False
+        self._lock = threading.RLock()
+
+    def reload_bm25_index(
+        self, corpus_chunks: list[dict[str, Any]] | None = None
+    ) -> int:
+        """Re-tokenizes and rebuilds the BM25 lexical index from the updated corpus.
+
+        Args:
+            corpus_chunks: Optional explicit list of chunk dictionaries to index.
+                If None, all documents are dynamically re-extracted from the vector store.
+
+        Returns:
+            Number of indexed chunks.
+        """
+        with self._lock:
+            if corpus_chunks is not None:
+                self.bm25.index(corpus_chunks)
+                self._is_bm25_indexed = True
+                logger.info(
+                    "HybridRetriever explicitly re-indexed %d documents into BM25.",
+                    len(corpus_chunks),
+                )
+                return len(corpus_chunks)
+
+            try:
+                collection = getattr(self.vector_store, "collection", None)
+                if collection is not None:
+                    data = collection.get()
+                    docs = data.get("documents") or []
+                    metas = data.get("metadatas") or []
+                    ids = data.get("ids") or []
+
+                    corpus_items = []
+                    for i, doc_text in enumerate(docs):
+                        meta = metas[i] if i < len(metas) else {}
+                        cid = ids[i] if i < len(ids) else f"chunk_{i}"
+                        corpus_items.append(
+                            {
+                                "id": cid,
+                                "chunk_text": doc_text,
+                                "section_heading": meta.get("section_heading", ""),
+                                "metadata": meta,
+                                "source_url": meta.get("source_url", ""),
+                                "doc_id": meta.get("doc_id", ""),
+                                "doc_type": meta.get("doc_type", "statute"),
+                                "title": meta.get("title", ""),
+                                "date_retrieved": meta.get("date_retrieved", ""),
+                            }
+                        )
+                    self.bm25.index(corpus_items)
+                    self._is_bm25_indexed = True
+                    logger.info(
+                        "HybridRetriever reloaded %d documents into BM25 index.",
+                        len(corpus_items),
+                    )
+                    return len(corpus_items)
+            except Exception as e:  # noqa: BLE001
+                logger.warning(
+                    "Could not reload BM25 index from vector store: %s",
+                    e,
+                )
+            return 0
 
     def _ensure_bm25_index(self) -> None:
         """Lazily extracts all documents from the vector store to populate the BM25 index."""
-        if self._is_bm25_indexed:
-            return
-
-        try:
-            collection = getattr(self.vector_store, "collection", None)
-            if collection is not None:
-                data = collection.get()
-                docs = data.get("documents") or []
-                metas = data.get("metadatas") or []
-                ids = data.get("ids") or []
-
-                corpus_items = []
-                for i, doc_text in enumerate(docs):
-                    meta = metas[i] if i < len(metas) else {}
-                    cid = ids[i] if i < len(ids) else f"chunk_{i}"
-                    corpus_items.append(
-                        {
-                            "id": cid,
-                            "chunk_text": doc_text,
-                            "section_heading": meta.get("section_heading", ""),
-                            "metadata": meta,
-                            "source_url": meta.get("source_url", ""),
-                            "doc_id": meta.get("doc_id", ""),
-                            "doc_type": meta.get("doc_type", "statute"),
-                            "title": meta.get("title", ""),
-                            "date_retrieved": meta.get("date_retrieved", ""),
-                        }
-                    )
-                self.bm25.index(corpus_items)
-                self._is_bm25_indexed = True
-                logger.info(
-                    "HybridRetriever indexed %d documents into BM25.",
-                    len(corpus_items),
-                )
-        except Exception as e:  # noqa: BLE001
-            logger.warning(
-                "Could not automatically populate BM25 index from vector store: %s",
-                e,
-            )
+        with self._lock:
+            if self._is_bm25_indexed:
+                return
+            self.reload_bm25_index()
 
     def retrieve(
         self,
