@@ -151,6 +151,35 @@ async def process_query(payload: QueryRequest, request: Request) -> QueryRespons
             detail="Service temporarily unavailable",
         ) from exc
 
+@api_v1_router.get(
+    "/corpus/stats",
+    summary="Corpus statistics",
+    tags=["System"],
+)
+async def get_corpus_stats(request: Request) -> dict[str, int]:
+    """Retrieve non-sensitive chunk and document counts for the live corpus."""
+    try:
+        store = None
+        if hasattr(request.app.state, "pipeline") and request.app.state.pipeline:
+            retriever = getattr(request.app.state.pipeline, "retriever", None)
+            if retriever:
+                store = getattr(retriever, "vector_store", None)
+        if store is None or not hasattr(store, "get_collection_stats"):
+            from src.vector_store.chroma_store import ChromaStore
+            store = ChromaStore()
+        stats = store.get_collection_stats()
+        # Return only safe integer stats to standard authenticated users
+        return {
+            "total_chunks": stats.get("total_chunks", 0),
+            "total_documents": stats.get("total_documents", 0)
+        }
+    except Exception as e:
+        logger.error("Failed to fetch corpus stats: %s", e)
+        raise HTTPException(
+            status_code=503,
+            detail="Vector store is unavailable",
+        ) from e
+
 
 router = APIRouter()
 router.include_router(system_router)

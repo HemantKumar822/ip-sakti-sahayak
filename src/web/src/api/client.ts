@@ -117,3 +117,24 @@ export async function fetchSession(sessionId: string): Promise<SessionDetail> {
   return response.json();
 }
 
+export interface CorpusStats {
+  total_chunks: number;
+  total_documents: number;
+}
+
+export async function fetchCorpusStats(): Promise<CorpusStats> {
+  const response = await fetch(`${API_BASE_URL}/corpus/stats`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': API_KEY,
+    },
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to retrieve corpus stats');
+  }
+
+  return response.json();
+}
+
