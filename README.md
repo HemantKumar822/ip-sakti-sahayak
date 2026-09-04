@@ -213,7 +213,7 @@ python run.py --ingest   # Download & embed authentic legal documents into Chrom
 
 ## 🎨 Interactive Legal Workbench
 
-The user interface is built on modern, document-first design principles (modeled after Notion's clean typography and color system):
+The user interface is a strict, distraction-free environment modeled on the **x.ai Intelligence Terminal** aesthetic. It uses a pure dark canvas (`#0a0a0a`), single-weight geometric sans-serif typography, and zero drop shadows or glassmorphism:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
@@ -399,6 +399,7 @@ docker compose up --build -d
 ├── run.py                             # Unified cross-platform CLI runner
 ├── start.bat                          # 1-Click Windows launcher
 ├── start.sh                           # 1-Click Linux/macOS launcher
+├── DESIGN.md                          # Strict x.ai Design Specification Tokens
 ├── Dockerfile                         # Hardened multi-stage containerfile
 ├── docker-compose.yml                 # Production multi-service orchestration
 ├── nginx/
@@ -420,12 +421,11 @@ docker compose up --build -d
 │   ├── web/                           # Modern React + Vite TypeScript Frontend
 │   │   ├── Dockerfile                 # Frontend static/preview containerfile
 │   │   ├── package.json               # Frontend dependencies (React 18, Lucide)
-│   │   ├── design_system.md           # Visual design tokens & specifications
 │   │   └── src/
 │   │       ├── App.tsx                # Application shell with legal disclaimer
 │   │       ├── index.css              # Base layout & typography
 │   │       ├── api/client.ts          # Type-safe API client for FastAPI
-│   │       ├── styles/design_tokens.css # Glassmorphism & micro-animations
+│   │       ├── styles/design_tokens.css # x.ai dark-mode design tokens
 │   │       └── components/            # ChatInterface, Callout, StatutoryBadge, Stepper
 │   ├── models/
 │   │   ├── request.py                 # QueryRequest schema
