@@ -207,6 +207,33 @@ class ChromaStore(VectorStore):
         """Return the number of documents in the vector store."""
         return self.collection.count()
 
+    def get_collection_stats(self) -> dict[str, Any]:
+        """Return diagnostic statistics and health status of the ChromaDB collection.
+
+        Returns:
+            Dictionary containing collection status, name, total chunk count,
+            unique document count, and sorted list of document IDs.
+        """
+        total_chunks = self.count()
+        documents: list[str] = []
+
+        if total_chunks > 0:
+            data = self.collection.get(include=["metadatas"])
+            metadatas = data.get("metadatas") or []
+            doc_ids = set()
+            for meta in metadatas:
+                if meta and meta.get("doc_id"):
+                    doc_ids.add(str(meta["doc_id"]))
+            documents = sorted(doc_ids)
+
+        return {
+            "status": "healthy",
+            "collection_name": self.collection_name,
+            "total_chunks": total_chunks,
+            "document_count": len(documents),
+            "documents": documents,
+        }
+
     def reset(self) -> None:
         """Clears and reinitializes the collection."""
         try:

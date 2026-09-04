@@ -208,3 +208,66 @@ def test_ephemeral_client_teardown_no_disk_artifacts(
     # Ensure ephemeral client is in use
     assert isinstance(ephemeral_store.client, chromadb.api.client.Client)
     assert ephemeral_store.count() == 4
+
+
+def test_hybrid_retriever_dynamic_bm25_reload(
+    hybrid_retriever: HybridRetriever, ephemeral_store: ChromaStore
+) -> None:
+    """Verifies that newly added documents are retrievable by BM25 after reload."""
+    # 1. Query for a brand new legal statute term that does not exist in initial corpus
+    initial_results = hybrid_retriever.bm25.search(
+        "Ashwagandha Withania somnifera novel extract", top_k=3
+    )
+    assert len(initial_results) == 0
+
+    # 2. Add new document to ChromaStore
+    new_doc_text = "Withania somnifera (Ashwagandha) is widely cultivated across Madhya Pradesh and Rajasthan."
+    new_meta = {
+        "doc_id": "ashwagandha-monograph",
+        "doc_type": "monograph",
+        "title": "Ayurvedic Pharmacopoeia: Ashwagandha",
+        "section_heading": "Monograph 42: Withania Somnifera",
+    }
+    ephemeral_store.add(
+        documents=[new_doc_text],
+        metadatas=[new_meta],
+        ids=["ashwagandha#chunk_1"],
+    )
+
+    # 3. Reload BM25 index
+    indexed_count = hybrid_retriever.reload_bm25_index()
+    assert indexed_count == 5
+
+    # 4. Search again via BM25
+    updated_bm25 = hybrid_retriever.bm25.search(
+        "Ashwagandha Withania somnifera", top_k=3
+    )
+    assert len(updated_bm25) > 0
+    assert updated_bm25[0]["doc_id"] == "ashwagandha-monograph"
+
+    # 5. Hybrid search should also rank the newly ingested document
+    hybrid_res = hybrid_retriever.retrieve(
+        "Ashwagandha Withania somnifera extract", top_k=3
+    )
+    assert any(r["doc_id"] == "ashwagandha-monograph" for r in hybrid_res)
+
+
+def test_top_level_retriever_reload_hybrid_index(ephemeral_store: ChromaStore) -> None:
+    """Verifies that top-level Retriever.reload_hybrid_index() reloads the underlying BM25 index."""
+    retriever = Retriever(vector_store=ephemeral_store)
+    # Trigger initial index
+    retriever.retrieve("Triphala ASU formulation", top_k=1)
+
+    # Add new doc
+    ephemeral_store.add(
+        documents=["Brahmi (Bacopa monnieri) memory enhancer extract."],
+        metadatas=[{"doc_id": "brahmi-monograph", "title": "Brahmi"}],
+        ids=["brahmi#1"],
+    )
+
+    reloaded_count = retriever.reload_hybrid_index()
+    assert reloaded_count == 5
+
+    results = retriever.retrieve("Brahmi Bacopa monnieri memory", top_k=1)
+    assert len(results) > 0
+    assert results[0]["doc_id"] == "brahmi-monograph"

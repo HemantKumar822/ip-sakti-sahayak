@@ -48,6 +48,10 @@ class Config:
         "yes",
     )
 
+    # Session & Persistence configuration
+    SESSION_DB_PATH: str = os.getenv("SESSION_DB_PATH", "./corpus/sessions.db")
+    MAX_SESSION_TURNS: int = int(os.getenv("MAX_SESSION_TURNS", "6"))
+
     # Server configuration (supports API_PORT/APP_PORT and API_HOST/APP_HOST)
     API_PORT: int = int(os.getenv("API_PORT", os.getenv("APP_PORT", "8000")))
     API_HOST: str = os.getenv("API_HOST", os.getenv("APP_HOST", "0.0.0.0"))

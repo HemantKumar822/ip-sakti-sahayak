@@ -29,16 +29,23 @@ def client(mock_orchestrator: MagicMock) -> Generator[TestClient, None, None]:
 
     Startup lifecycle hooks are executed cleanly with PipelineOrchestrator
     patched so no external vector stores or models are initialized during testing.
+    SQLiteSessionStore uses an isolated in-memory database.
     Includes default valid X-API-Key header.
     """
+    from src.session.sqlite_store import SQLiteSessionStore
+
+    in_memory_store = SQLiteSessionStore(":memory:")
     with (
         patch("src.main.PipelineOrchestrator", return_value=mock_orchestrator),
+        patch("src.main.SQLiteSessionStore", return_value=in_memory_store),
         TestClient(app, headers={"X-API-Key": "test-valid-key"}) as test_client,
     ):
         yield test_client
 
     # Guarantee clean state reset after test teardown
+    in_memory_store.close()
     app.state.pipeline = None
+    app.state.session_store = None
     app.state.is_ready = False
 
 

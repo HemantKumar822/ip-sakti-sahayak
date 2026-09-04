@@ -28,6 +28,23 @@ class Retriever:
         self.top_k: int = top_k if top_k is not None else config.RETRIEVAL_TOP_K
         self.hybrid_retriever: Any = None
 
+    def reload_hybrid_index(
+        self, corpus_chunks: list[dict[str, Any]] | None = None
+    ) -> int:
+        """Reloads the underlying hybrid retriever's BM25 lexical index.
+
+        Args:
+            corpus_chunks: Optional explicit list of chunk dictionaries to index.
+
+        Returns:
+            Number of indexed chunks.
+        """
+        if self.hybrid_retriever is None:
+            from src.pipeline.hybrid_retriever import HybridRetriever
+
+            self.hybrid_retriever = HybridRetriever(vector_store=self.vector_store)
+        return self.hybrid_retriever.reload_bm25_index(corpus_chunks=corpus_chunks)
+
     def retrieve(
         self,
         query: str,
