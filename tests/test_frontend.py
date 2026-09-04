@@ -298,7 +298,6 @@ def test_judge_mode_scenarios_configured_and_non_empty():
     assert "11 Official" in hero_content or "11 Official" in sidebar_content
 
 
-
 def test_trust_inspector_and_export_brief_features():
     """Verify TrustInspector diagnostic metrics and research brief export."""
     inspector_content = Path("src/web/src/components/TrustInspector.tsx").read_text(
@@ -328,7 +327,7 @@ def test_useful_abstention_guidance_content():
 def test_api_client_contract():
     """Verify client.ts API contracts: PII scrubbing, X-API-Key auth, and endpoints."""
     client_content = Path("src/web/src/api/client.ts").read_text(encoding="utf-8")
-    
+
     assert "submitQuery" in client_content
     assert "scrubPII" in client_content
     assert "X-API-Key" in client_content
