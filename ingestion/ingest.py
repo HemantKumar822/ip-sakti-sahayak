@@ -1,3 +1,4 @@
+import io
 import json
 import logging
 from pathlib import Path
@@ -26,7 +27,6 @@ def ingest_single_document(
     Returns:
         Number of chunks ingested.
     """
-    import io
     doc_id = metadata.get("doc_id")
     if not doc_id:
         logger.error("Missing doc_id in metadata.")
@@ -82,9 +82,7 @@ def ingest_single_document(
 
     if docs_list:
         vector_store.add(documents=docs_list, metadatas=metas_list, ids=ids_list)
-        logger.info(
-            "Successfully ingested %d chunks for '%s'", len(docs_list), doc_id
-        )
+        logger.info("Successfully ingested %d chunks for '%s'", len(docs_list), doc_id)
         return len(docs_list)
     else:
         logger.warning("Document '%s' produced 0 chunks after parsing", doc_id)
@@ -184,7 +182,7 @@ def run_ingest(
 
         num_chunks = ingest_single_document(target_file, doc, store)
         doc["chunk_count"] = num_chunks
-        
+
         if num_chunks > 0:
             total_chunks_ingested += num_chunks
             documents_processed += 1
