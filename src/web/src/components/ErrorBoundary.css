@@ -1,0 +1,119 @@
+/* ErrorBoundary.css - x.ai Terminal Recovery Layout */
+.error-boundary-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100vw;
+  background-color: var(--color-canvas, #0a0a0a);
+  color: var(--color-ink, #ffffff);
+  padding: 2rem 1.5rem;
+  box-sizing: border-box;
+}
+
+.error-boundary-card {
+  max-width: 580px;
+  width: 100%;
+  background-color: var(--color-card, #191919);
+  border: 1px solid var(--color-hairline, #212327);
+  border-radius: var(--radius-card, 8px);
+  padding: 2.25rem 2rem;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.error-boundary-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.error-boundary-icon {
+  color: var(--color-warning, #ff7a17);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-boundary-eyebrow {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.725rem;
+  letter-spacing: var(--tracking-mono-eyebrow, 1.4px);
+  color: var(--color-muted, #7d8187);
+  text-transform: uppercase;
+}
+
+.error-boundary-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--color-ink, #ffffff);
+  line-height: 1.3;
+}
+
+.error-boundary-desc {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-body, #dadbdf);
+  line-height: 1.5;
+}
+
+.error-boundary-details {
+  background-color: var(--color-canvas, #0a0a0a);
+  border: 1px solid var(--color-hairline, #212327);
+  border-radius: var(--radius-card, 8px);
+  padding: 0.85rem 1rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  color: var(--color-body, #dadbdf);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 180px;
+}
+
+.error-boundary-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.error-reset-btn {
+  background-color: var(--color-primary, #ffffff);
+  color: var(--color-on-primary, #0a0a0a);
+  border: 1px solid var(--color-primary, #ffffff);
+  border-radius: var(--radius-pill, 9999px);
+  padding: 0.6rem 1.4rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: none;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.error-reset-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.error-reload-btn {
+  background-color: transparent;
+  color: var(--color-ink, #ffffff);
+  border: 1px solid var(--color-hairline, #212327);
+  border-radius: var(--radius-pill, 9999px);
+  padding: 0.6rem 1.4rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.error-reload-btn:hover {
+  background-color: var(--color-card-hover, #222222);
+  border-color: var(--color-hairline-strong, #363a3f);
+}

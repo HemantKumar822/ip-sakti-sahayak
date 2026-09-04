@@ -5,6 +5,8 @@ import { Sidebar } from './components/Sidebar';
 import { Topbar } from './components/Topbar';
 import { ChatInterface } from './components/ChatInterface';
 import { TrustInspector } from './components/TrustInspector';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { ToastContainer } from './components/ToastContainer';
 import './App.css';
 
 function getInitialSessionId(): string {
@@ -133,66 +135,69 @@ function App() {
   }, []);
 
   return (
-    <div className="workbench-root">
-      {authError && (
-        <div className="auth-error-banner animate-fade-in" role="alert" style={{
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, 
-          backgroundColor: '#ef4444', color: 'white', padding: '1rem', textAlign: 'center', fontWeight: 'bold'
-        }}>
-          API Key Required / Unauthorized: Please check your configuration in .env (VITE_API_KEY).
-        </div>
-      )}
-      {/* Notion Topbar with Breadcrumbs and Inspector Toggle */}
-      <Topbar 
-        onReset={handleReset} 
-        hasMessages={messages.length > 0} 
-        onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
-        onToggleInspector={() => setIsInspectorOpen(prev => !prev)}
-        isInspectorOpen={isInspectorOpen}
-        activeCategory={lastResponse?.category}
-      />
+    <ErrorBoundary onReset={handleReset}>
+      <div className="workbench-root">
+        <ToastContainer />
+        {authError && (
+          <div className="auth-error-banner animate-fade-in" role="alert" style={{
+            position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, 
+            backgroundColor: '#ef4444', color: 'white', padding: '1rem', textAlign: 'center', fontWeight: 'bold'
+          }}>
+            API Key Required / Unauthorized: Please check your configuration in .env (VITE_API_KEY).
+          </div>
+        )}
+        {/* Notion Topbar with Breadcrumbs and Inspector Toggle */}
+        <Topbar 
+          onReset={handleReset} 
+          hasMessages={messages.length > 0} 
+          onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+          onToggleInspector={() => setIsInspectorOpen(prev => !prev)}
+          isInspectorOpen={isInspectorOpen}
+          activeCategory={lastResponse?.category}
+        />
 
-      <div className="workbench-layout">
-        {/* Left Column: Navigation */}
-        <div className={`workbench-sidebar ${isSidebarOpen ? '' : 'collapsed'}`}>
-          <Sidebar
-            onNewNote={handleReset}
-            activeSessionId={sessionId}
-            onSelectSession={setSessionId}
-            refreshTrigger={messages.length}
-          />
+        <div className="workbench-layout">
+          {/* Left Column: Navigation */}
+          <div className={`workbench-sidebar ${isSidebarOpen ? '' : 'collapsed'}`}>
+            <Sidebar
+              onNewNote={handleReset}
+              activeSessionId={sessionId}
+              onSelectSession={setSessionId}
+              refreshTrigger={messages.length}
+            />
+          </div>
+
+          {/* Center Column: Notion Legal Research Canvas */}
+          <main className="workbench-center">
+            <ChatInterface 
+              messages={messages} 
+              setMessages={setMessages}
+              lastResponse={lastResponse}
+              setLastResponse={setLastResponse}
+              currentQuery={currentQuery}
+              setCurrentQuery={setCurrentQuery}
+              sessionId={sessionId}
+              onReset={handleReset}
+              onAuthError={() => setAuthError(true)}
+            />
+          </main>
+
+          {/* Right Column: Trust & Telemetry Inspector ("Why This Answer?") */}
+          <div className={`workbench-inspector ${isInspectorOpen ? '' : 'hidden'}`}>
+            <TrustInspector
+              query={currentQuery}
+              response={lastResponse}
+              onClose={() => setIsInspectorOpen(false)}
+            />
+          </div>
         </div>
 
-        {/* Center Column: Notion Legal Research Canvas */}
-        <main className="workbench-center">
-          <ChatInterface 
-            messages={messages} 
-            setMessages={setMessages}
-            lastResponse={lastResponse}
-            setLastResponse={setLastResponse}
-            currentQuery={currentQuery}
-            setCurrentQuery={setCurrentQuery}
-            sessionId={sessionId}
-            onReset={handleReset}
-            onAuthError={() => setAuthError(true)}
-          />
-        </main>
-
-        {/* Right Column: Trust & Telemetry Inspector ("Why This Answer?") */}
-        <div className={`workbench-inspector ${isInspectorOpen ? '' : 'hidden'}`}>
-          <TrustInspector
-            query={currentQuery}
-            response={lastResponse}
-            onClose={() => setIsInspectorOpen(false)}
-          />
-        </div>
+        {/* Statutory Legal Disclaimer */}
+        <footer className="workbench-footer-disclaimer">
+          This information is provided for general awareness and does not constitute legal advice. Consult a qualified IP attorney for decisions specific to your situation.
+        </footer>
       </div>
-
-      {/* Statutory Legal Disclaimer */}
-      <footer className="workbench-footer-disclaimer">
-        This information is provided for general awareness and does not constitute legal advice. Consult a qualified IP attorney for decisions specific to your situation.
-      </footer>
-    </div>
+    </ErrorBoundary>
   );
 }
 
