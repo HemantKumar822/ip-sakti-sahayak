@@ -72,8 +72,7 @@ async def verify_api_key(
 
 
 async def require_admin(
-    request: Request,
-    api_key: str = Security(verify_api_key)
+    request: Request, api_key: str = Security(verify_api_key)
 ) -> str:
     """FastAPI security dependency to verify Admin privileges.
 
