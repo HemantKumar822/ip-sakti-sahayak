@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { AlertTriangle, Info, XCircle } from 'lucide-react';
-import './Callout.css';
 
 interface CalloutProps {
   type: 'abs' | 'tkdl' | 'abstain' | 'error';
@@ -8,23 +7,22 @@ interface CalloutProps {
   children: ReactNode;
 }
 
-export const Callout = ({ type, title, children }: CalloutProps) => {
-  const icons = {
-    abs: <AlertTriangle size={20} color="var(--color-warning)" />,
-    tkdl: <Info size={20} color="var(--color-info)" />,
-    abstain: <XCircle size={20} color="var(--color-error)" />,
-    error: <XCircle size={20} color="var(--color-error)" />
-  };
+const META = {
+  abs: { icon: <AlertTriangle size={16} aria-hidden="true" />, cls: 'sk-alert-warn' },
+  tkdl: { icon: <Info size={16} aria-hidden="true" />, cls: 'sk-alert-info' },
+  abstain: { icon: <XCircle size={16} aria-hidden="true" />, cls: 'sk-alert-bad' },
+  error: { icon: <XCircle size={16} aria-hidden="true" />, cls: 'sk-alert-bad' },
+} as const;
 
+export const Callout = ({ type, title, children }: CalloutProps) => {
+  const m = META[type];
   return (
-    <div className={`callout callout-${type} animate-fade-in`}>
-      <div className="callout-header">
-        <span className="callout-icon">{icons[type]}</span>
-        <span className="callout-title">{title}</span>
-      </div>
-      <div className="callout-body">
-        {children}
-      </div>
+    <div className={`sk-alert ${m.cls} animate-fade-in`} role="note">
+      <p className="sk-alert-title">
+        {m.icon}
+        <span>{title}</span>
+      </p>
+      <div className="sk-alert-body">{children}</div>
     </div>
   );
 };

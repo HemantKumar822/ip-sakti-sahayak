@@ -1,0 +1,100 @@
+/* =============================================================================
+   IP-SAKTI Sahayak Design System — Tokens Engine
+   Strictly derived from DESIGN.md (xAI-inspired frontier laboratory language)
+   Zero Hardcoding Rule: Every UI value is an explicit CSS Custom Property.
+   ============================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400&family=Geist+Mono:wght@400&display=swap');
+
+:root {
+  /* --- Surfaces & Canvas --- */
+  --canvas: #0a0a0a;
+  --canvas-soft: #1a1c20;
+  --canvas-card: #191919;
+  --canvas-mid: #363a3f;
+  --hairline: #212327;
+  --hairline-strong: #363a3f;
+  --hairline-translucent: rgba(255, 255, 255, 0.20);
+  --hairline-translucent-hover: rgba(255, 255, 255, 0.40);
+
+  /* --- Text & Inks --- */
+  --ink: #ffffff;
+  --ink-hover: #fafaf7;
+  --body: #dadbdf;
+  --body-mid: #7d8187;
+  --mute: #7d8187;
+
+  /* --- Primary Brand Invariants --- */
+  --primary: #ffffff;
+  --on-primary: #0a0a0a;
+
+  /* --- Restrained Accent Palette --- */
+  --accent-sunset: #ff7a17;
+  --accent-sunset-soft: #ffc285;
+  --accent-dusk: #7c3aed;
+  --accent-twilight: #c4b5fd;
+  --accent-breeze: #a0c3ec;
+  --accent-midnight: #0d1726;
+
+  /* --- Semantic Status Indicators (Bounded to Palette) --- */
+  --status-success: #10b981;
+  --status-success-bg: rgba(16, 185, 129, 0.12);
+  --status-warning: #ff7a17;
+  --status-warning-bg: rgba(255, 122, 23, 0.12);
+  --status-error: #ef4444;
+  --status-error-bg: rgba(239, 68, 68, 0.12);
+  --status-info: #a0c3ec;
+  --status-info-bg: rgba(160, 195, 236, 0.12);
+
+  /* --- Typography Families --- */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-weight-regular: 400; /* Strict xAI: 400 for everything; no bolding */
+
+  /* --- Display Tracking Ladder (Negative Letter-Spacing) --- */
+  --tracking-display-xl: -2.4px;
+  --tracking-display-lg: -1.8px;
+  --tracking-display-md: -1.2px;
+  --tracking-display-sm: -0.6px;
+  --tracking-display-xs: 0px;
+
+  /* --- Monospace Eyebrow Tracking Ladder (Positive Letter-Spacing) --- */
+  --tracking-caption-mono: 1.4px;
+  --tracking-caption-mono-sm: 1.2px;
+
+  /* --- Border Radii --- */
+  --radius-none: 0px;
+  --radius-sm: 8px;   /* Canonical card & input radius */
+  --radius-pill: 9999px; /* Canonical button & badge radius */
+  --radius-full: 9999px;
+
+  /* --- Spacing Scale (4px Base Unit) --- */
+  --space-xxs: 2px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+  --space-4xl: 64px;
+
+  /* --- Elevation & Shadows: STRICT ZERO SHADOWS --- */
+  --shadow-none: none;
+
+  /* --- Layout Invariants --- */
+  --topbar-height: 56px;
+  --container-max-width: 1200px;
+  --container-wide-max-width: 1380px;
+  --transition-fast: 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  --focus-ring: #a0c3ec;
+
+  /* --- Type Scale (fluid display, fixed body) --- */
+  --text-hero: clamp(40px, 5.5vw, 76px);
+  --text-h1: clamp(28px, 3.4vw, 44px);
+  --text-h2: clamp(22px, 2.6vw, 32px);
+  --text-h3: 20px;
+  --text-body: 15px;
+  --text-small: 13px;
+  --text-mini: 12px;
+}

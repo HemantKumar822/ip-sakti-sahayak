@@ -13,7 +13,7 @@ class Config:
     GEMINI_MAX_OUTPUT_TOKENS: int = int(os.getenv("GEMINI_MAX_OUTPUT_TOKENS", "2048"))
     GEMINI_REQUEST_TIMEOUT: float = float(os.getenv("GEMINI_REQUEST_TIMEOUT", "30.0"))
 
-    # LLM Provider configuration ('gemini' or 'openrouter')
+    # LLM Provider configuration ('gemini', 'openrouter', or 'omniroute')
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "gemini").strip().lower()
 
     # OpenRouter configuration
@@ -23,6 +23,13 @@ class Config:
     )
     OPENROUTER_BASE_URL: str = os.getenv(
         "OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"
+    )
+
+    # OmniRoute configuration (used when LLM_PROVIDER=omniroute)
+    OMNIROUTE_API_KEY: str = os.getenv("OMNIROUTE_API_KEY", "omniroute-local")
+    OMNIROUTE_MODEL: str = os.getenv("OMNIROUTE_MODEL", "auto")
+    OMNIROUTE_BASE_URL: str = os.getenv(
+        "OMNIROUTE_BASE_URL", "http://localhost:11434/v1"
     )
 
     # Embedding configuration
@@ -106,6 +113,10 @@ class Config:
         if cls.LLM_PROVIDER == "openrouter" and not cls.OPENROUTER_MODEL:
             raise RuntimeError(
                 "OPENROUTER_MODEL is required when LLM_PROVIDER is 'openrouter' but not set in configuration or environment variables."
+            )
+        if cls.LLM_PROVIDER == "omniroute" and not cls.OMNIROUTE_BASE_URL:
+            raise RuntimeError(
+                "OMNIROUTE_BASE_URL is required when LLM_PROVIDER is 'omniroute' but not set in configuration or environment variables."
             )
         if not cls.CHROMA_COLLECTION_NAME:
             raise RuntimeError(

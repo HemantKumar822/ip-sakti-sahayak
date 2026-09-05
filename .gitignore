@@ -38,3 +38,6 @@ scratch/
 uv.lock
 evaluation/reports/*.json
 evaluation/reports/*.md
+
+# Hackathon presentation decks (large binaries, not product code)
+*.pptx

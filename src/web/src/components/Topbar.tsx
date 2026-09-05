@@ -1,149 +1,75 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  PanelLeft, 
-  PanelRight, 
-  RotateCcw, 
-  ShieldCheck, 
-  ChevronRight,
-  Database,
-  Terminal
-} from 'lucide-react';
+import { Scale, LayoutGrid, FlaskConical, Database } from 'lucide-react';
 import { fetchCorpusStats } from '../api/client';
 import type { CorpusStats } from '../api/client';
-import './Topbar.css';
+
+export type AppView = 'landing' | 'workbench' | 'admin';
 
 interface TopbarProps {
-  onReset: () => void;
-  hasMessages: boolean;
-  onToggleSidebar?: () => void;
-  onToggleInspector?: () => void;
-  isInspectorOpen?: boolean;
-  activeCategory?: string | null;
-  activeView: 'workbench' | 'admin';
-  onViewChange: (view: 'workbench' | 'admin') => void;
+  activeView: AppView;
+  onViewChange: (view: AppView) => void;
+  onHome: () => void;
 }
 
-export const Topbar: React.FC<TopbarProps> = ({ 
-  onReset, 
-  hasMessages,
-  onToggleSidebar,
-  onToggleInspector,
-  isInspectorOpen = true,
-  activeCategory,
-  activeView,
-  onViewChange
-}) => {
+const TABS: { id: AppView; label: string; icon: React.ReactNode }[] = [
+  { id: 'landing', label: 'Overview', icon: <LayoutGrid size={13} aria-hidden="true" /> },
+  { id: 'workbench', label: 'Clearance Desk', icon: <FlaskConical size={13} aria-hidden="true" /> },
+  { id: 'admin', label: 'Corpus', icon: <Database size={13} aria-hidden="true" /> },
+];
+
+export const Topbar: React.FC<TopbarProps> = ({ activeView, onViewChange, onHome }) => {
   const [stats, setStats] = useState<CorpusStats | null>(null);
 
   useEffect(() => {
-    let isCancelled = false;
-    async function loadStats() {
+    let cancelled = false;
+    async function load() {
       try {
         const data = await fetchCorpusStats();
-        if (!isCancelled) setStats(data);
-      } catch (err) {
-        console.error("Failed to load corpus stats", err);
+        if (!cancelled) setStats(data);
+      } catch {
+        /* offline — indicator degrades silently */
       }
     }
-    loadStats();
-    // Refresh stats periodically
-    const interval = setInterval(loadStats, 30000);
+    load();
+    const t = setInterval(load, 60000);
     return () => {
-      isCancelled = true;
-      clearInterval(interval);
+      cancelled = true;
+      clearInterval(t);
     };
   }, []);
 
   return (
-    <header className="topbar-workbench" aria-label="Workbench Topbar">
-      <div className="topbar-left-section">
-        {onToggleSidebar && (
-          <button 
-            className="sidebar-toggle-btn"
-            onClick={onToggleSidebar}
-            title="Toggle Navigation Sidebar"
-            aria-label="Toggle Sidebar"
-          >
-            <PanelLeft size={16} />
-          </button>
-        )}
+    <header className="sk-topbar" aria-label="Primary">
+      <button type="button" className="sk-brand" onClick={onHome} aria-label="IP-SAKTI Sahayak home">
+        <span className="sk-brand-mark" aria-hidden="true">
+          <Scale size={15} />
+        </span>
+        <span>IP-SAKTI Sahayak</span>
+        <span className="sk-brand-sub">Ayurveda IP clearance</span>
+      </button>
 
-        {/* View Toggles */}
-        <div className="view-toggles" aria-label="View Toggles">
-          <button 
-            className={`view-toggle-btn ${activeView === 'workbench' ? 'active' : ''}`}
-            onClick={() => onViewChange('workbench')}
-            title="Intelligence Workbench"
+      <nav className="sk-viewtabs" aria-label="Views">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className="sk-viewtab"
+            aria-current={activeView === t.id ? 'page' : undefined}
+            aria-label={t.label}
+            title={t.label}
+            onClick={() => onViewChange(t.id)}
           >
-            <Terminal size={14} />
-            <span>Workbench</span>
+            {t.icon}
+            <span>{t.label}</span>
           </button>
-          <button 
-            className={`view-toggle-btn ${activeView === 'admin' ? 'active' : ''}`}
-            onClick={() => onViewChange('admin')}
-            title="Corpus Admin Console"
-          >
-            <Database size={14} />
-            <span>Admin Console</span>
-          </button>
-        </div>
+        ))}
+      </nav>
 
-        {/* Breadcrumbs for Workbench */}
-        {activeView === 'workbench' && (
-          <nav className="notion-breadcrumbs" aria-label="Breadcrumb">
-            <span className="breadcrumb-item brand-link" onClick={onReset}>
-              <span className="brand-icon">🏛️</span>
-              <span className="brand-text">IP-SAKTI Sahayak</span>
-            </span>
-            <ChevronRight size={13} className="breadcrumb-arrow" />
-            <span className="breadcrumb-item jurisdiction-link">
-              <span className="flag-icon-inline">🇮🇳</span>
-              <span>India</span>
-            </span>
-            {activeCategory && (
-              <>
-                <ChevronRight size={13} className="breadcrumb-arrow" />
-                <span className="breadcrumb-item category-current">
-                  {activeCategory}
-                </span>
-              </>
-            )}
-          </nav>
-        )}
-      </div>
-
-      <div className="topbar-right-section">
-        {/* Live Corpus Online Status */}
-        <div className="corpus-live-indicator" title="Hybrid Dense + BM25 Legal Retrieval Engine Ready">
-          <span className="indicator-dot"></span>
-          <span className="indicator-label">
-            {stats ? `${stats.total_documents} Gazettes (${stats.total_chunks} chunks)` : 'Loading Stats...'}
-          </span>
-        </div>
-
-        {activeView === 'workbench' && hasMessages && (
-          <button 
-            className="topbar-reset-btn" 
-            onClick={onReset}
-            title="Reset to New Legal Research Memorandum"
-          >
-            <RotateCcw size={13} />
-            <span>Reset Canvas</span>
-          </button>
-        )}
-
-        {/* Trust Inspector Toggle Button */}
-        {activeView === 'workbench' && onToggleInspector && (
-          <button 
-            className={`inspector-toggle-btn ${isInspectorOpen ? 'active' : ''}`}
-            onClick={onToggleInspector}
-            title="Toggle Trust & Telemetry Inspector"
-          >
-            <ShieldCheck size={15} />
-            <span>Trust Inspector</span>
-            <PanelRight size={14} className="panel-right-icon" />
-          </button>
-        )}
+      <div className="sk-topbar-right">
+        <span className="sk-live" title="Indexed statutory corpus">
+          <span className={`sk-dot${stats ? '' : ' sk-dot-bad'}`} aria-hidden="true" />
+          <span>{stats ? `${stats.total_documents} gazettes · ${stats.total_chunks} chunks` : 'Corpus offline'}</span>
+        </span>
       </div>
     </header>
   );

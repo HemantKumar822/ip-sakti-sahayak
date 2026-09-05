@@ -12,6 +12,7 @@ from src.pipeline.classifier import Classifier, ClassifierOutput
 from src.pipeline.providers import (
     BaseLLMClient,
     GeminiProvider,
+    OmniRouteProvider,
     OpenRouterProvider,
     get_llm_client,
 )
@@ -39,6 +40,14 @@ def test_factory_explicit_openrouter():
     client = get_llm_client("openrouter")
     assert isinstance(client, OpenRouterProvider)
     assert isinstance(client, BaseLLMClient)
+
+
+def test_factory_explicit_omniroute():
+    client = get_llm_client("omniroute")
+    assert isinstance(client, OmniRouteProvider)
+    assert isinstance(client, BaseLLMClient)
+    assert client.base_url == config.OMNIROUTE_BASE_URL
+    assert client.model_name == config.OMNIROUTE_MODEL
 
 
 def test_factory_unsupported_provider():
@@ -331,3 +340,78 @@ def test_answer_generator_with_openrouter_provider(tmp_path):
         assert "[1]" in res.answer
         assert len(res.citations) == 1
         assert res.citations[0].doc_id == "patents-act-1970"
+
+
+# ---------------------------------------------------------------------------
+# OmniRouteProvider Tests
+# ---------------------------------------------------------------------------
+
+
+def test_omniroute_provider_generate_text():
+    provider = OmniRouteProvider(
+        base_url="http://localhost:20128/v1", model_name="auto"
+    )
+    mock_choice = MagicMock()
+    mock_choice.message.content = "OmniRoute answer text"
+    mock_response = MagicMock()
+    mock_response.choices = [mock_choice]
+
+    with patch.object(
+        provider.client.chat.completions, "create", return_value=mock_response
+    ) as mock_create:
+        res = provider.generate_text("Explain Section 3(p)")
+        assert res == "OmniRoute answer text"
+        mock_create.assert_called_once()
+
+
+def test_omniroute_provider_generate_structured():
+    provider = OmniRouteProvider()
+    mock_choice = MagicMock()
+    mock_choice.message.content = json.dumps({"title": "Omni Patent", "score": 0.92})
+    mock_response = MagicMock()
+    mock_response.choices = [mock_choice]
+
+    with patch.object(
+        provider.client.chat.completions, "create", return_value=mock_response
+    ):
+        res = provider.generate_structured("Extract", response_schema=SampleSchema)
+        assert isinstance(res, SampleSchema)
+        assert res.title == "Omni Patent"
+        assert res.score == 0.92
+
+
+def test_omniroute_provider_generate_chat_structured():
+    provider = OmniRouteProvider()
+    mock_choice = MagicMock()
+    mock_choice.message.content = json.dumps({"title": "Omni Chat", "score": 0.85})
+    mock_response = MagicMock()
+    mock_response.choices = [mock_choice]
+
+    with patch.object(
+        provider.client.chat.completions, "create", return_value=mock_response
+    ):
+        res = provider.generate_chat(
+            "Query text",
+            conversation_history=[{"role": "user", "content": "Hi"}],
+            response_schema=SampleSchema,
+        )
+        assert isinstance(res, SampleSchema)
+        assert res.title == "Omni Chat"
+
+
+def test_omniroute_provider_connection_error_handling():
+    from openai import APIConnectionError
+
+    provider = OmniRouteProvider(base_url="http://localhost:20128/v1")
+
+    with (
+        patch.object(
+            provider.client.chat.completions,
+            "create",
+            side_effect=APIConnectionError(request=MagicMock()),
+        ),
+        pytest.raises(
+            ConnectionError, match="Cannot connect to the OpenAI-compatible gateway"
+        ),
+    ):
+        provider.generate_structured("Test query", response_schema=SampleSchema)

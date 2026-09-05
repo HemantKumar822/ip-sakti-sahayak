@@ -1,27 +1,27 @@
 import { useState, useEffect, useCallback } from 'react';
+import { TriangleAlert, X, RotateCw } from 'lucide-react';
 import { fetchSession } from './api/client';
 import type { Message, QueryResponse, Citation } from './api/client';
 import { Sidebar } from './components/Sidebar';
 import { Topbar } from './components/Topbar';
+import type { AppView } from './components/Topbar';
 import { ChatInterface } from './components/ChatInterface';
 import { TrustInspector } from './components/TrustInspector';
 import { CitationModal } from './components/CitationModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastContainer } from './components/ToastContainer';
 import { CorpusConsole } from './components/CorpusConsole';
-import './App.css';
+import { LandingPage } from './components/LandingPage';
+
+const DISCLAIMER =
+  'This information is provided for general awareness and does not constitute legal advice. Consult a qualified IP attorney for decisions specific to your situation.';
 
 function getInitialSessionId(): string {
   if (typeof window !== 'undefined') {
-    const urlParams = new URLSearchParams(window.location.search);
-    const fromUrl = urlParams.get('session');
-    if (fromUrl && fromUrl.trim()) {
-      return fromUrl.trim();
-    }
+    const fromUrl = new URLSearchParams(window.location.search).get('session');
+    if (fromUrl && fromUrl.trim()) return fromUrl.trim();
     const fromStorage = localStorage.getItem('ip_sakti_session_id');
-    if (fromStorage && fromStorage.trim()) {
-      return fromStorage.trim();
-    }
+    if (fromStorage && fromStorage.trim()) return fromStorage.trim();
   }
   return crypto.randomUUID();
 }
@@ -30,202 +30,175 @@ function App() {
   const [sessionId, setSessionId] = useState<string>(getInitialSessionId);
   const [messages, setMessages] = useState<Message[]>([]);
   const [lastResponse, setLastResponse] = useState<QueryResponse | null>(null);
-  const [currentQuery, setCurrentQuery] = useState<string>('');
-  
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(
-    typeof window !== 'undefined' ? window.innerWidth > 768 : true
-  );
-  const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(
-    typeof window !== 'undefined' ? window.innerWidth > 1100 : true
-  );
   const [authError, setAuthError] = useState<boolean>(false);
-  
-  // View Toggle State
-  const [activeView, setActiveView] = useState<'workbench' | 'admin'>('workbench');
-  
-  // Citation Modal State
+  const [activeView, setActiveView] = useState<AppView>('landing');
   const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null);
-  const [isCitationModalOpen, setIsCitationModalOpen] = useState(false);
+  const [citationOpen, setCitationOpen] = useState(false);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [pendingQuery, setPendingQuery] = useState<string | null>(null);
+  const [noticeDismissed, setNoticeDismissed] = useState(false);
 
-  // Sync active session ID to URL and localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('ip_sakti_session_id', sessionId);
-        const url = new URL(window.location.href);
-        if (url.searchParams.get('session') !== sessionId) {
-          url.searchParams.set('session', sessionId);
-          window.history.replaceState(null, '', url.toString());
-        }
-      } catch {
-        // Fallback for sandboxed browser environments
+    try {
+      localStorage.setItem('ip_sakti_session_id', sessionId);
+      const url = new URL(window.location.href);
+      if (url.searchParams.get('session') !== sessionId) {
+        url.searchParams.set('session', sessionId);
+        window.history.replaceState(null, '', url.toString());
       }
+    } catch {
+      /* sandboxed browser */
     }
   }, [sessionId]);
 
-  // Hydrate session turns from server upon initial mount or session change
   useEffect(() => {
-    let isCancelled = false;
+    let cancelled = false;
     async function hydrate() {
       try {
         const session = await fetchSession(sessionId);
-        if (isCancelled) return;
-        if (session && session.turns && session.turns.length > 0) {
+        if (cancelled) return;
+        if (session?.turns?.length) {
           const restored: Message[] = session.turns.map((t) => ({
             role: t.role,
             content: t.content,
-            responseMetadata:
-              t.response_metadata ||
-              (t.citations
-                ? {
-                    status: 'answered',
-                    answer: t.content,
-                    citations: t.citations,
-                    confidence_score: 1.0,
-                    response_time_ms: 0,
-                    abs_flag: false,
-                    tkdl_flag: false,
-                  }
-                : undefined),
+            responseMetadata: t.response_metadata || undefined,
           }));
           setMessages(restored);
-
           const lastAssist = [...restored].reverse().find((m) => m.role === 'assistant');
-          if (lastAssist?.responseMetadata) {
-            setLastResponse(lastAssist.responseMetadata);
-          } else {
-            setLastResponse(null);
-          }
-
-          const lastUser = [...restored].reverse().find((m) => m.role === 'user');
-          if (lastUser) {
-            setCurrentQuery(lastUser.content);
-          } else {
-            setCurrentQuery('');
-          }
+          setLastResponse(lastAssist?.responseMetadata ?? null);
         } else {
           setMessages([]);
           setLastResponse(null);
-          setCurrentQuery('');
         }
-      } catch (err: any) {
-        if (err.message && err.message.includes('API Key Required')) {
+      } catch (err: unknown) {
+        if (err instanceof Error && err.message.includes('API Key Required')) {
           setAuthError(true);
+          setNoticeDismissed(false);
         }
-        if (!isCancelled) {
+        if (!cancelled) {
           setMessages([]);
           setLastResponse(null);
-          setCurrentQuery('');
         }
       }
     }
-
     hydrate();
     return () => {
-      isCancelled = true;
+      cancelled = true;
     };
   }, [sessionId]);
 
   const handleReset = useCallback(() => {
-    const newId = crypto.randomUUID();
-    setSessionId(newId);
+    const id = crypto.randomUUID();
+    setSessionId(id);
     setMessages([]);
     setLastResponse(null);
-    setCurrentQuery('');
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('ip_sakti_session_id', newId);
-        const url = new URL(window.location.href);
-        url.searchParams.set('session', newId);
-        window.history.replaceState(null, '', url.toString());
-      } catch {
-        // Fallback for sandboxed browser environments
-      }
-    }
+  }, []);
+
+  const handleEnterWorkbench = useCallback((initialQuery?: string) => {
+    setActiveView('workbench');
+    if (initialQuery) setPendingQuery(initialQuery);
   }, []);
 
   const handleCitationClick = useCallback((citation: Citation) => {
     setSelectedCitation(citation);
-    setIsCitationModalOpen(true);
+    setCitationOpen(true);
   }, []);
 
   return (
     <ErrorBoundary onReset={handleReset}>
-      <div className="workbench-root">
+      <div className={`sk-shell${activeView === 'workbench' ? ' sk-shell-locked' : ''}`}>
         <ToastContainer />
-        {authError && (
-          <div className="auth-error-banner animate-fade-in" role="alert" style={{
-            position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, 
-            backgroundColor: '#ef4444', color: 'white', padding: '1rem', textAlign: 'center', fontWeight: 'bold'
-          }}>
-            API Key Required / Unauthorized: Please check your configuration in .env (VITE_API_KEY).
+        {authError && !noticeDismissed && (
+          <div className="sk-notice" role="alert">
+            <TriangleAlert size={15} aria-hidden="true" style={{ flexShrink: 0, color: 'var(--accent-sunset)' }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p className="sk-small" style={{ margin: 0, color: 'var(--ink)' }}>
+                The backend rejected this browser&apos;s API key — inquiries and corpus status are unavailable.
+              </p>
+              <p className="sk-mini" style={{ margin: '2px 0 0' }}>
+                Fix: set <code>VITE_API_KEY</code> in <code>src/web/.env</code> to match the backend{' '}
+                <code>VALID_API_KEYS</code>, then <strong>restart the frontend</strong> (Vite reads env only at
+                startup) and press Retry. <code>python run.py</code> checks this parity automatically.
+              </p>
+            </div>
+            <button type="button" className="sk-btn sk-btn-sm" onClick={() => window.location.reload()}>
+              <RotateCw size={13} aria-hidden="true" />
+              <span>Retry</span>
+            </button>
+            <button
+              type="button"
+              className="sk-btn sk-btn-quiet sk-btn-sm"
+              onClick={() => setNoticeDismissed(true)}
+              aria-label="Dismiss connection notice"
+              style={{ padding: '4px' }}
+            >
+              <X size={14} aria-hidden="true" />
+            </button>
           </div>
         )}
-        
-        {/* Notion Topbar with Breadcrumbs and Inspector Toggle */}
-        <Topbar 
-          onReset={handleReset} 
-          hasMessages={messages.length > 0} 
-          onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
-          onToggleInspector={() => setIsInspectorOpen(prev => !prev)}
-          isInspectorOpen={isInspectorOpen}
-          activeCategory={lastResponse?.category}
-          activeView={activeView}
-          onViewChange={setActiveView}
-        />
 
-        <div className="workbench-layout">
-          {/* Left Column: Navigation */}
-          <div className={`workbench-sidebar ${isSidebarOpen ? '' : 'collapsed'}`}>
-            <Sidebar
-              onNewNote={handleReset}
-              activeSessionId={sessionId}
-              onSelectSession={setSessionId}
-              refreshTrigger={messages.length}
-            />
-          </div>
+        <Topbar activeView={activeView} onViewChange={setActiveView} onHome={() => setActiveView('landing')} />
 
-          {/* Center Column: Active View */}
-          <main className="workbench-center">
-            {activeView === 'workbench' ? (
-              <ChatInterface 
-                messages={messages} 
-                setMessages={setMessages}
-                lastResponse={lastResponse}
-                setLastResponse={setLastResponse}
-                currentQuery={currentQuery}
-                setCurrentQuery={setCurrentQuery}
-                sessionId={sessionId}
-                onReset={handleReset}
-                onAuthError={() => setAuthError(true)}
-                onCitationClick={handleCitationClick}
-              />
-            ) : (
-              <CorpusConsole />
-            )}
+        {activeView === 'landing' && (
+          <main className="sk-main">
+            <LandingPage onEnterWorkbench={handleEnterWorkbench} onEnterAdmin={() => setActiveView('admin')} />
           </main>
+        )}
 
-          {/* Right Column: Trust & Telemetry Inspector ("Why This Answer?") */}
-          <div className={`workbench-inspector ${isInspectorOpen && activeView === 'workbench' ? '' : 'hidden'}`}>
-            <TrustInspector
-              query={currentQuery}
-              response={lastResponse}
-              onClose={() => setIsInspectorOpen(false)}
-            />
+        {activeView === 'workbench' && (
+          <main className="sk-main">
+            <div className="sk-wb">
+              <div className="sk-history">
+                <Sidebar
+                  onNewNote={handleReset}
+                  activeSessionId={sessionId}
+                  onSelectSession={setSessionId}
+                  refreshTrigger={messages.length}
+                />
+              </div>
+              <div className="sk-dock">
+                  <ChatInterface
+                    messages={messages}
+                    setMessages={setMessages}
+                    lastResponse={lastResponse}
+                    setLastResponse={setLastResponse}
+                    sessionId={sessionId}
+                    onReset={handleReset}
+                    onAuthError={() => {
+                      setAuthError(true);
+                      setNoticeDismissed(false);
+                    }}
+                    onCitationClick={handleCitationClick}
+                    onOpenEvidence={() => setEvidenceOpen(true)}
+                    pendingQuery={pendingQuery}
+                    onConsumePending={() => setPendingQuery(null)}
+                  />
+              </div>
+              <div className="sk-evidence">
+                <TrustInspector response={lastResponse} />
+              </div>
+            </div>
+          </main>
+        )}
+
+        {activeView === 'admin' && (
+          <main className="sk-main">
+            <CorpusConsole />
+          </main>
+        )}
+
+        <footer className="sk-footer">{DISCLAIMER}</footer>
+
+        {evidenceOpen && (
+          <div className="sk-drawer-backdrop" onClick={() => setEvidenceOpen(false)} aria-hidden="true" />
+        )}
+        {evidenceOpen && (
+          <div className="sk-drawer" role="dialog" aria-label="Evidence and verification">
+            <TrustInspector response={lastResponse} onClose={() => setEvidenceOpen(false)} />
           </div>
-        </div>
+        )}
 
-        {/* Statutory Legal Disclaimer */}
-        <footer className="workbench-footer-disclaimer">
-          This information is provided for general awareness and does not constitute legal advice. Consult a qualified IP attorney for decisions specific to your situation.
-        </footer>
-
-        {/* Overlays */}
-        <CitationModal 
-          citation={selectedCitation}
-          isOpen={isCitationModalOpen}
-          onClose={() => setIsCitationModalOpen(false)}
-        />
+        <CitationModal citation={selectedCitation} isOpen={citationOpen} onClose={() => setCitationOpen(false)} />
       </div>
     </ErrorBoundary>
   );

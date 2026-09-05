@@ -1,220 +1,182 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, RotateCcw, ShieldCheck } from 'lucide-react';
 import { submitQuery } from '../api/client';
 import type { Message, QueryResponse, Citation } from '../api/client';
 import { HeroState } from './HeroState';
 import { ResearchMemo } from './ResearchMemo';
 import { AbstentionCard } from './AbstentionCard';
 import { PromptBar } from './PromptBar';
-import './ChatInterface.css';
+import { FormulationDeconstructor } from './FormulationDeconstructor';
 
 interface ChatInterfaceProps {
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   lastResponse: QueryResponse | null;
   setLastResponse: React.Dispatch<React.SetStateAction<QueryResponse | null>>;
-  currentQuery: string;
-  setCurrentQuery: React.Dispatch<React.SetStateAction<string>>;
   sessionId: string;
   onReset?: () => void;
-  onCitationClick?: (citation: Citation, index: number) => void;
+  onCitationClick?: (citation: Citation) => void;
   onAuthError?: () => void;
+  onOpenEvidence?: () => void;
+  pendingQuery?: string | null;
+  onConsumePending?: () => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   messages,
   setMessages,
   setLastResponse,
-  currentQuery,
-  setCurrentQuery,
   sessionId,
-  onReset,
   onCitationClick,
   onAuthError,
+  onOpenEvidence,
+  pendingQuery,
+  onConsumePending,
 }) => {
   const [loading, setLoading] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-  const userTurnCount = useMemo(
-    () => messages.filter((m) => m.role === 'user').length,
-    [messages]
-  );
-  const isTurnLimitReached = userTurnCount >= 6;
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const userTurns = useMemo(() => messages.filter((m) => m.role === 'user').length, [messages]);
+  const limitReached = userTurns >= 6;
+  const isEmpty = messages.length === 0 && !loading;
 
   useEffect(() => {
-    if (messages.length > 0 || loading) {
-      scrollToBottom();
-    }
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages, loading]);
 
-  const handleSendText = async (text: string) => {
-    if (!text.trim() || loading) return;
+  // Portal persona CTAs arrive as a pending query: send exactly once.
+  const pendingRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (pendingQuery && pendingRef.current !== pendingQuery) {
+      pendingRef.current = pendingQuery;
+      onConsumePending?.();
+      void send(pendingQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingQuery]);
 
-    const trimmedQuery = text.trim();
-    setCurrentQuery(trimmedQuery);
-    const userMsg: Message = { role: 'user', content: trimmedQuery };
-    setMessages((prev) => [...prev, userMsg]);
+  async function send(text: string) {
+    const query = text.trim();
+    if (!query || loading) return;
     setLoading(true);
-
     try {
-      // Submit query with anonymous session_id
-      const response = await submitQuery({
-        query_text: userMsg.content,
-        session_id: sessionId,
-        conversation_history: messages,
-      });
-
+      setMessages((prev) => [...prev, { role: 'user', content: query }]);
+      const history = [...messages, { role: 'user', content: query }];
+      const response = await submitQuery({ query_text: query, session_id: sessionId, conversation_history: history });
       setLastResponse(response);
       setMessages((prev) => [
         ...prev,
-        {
-          role: 'assistant',
-          content: response.answer || response.abstention_message || '',
-          responseMetadata: response,
-        },
+        { role: 'assistant', content: response.answer || response.abstention_message || '', responseMetadata: response },
       ]);
-    } catch (error: any) {
-      if (error.message && error.message.includes('API Key Required')) {
-        if (onAuthError) {
-          onAuthError();
-        }
-        setLoading(false);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Service temporarily unavailable';
+      if (msg.includes('API Key Required')) {
+        onAuthError?.();
         return;
       }
-      const errorMsg = error.message || 'Service temporarily unavailable';
-      const fallbackResponse: QueryResponse = {
+      const fallback: QueryResponse = {
         status: 'abstained',
         answer: null,
-        abstention_message: errorMsg,
+        abstention_message: msg,
         citations: [],
-        confidence_score: 0.0,
+        confidence_score: 0,
         response_time_ms: 0,
         abs_flag: false,
         tkdl_flag: false,
       };
-      setLastResponse(fallbackResponse);
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: errorMsg, responseMetadata: fallbackResponse },
-      ]);
+      setLastResponse(fallback);
+      setMessages((prev) => [...prev, { role: 'assistant', content: msg, responseMetadata: fallback }]);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const handleReset = () => {
+  function reset() {
     setMessages([]);
     setLastResponse(null);
-    setCurrentQuery('');
-  };
+  }
 
   return (
-    <div className="workbench-canvas-wrapper">
-      <div className="workbench-canvas-content">
-        {messages.length === 0 && !loading ? (
-          <HeroState onSelectScenario={(prompt) => handleSendText(prompt)} />
-        ) : (
-          <div className="chat-history-container">
-            {messages.map((msg, index) => {
-              if (msg.role === 'user') {
-                return (
-                  <div key={index} className="chat-user-message-bubble">
-                    {msg.content}
-                  </div>
-                );
-              }
-              // Assistant role
-              if (msg.responseMetadata) {
-                if (msg.responseMetadata.status === 'abstained') {
-                  return (
-                    <div key={index} className="chat-assistant-wrapper">
-                      <AbstentionCard
-                        query={currentQuery}
-                        response={msg.responseMetadata}
-                        onSelectSuggestion={(sug) => handleSendText(sug)}
-                        onReset={handleReset}
-                      />
-                    </div>
-                  );
-                } else {
-                  return (
-                    <div key={index} className="chat-assistant-wrapper">
-                      <ResearchMemo
-                        query={currentQuery}
-                        response={msg.responseMetadata}
-                        onCitationClick={onCitationClick}
-                      />
-                    </div>
-                  );
-                }
-              }
-              // Fallback for assistant message without metadata
-              return (
-                <div key={index} className="chat-assistant-wrapper">
-                  {msg.content}
-                </div>
-              );
-            })}
-
-            {/* Loading State Skeleton is appended at the bottom */}
-            {loading && (
-              <div className="notion-loading-card animate-fade-in" aria-live="polite">
-                <Loader2 className="spinner" size={20} />
-                <div className="loading-text-group">
-                  <span className="loading-main">Searching Statutory & Case Precedent Corpus...</span>
-                  <span className="loading-sub">
-                    RRF Reciprocal Rank Fusion (BM25 + BGE Dense Embeddings) · 11 Official Gazettes
-                  </span>
-                </div>
-              </div>
-            )}
-            
-            {/* Turn limit warning banner if 6 turns completed */}
-            {isTurnLimitReached && (
-              <div className="session-limit-callout animate-fade-in" role="alert">
-                <div className="limit-callout-header">
-                  <span className="limit-callout-icon">⏱️</span>
-                  <strong>Session Turn Limit Reached (6 of 6 turns)</strong>
-                </div>
-                <p className="limit-callout-body">
-                  To prevent legal context drift and maintain high citation accuracy, each session is limited to 6 interactive turns. Please start a new research note for subsequent inquiries.
-                </p>
-                {onReset && (
-                  <button className="limit-reset-btn" onClick={onReset} type="button">
-                    Start Fresh Session
+    <div className="sk-dock-chat">
+      <div className="sk-dock-scroll">
+        <div className="sk-dock-narrow">
+          {messages.length > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <p className="sk-eyebrow">Clearance record · {userTurns} of 6 inquiries</p>
+              <div style={{ display: 'flex', gap: 'var(--space-xs)' }}>
+                {onOpenEvidence && (
+                  <button type="button" className="sk-btn sk-btn-sm sk-only-mobile" onClick={onOpenEvidence}>
+                    <ShieldCheck size={13} aria-hidden="true" />
+                    <span>Evidence</span>
                   </button>
                 )}
+                <button type="button" className="sk-btn sk-btn-quiet sk-btn-sm" onClick={reset} title="Start over">
+                  <RotateCcw size={13} aria-hidden="true" />
+                  <span>Start over</span>
+                </button>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Invisible div to auto-scroll to bottom */}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
+          {isEmpty && <HeroState onSelectScenario={(p) => void send(p)} />}
+
+          {messages.map((msg, i) => {
+            if (msg.role === 'user') {
+              return (
+                <section key={i} className="animate-fade-in" aria-label={`Inquiry ${Math.ceil((i + 1) / 2)}`}>
+                  <p className="sk-eyebrow" style={{ marginBottom: 'var(--space-xs)' }}>
+                    Your inquiry
+                  </p>
+                  <h2 className="sk-h2">{msg.content}</h2>
+                </section>
+              );
+            }
+            const r = msg.responseMetadata;
+            if (!r) return null;
+            return r.status === 'abstained' ? (
+              <AbstentionCard key={i} response={r} onSelectSuggestion={(s) => void send(s)} onReset={reset} />
+            ) : (
+              <ResearchMemo key={i} response={r} onCitationClick={onCitationClick} />
+            );
+          })}
+
+          {loading && (
+            <div className="sk-card animate-fade-in" role="status" aria-label="Checking">
+              <div className="sk-loading">
+                <Loader2 size={18} className="animate-spin" aria-hidden="true" style={{ color: 'var(--accent-sunset)' }} />
+                <div>
+                  <p className="sk-eyebrow" style={{ color: 'var(--ink)' }}>
+                    Checking gazettes and compliance flags
+                  </p>
+                  <p className="sk-mini" style={{ margin: '2px 0 0' }}>
+                    Dense + lexical retrieval, Section 3(p) / Section 6 screen, 0.65 gate…
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div ref={bottomRef} />
+        </div>
       </div>
 
-      {/* Command Prompt Bar docked at bottom */}
-      <div className="prompt-bar-docked">
-        <div className="prompt-meta-row">
-          <span className="turn-counter-badge" title="Maximum 6 conversation turns per legal research session">
-            Turn {userTurnCount} / 6
-          </span>
-          {isTurnLimitReached && (
-            <span className="turn-limit-warning-text">
-              Limit reached. Click &quot;Start Fresh Session&quot; to begin a new session.
-            </span>
+      <div className="sk-dock-inquiry">
+        <div className="sk-dock-inquiry-inner">
+          {limitReached ? (
+            <div className="sk-card sk-card-soft" style={{ padding: 'var(--space-md)' }}>
+              <p className="sk-small" style={{ margin: 0 }}>
+                Six inquiries used — session memory is full. Start over for a fresh record.
+              </p>
+            </div>
+          ) : (
+            <>
+              <PromptBar onSubmitQuery={(t) => void send(t)} loading={loading} />
+              {!loading && messages.length < 3 && (
+                <FormulationDeconstructor onSubmitDeconstruction={(q) => void send(q)} isLoading={loading} />
+              )}
+            </>
           )}
         </div>
-        <PromptBar
-          onSubmitQuery={handleSendText}
-          loading={loading}
-          disabled={isTurnLimitReached}
-        />
       </div>
     </div>
   );

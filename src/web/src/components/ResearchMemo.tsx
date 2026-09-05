@@ -1,231 +1,197 @@
 import React, { useMemo } from 'react';
-import { 
-  ShieldCheck, 
-  Scale, 
-  Clock, 
-  FileText, 
-  ExternalLink,
-  BookOpen,
-  Sparkles
-} from 'lucide-react';
+import { ShieldCheck, Scale, Clock, ExternalLink, Copy, Printer, Download } from 'lucide-react';
 import type { QueryResponse, Citation } from '../api/client';
-import { Callout } from './Callout';
-import { StatutoryBadge } from './StatutoryBadge';
-import './ResearchMemo.css';
+import { toast } from '../utils/toast';
 
 interface ResearchMemoProps {
-  query: string;
   response: QueryResponse;
-  onCitationClick?: (citation: Citation, index: number) => void;
+  onCitationClick?: (citation: Citation) => void;
+  queryLabel?: string;
 }
 
-export const ResearchMemo: React.FC<ResearchMemoProps> = ({
-  query,
-  response,
-  onCitationClick
-}) => {
-  // Format inline citation markers [1], [2] into interactive link tags
-  const formattedAnswerHtml = useMemo(() => {
-    if (!response.answer) return '';
-
-    const replaceCitation = (match: string, p1: string) => {
-      const rawNums = p1.split(',');
-      const links = rawNums.map((n) => {
-        const num = n.trim();
-        if (/^\d+$/.test(num)) {
-          return `<a href="#citation-${num}" class="citation-marker" data-index="${num}">[${num}]</a>`;
-        }
-        return match;
-      });
-      return links.join('');
+function verdictFor(r: QueryResponse): { title: string; body: string; tone: 'warn' | 'info' | '' } {
+  if (r.tkdl_flag && r.abs_flag)
+    return {
+      title: 'Patent-barred — and NBA clearance would still be required',
+      body: 'This reads as traditional knowledge under Section 3(p), so a patent cannot cover it as claimed. Separately, any use of the underlying biological resource needs National Biodiversity Authority approval under Section 6 before an IP application.',
+      tone: 'warn',
     };
+  if (r.tkdl_flag)
+    return {
+      title: 'Patent-barred under Section 3(p)',
+      body: 'The invention matches classical prior art or a mere aggregation of known properties. Under the Patents Act 1970 and the 2025 AYUSH examination guidelines, that is not patentable subject matter.',
+      tone: 'warn',
+    };
+  if (r.abs_flag)
+    return {
+      title: 'Potentially patentable — NBA approval mandatory',
+      body: 'A novel, efficacious proprietary invention can be patent-eligible under Section 3(d), but because it uses Indian biological resources, prior NBA approval under Section 6 of the Biological Diversity Act is required before grant.',
+      tone: 'info',
+    };
+  return {
+    title: 'No statutory bar detected',
+    body: 'No prior-art bar or biodiversity clearance requirement surfaced in the retrieved authorities. Novelty, inventive step and efficacy evidence still decide patentability at examination.',
+    tone: '',
+  };
+}
 
-    const processed = response.answer.replace(/\[(\d+(?:\s*,\s*\d+)*)\]/g, replaceCitation);
-    const paragraphs = processed.split('\n\n').filter((p) => p.trim().length > 0);
-    if (paragraphs.length === 0) {
-      return `<p>${processed}</p>`;
-    }
-    return paragraphs.map((p) => `<p>${p.replace(/\n/g, '<br/>')}</p>`).join('');
+export const ResearchMemo: React.FC<ResearchMemoProps> = ({ response, onCitationClick, queryLabel }) => {
+  const verdict = useMemo(() => verdictFor(response), [response]);
+
+  const bodyHtml = useMemo(() => {
+    if (!response.answer) return '';
+    const linked = response.answer.replace(/\[(\d+(?:\s*,\s*\d+)*)\]/g, (_m, nums: string) =>
+      nums
+        .split(',')
+        .map((n) => n.trim())
+        .filter((n) => /^\d+$/.test(n))
+        .map((n) => `<a href="#citation-${n}" class="sk-cite-marker" data-index="${n}">[${n}]</a>`)
+        .join('')
+    );
+    return linked
+      .split('\n\n')
+      .filter((p) => p.trim())
+      .map((p) => `<p style="margin:0 0 1rem;">${p.replace(/\n/g, '<br/>')}</p>`)
+      .join('');
   }, [response.answer]);
 
-  // Determine preliminary assessment styling and text
-  const preliminaryAssessment = useMemo(() => {
-    const isAbstained = response.status === 'abstained';
-    const isAbs = Boolean(response.abs_flag);
-    const isTkdl = Boolean(response.tkdl_flag);
+  function activateCitation(el: HTMLElement | null) {
+    if (!el) return;
+    const idx = parseInt(el.getAttribute('data-index') || '1', 10) - 1;
+    const c = response.citations?.[idx];
+    if (c && onCitationClick) onCitationClick(c);
+  }
 
-    if (isAbstained) {
-      return {
-        verdict: 'OUT OF SCOPE / INSUFFICIENT STATUTORY EVIDENCE',
-        type: 'abstain',
-        summary: response.abstention_message || 'The inquiry falls outside the indexed Indian Ayurvedic & patent corpus or scored below the 0.65 confidence gate.'
-      };
-    }
-
-    if (isTkdl && isAbs) {
-      return {
-        verdict: 'NON-PATENTABLE UNDER S. 3(p) + MANDATORY NBA ABS CLEARANCE REQUIRED',
-        type: 'critical',
-        summary: 'Invention is barred as traditional knowledge prior art under Section 3(p) of the Patents Act, 1970. Furthermore, utilizing biological resources mandates prior Form I/III approval from the National Biodiversity Authority under Section 6 of the Biological Diversity Act, 2002.'
-      };
-    }
-
-    if (isTkdl) {
-      return {
-        verdict: 'NON-PATENTABLE UNDER PATENTS ACT 1970 — SECTION 3(p) EXCLUSION',
-        type: 'warning',
-        summary: 'Invention is barred as traditional knowledge or mere aggregation of known properties under Section 3(p) and Ayush Examination Guidelines 2025.'
-      };
-    }
-
-    if (isAbs) {
-      return {
-        verdict: 'PATENTABLE SUBJECT TO MANDATORY BIOLOGICAL DIVERSITY ABS CLEARANCE',
-        type: 'info',
-        summary: 'Proprietary formulation may be patent-eligible under Section 3(d) provided enhanced therapeutic efficacy is proven. Mandatory approval from National Biodiversity Authority (NBA) is required prior to grant under Section 6 of BDA 2002/2023.'
-      };
-    }
-
-    return {
-      verdict: 'PATENT-ELIGIBLE SUBJECT TO STATUTORY NOVELTY & EFFICACY STANDARDS',
-      type: 'success',
-      summary: 'Inquiry meets initial patentability thresholds under Indian patent law. Requires non-obviousness and proven therapeutic efficacy (Novartis standard) if modifying an existing substance.'
-    };
-  }, [response]);
+  function copyMemo() {
+    const cites = (response.citations || [])
+      .map((c, i) => `[${i + 1}] ${c.title || c.doc_id} (${c.section || 'general'})\n${c.source_url || ''}`)
+      .join('\n\n');
+    const md = `# Clearance memorandum\n\n**Verdict:** ${verdict.title}\n\n${verdict.body}\n\n---\n\n## Analysis\n\n${response.answer || ''}\n\n---\n\n## Authorities\n\n${cites}\n\n*IP-SAKTI Sahayak — general awareness only, not legal advice.*`;
+    navigator.clipboard
+      .writeText(md)
+      .then(() => toast.success('Copied', 'Memorandum copied as Markdown.'))
+      .catch(() => toast.error('Copy failed', 'Your browser blocked clipboard access.'));
+  }
 
   return (
-    <article className="research-memo-container animate-fade-in" aria-label="Legal Research Memorandum">
-      {/* Memorandum Title Header */}
-      <header className="memo-header">
-        <div className="memo-type-badge">
-          <FileText size={13} />
-          <span>STATUTORY RESEARCH MEMORANDUM</span>
+    <article className="sk-card sk-memo animate-fade-in" aria-label="Clearance memorandum">
+      <header className="sk-memo-head">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
+          <p className="sk-eyebrow">Clearance memorandum</p>
+          <div className="sk-memo-actions">
+            <button type="button" className="sk-btn sk-btn-sm sk-btn-quiet" onClick={copyMemo} title="Copy as Markdown">
+              <Copy size={13} aria-hidden="true" />
+              <span>Copy</span>
+            </button>
+            <button type="button" className="sk-btn sk-btn-sm sk-btn-quiet" onClick={() => window.print()} title="Print or save PDF">
+              <Printer size={13} aria-hidden="true" />
+              <span>Print</span>
+            </button>
+          </div>
         </div>
-        <h1 className="memo-title">{query}</h1>
-      </header>
-
-      {/* Notion Property Metadata Table */}
-      <section className="memo-properties-grid" aria-label="Memorandum Properties">
-        <div className="property-cell">
-          <span className="property-label">Category</span>
-          <span className="property-tag category-tag">
-            🏷️ {response.category || 'Ayurvedic IP Advisory'}
+        {queryLabel && <h3 className="sk-h3">{queryLabel}</h3>}
+        <div className="sk-memo-tags">
+          <span className="sk-tag">{response.category || 'Ayurvedic IP advisory'}</span>
+          <span className="sk-tag sk-tag-ok">
+            <ShieldCheck size={11} aria-hidden="true" />
+            <span>{(response.confidence_score * 100).toFixed(1)}% grounded</span>
           </span>
-        </div>
-
-        <div className="property-cell">
-          <span className="property-label">Jurisdiction</span>
-          <span className="property-tag jurisdiction-tag">
-            <Scale size={12} />
-            <span>{response.jurisdiction || 'India (CGPDTM / NBA)'}</span>
-          </span>
-        </div>
-
-        <div className="property-cell">
-          <span className="property-label">Confidence</span>
-          <span className="property-tag confidence-tag">
-            <ShieldCheck size={12} />
-            <span>{(response.confidence_score * 100).toFixed(1)}% Grounded</span>
-          </span>
-        </div>
-
-        <div className="property-cell">
-          <span className="property-label">Latency</span>
-          <span className="property-tag latency-tag">
-            <Clock size={12} />
+          <span className="sk-tag">
+            <Clock size={11} aria-hidden="true" />
             <span>{response.response_time_ms} ms</span>
           </span>
         </div>
+      </header>
+
+      <section className={`sk-alert ${verdict.tone === 'warn' ? 'sk-alert-warn' : verdict.tone === 'info' ? 'sk-alert-info' : ''}`} aria-label="Verdict">
+        <p className="sk-eyebrow">Verdict</p>
+        <p className="sk-verdict">{verdict.title}</p>
+        <p className="sk-alert-body">{verdict.body}</p>
       </section>
 
-      {/* Preliminary Executive Assessment Banner */}
-      <section className={`preliminary-assessment-callout ${preliminaryAssessment.type}`}>
-        <div className="assessment-verdict-row">
-          <span className="assessment-indicator"></span>
-          <span className="assessment-verdict-title">{preliminaryAssessment.verdict}</span>
-        </div>
-        <p className="assessment-summary-text">{preliminaryAssessment.summary}</p>
-      </section>
-
-      {/* Statutory Compliance Alerts (ABS & TKDL) */}
-      {response.abs_flag && (
-        <Callout type="abs" title="Biological Diversity Act — Mandatory ABS Clearance Required">
-          {response.abs_detail}
-        </Callout>
+      {(response.abs_flag || response.tkdl_flag) && (
+        <section aria-label="Compliance flags" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+          {response.abs_flag && (
+            <div className="sk-flag sk-flag-warn">
+              <Scale size={15} aria-hidden="true" style={{ color: 'var(--accent-sunset)', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <p className="sk-small" style={{ margin: 0, color: 'var(--ink)' }}>
+                  Section 6 · Biological Diversity Act — NBA approval required
+                </p>
+                <p className="sk-small" style={{ margin: '2px 0 0' }}>
+                  {response.abs_detail || 'Commercial use of this biological resource needs prior National Biodiversity Authority approval.'}
+                </p>
+              </div>
+            </div>
+          )}
+          {response.tkdl_flag && (
+            <div className="sk-flag sk-flag-info">
+              <ShieldCheck size={15} aria-hidden="true" style={{ color: 'var(--accent-breeze)', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <p className="sk-small" style={{ margin: 0, color: 'var(--ink)' }}>
+                  Section 3(p) · Patents Act — prior-art bar
+                </p>
+                <p className="sk-small" style={{ margin: '2px 0 0' }}>
+                  {response.tkdl_detail || 'This matches traditional-knowledge prior art recorded in the TKDL corpus.'}
+                </p>
+              </div>
+            </div>
+          )}
+        </section>
       )}
 
-      {response.tkdl_flag && (
-        <Callout type="tkdl" title="Patents Act 1970 — Section 3(p) Traditional Knowledge Prior Art Bar">
-          {response.tkdl_detail}
-        </Callout>
-      )}
-
-      {/* Structured Legal Analysis Content */}
-      <section className="memo-body-section">
-        <div className="memo-section-heading">
-          <BookOpen size={15} />
-          <h2>Detailed Statutory Analysis & Reasoning</h2>
-        </div>
-        <div 
-          className="memo-prose-content" 
-          dangerouslySetInnerHTML={{ __html: formattedAnswerHtml }}
+      <section aria-label="Analysis">
+        <p className="sk-eyebrow" style={{ marginBottom: 'var(--space-sm)' }}>
+          Analysis
+        </p>
+        <div
+          className="sk-body"
+          dangerouslySetInnerHTML={{ __html: bodyHtml }}
           onClick={(e) => {
-            const target = e.target as HTMLElement;
-            if (target.classList.contains('citation-marker')) {
+            const t = e.target as HTMLElement;
+            if (t.closest?.('.sk-cite-marker')) {
               e.preventDefault();
-              const idx = parseInt(target.getAttribute('data-index') || '1', 10) - 1;
-              if (response.citations && response.citations[idx] && onCitationClick) {
-                onCitationClick(response.citations[idx], idx);
-              }
+              activateCitation(t.closest('.sk-cite-marker') as HTMLElement);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            const t = e.target as HTMLElement;
+            const m = t.closest?.('.sk-cite-marker') as HTMLElement | null;
+            if (m) {
+              e.preventDefault();
+              activateCitation(m);
             }
           }}
         />
       </section>
 
-      {/* Primary Statutory Authorities & Official Gazette Citations */}
-      {response.citations && response.citations.length > 0 && (
-        <section className="memo-authorities-section" id="memo-authorities">
-          <div className="memo-section-heading">
-            <Sparkles size={15} />
-            <h2>Primary Statutory Authorities & Gazette Records ({response.citations.length})</h2>
-          </div>
-          <p className="authorities-desc">
-            All citations are programmatically verified against the 11 official legal publications:
+      {response.citations?.length > 0 && (
+        <section aria-label={`Authorities, ${response.citations.length}`} style={{ borderTop: '1px solid var(--hairline)', paddingTop: 'var(--space-lg)' }}>
+          <p className="sk-eyebrow" style={{ marginBottom: 'var(--space-md)' }}>
+            Authorities · {response.citations.length}
           </p>
-
-          <div className="authorities-grid">
-            {response.citations.map((cit, idx) => (
-              <div 
-                key={idx} 
-                className="authority-card" 
-                id={`citation-${idx + 1}`}
-              >
-                <div className="authority-card-header">
-                  <span className="authority-index-pill">[{idx + 1}]</span>
-                  <StatutoryBadge citation={cit} />
-                </div>
-                <div className="authority-card-body">
-                  <div className="authority-doc-id">{cit.doc_id}</div>
-                  {cit.section && (
-                    <div className="authority-section-ref">
-                      <strong>Section:</strong> {cit.section}
-                    </div>
-                  )}
-                  {cit.source_url && (
-                    <a 
-                      href={cit.source_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="authority-external-link"
-                    >
-                      <span>Official Source Gazette</span>
-                      <ExternalLink size={12} />
-                    </a>
-                  )}
-                </div>
+          <div className="sk-cites">
+            {response.citations.map((c, i) => (
+              <div key={i} className="sk-card sk-card-soft sk-cite" id={`citation-${i + 1}`}>
+                <span className="sk-mini">[{i + 1}] · {c.doc_type || 'Authority'}</span>
+                <p className="sk-small" style={{ margin: 0, color: 'var(--ink)' }}>
+                  {c.title || c.doc_id}
+                </p>
+                {c.section && <p className="sk-mini" style={{ margin: 0 }}>Section: {c.section}</p>}
+                {c.source_url && (
+                  <a href={c.source_url} target="_blank" rel="noopener noreferrer" className="sk-small" style={{ display: 'inline-flex', gap: 'var(--space-xs)', alignItems: 'center', color: 'var(--accent-breeze)' }}>
+                    <span>Official source</span>
+                    <ExternalLink size={12} aria-hidden="true" />
+                  </a>
+                )}
               </div>
             ))}
           </div>
+          <p className="sk-mini" style={{ marginTop: 'var(--space-md)', display: 'flex', gap: 'var(--space-xs)', alignItems: 'center' }}>
+            <Download size={12} aria-hidden="true" />
+            <span>Full research-brief export lives in the evidence rail.</span>
+          </p>
         </section>
       )}
     </article>

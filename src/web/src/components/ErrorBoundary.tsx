@@ -2,7 +2,6 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle } from 'lucide-react';
-import './ErrorBoundary.css';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -60,44 +59,28 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   public override render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="error-boundary-wrapper" role="alert">
-          <div className="error-boundary-card">
-            <div className="error-boundary-header">
-              <div className="error-boundary-icon">
-                <AlertTriangle size={24} />
-              </div>
-              <span className="error-boundary-eyebrow">
-                SYSTEM FAULT // RECOVERY WORKBENCH
-              </span>
-            </div>
-
-            <h2 className="error-boundary-title">
-              Application Encountered an Unhandled State
-            </h2>
-
-            <p className="error-boundary-desc">
-              An unhandled rendering exception occurred. You can reset the workspace session to return to a clean operational state.
+        <div className="sk-portal" role="alert" style={{ alignItems: 'center' }}>
+          <div className="sk-card" style={{ maxWidth: '560px' }}>
+            <p className="sk-eyebrow" style={{ color: 'var(--status-error)', display: 'inline-flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+              <AlertTriangle size={15} aria-hidden="true" />
+              <span>SYSTEM FAULT // RECOVERY WORKBENCH</span>
             </p>
-
+            <h2 className="sk-h2" style={{ marginTop: 'var(--space-sm)' }}>
+              Something broke rendering this view
+            </h2>
+            <p className="sk-body" style={{ marginTop: 'var(--space-sm)' }}>
+              Resetting clears the stored session and returns to a clean desk. Your corpus and history on the server are untouched.
+            </p>
             {this.state.error && (
-              <pre className="error-boundary-details">
+              <pre className="sk-mini" style={{ marginTop: 'var(--space-md)', padding: 'var(--space-md)', background: 'var(--canvas-soft)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-sm)', overflowX: 'auto' }}>
                 {this.state.error.message || String(this.state.error)}
               </pre>
             )}
-
-            <div className="error-boundary-actions">
-              <button
-                type="button"
-                className="error-reset-btn"
-                onClick={this.handleReset}
-              >
+            <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-lg)' }}>
+              <button type="button" className="sk-btn sk-btn-primary sk-btn-sm" onClick={this.handleReset}>
                 Reset Workspace
               </button>
-              <button
-                type="button"
-                className="error-reload-btn"
-                onClick={this.handleReload}
-              >
+              <button type="button" className="sk-btn sk-btn-sm" onClick={this.handleReload}>
                 Reload Page
               </button>
             </div>

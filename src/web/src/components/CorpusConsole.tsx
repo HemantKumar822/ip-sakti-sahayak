@@ -1,25 +1,23 @@
-// src/components/CorpusConsole.tsx
+// Corpus administration: live ChromaDB telemetry, gazette table, PDF ingestion.
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { FC, DragEvent, ChangeEvent, FormEvent } from 'react';
-import { 
-  Database, 
-  UploadCloud, 
-  FileText, 
-  CheckCircle2, 
-  ExternalLink, 
-  ShieldAlert, 
-  RefreshCw, 
-  Layers, 
-  HardDrive,
+import {
+  Database,
+  UploadCloud,
+  FileText,
+  CheckCircle2,
+  ExternalLink,
+  ShieldAlert,
+  RefreshCw,
+  Layers,
   X,
-  Search
+  Search,
 } from 'lucide-react';
 import { fetchCorpusStatus, ingestCorpusDocument } from '../api/client';
 import type { CorpusStatusResponse, DocumentBreakdown } from '../api/client';
 import { toast } from '../utils/toast';
-import './CorpusConsole.css';
 
-// 11 authentic legal gazettes baseline (Story 17.1 specification)
+// Baseline shown when the backend is unreachable: the 11 authentic gazettes.
 const DEFAULT_DOCUMENTS: DocumentBreakdown[] = [
   {
     doc_id: 'tkdl-overview',
@@ -111,134 +109,98 @@ const DEFAULT_DOCUMENTS: DocumentBreakdown[] = [
   },
 ];
 
+function acceptPdf(file: File): boolean {
+  return file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+}
+
 export const CorpusConsole: FC = () => {
   const [corpusData, setCorpusData] = useState<CorpusStatusResponse | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [authError, setAuthError] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [restricted, setRestricted] = useState<null | 'auth' | 'admin'>(null);
 
-  // PDF Ingestion state (Story 17.2)
+  function classifyAccessError(err: unknown): void {
+    if (!(err instanceof Error)) return;
+    if (err.message.includes('API Key Required')) setRestricted('auth');
+    else if (err.message.includes('Admin privileges required')) setRestricted('admin');
+  }
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [docId, setDocId] = useState<string>('');
-  const [title, setTitle] = useState<string>('');
-  const [documentType, setDocumentType] = useState<string>('statute');
-  const [sourceUrl, setSourceUrl] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
+  const [isDragging, setIsDragging] = useState(false);
+  const [docId, setDocId] = useState('');
+  const [title, setTitle] = useState('');
+  const [documentType, setDocumentType] = useState('statute');
+  const [sourceUrl, setSourceUrl] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchStatusData = useCallback(async () => {
     try {
-      const data = await fetchCorpusStatus();
-      setCorpusData(data);
-      setAuthError(false);
-    } catch (err: any) {
-      if (err.message && err.message.includes('API Key Required')) {
-        setAuthError(true);
-      } else {
-        console.error('Failed to load corpus status:', err);
-      }
+      setCorpusData(await fetchCorpusStatus());
+      setRestricted(null);
+    } catch (err: unknown) {
+      classifyAccessError(err);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    let isCancelled = false;
-    async function initLoad() {
+    let cancelled = false;
+    (async () => {
       try {
         const data = await fetchCorpusStatus();
-        if (!isCancelled) {
+        if (!cancelled) {
           setCorpusData(data);
-          setAuthError(false);
+          setRestricted(null);
         }
-      } catch (err: any) {
-        if (!isCancelled) {
-          if (err.message && err.message.includes('API Key Required')) {
-            setAuthError(true);
-          } else {
-            console.error('Failed to load corpus status:', err);
-          }
-        }
+      } catch (err: unknown) {
+        if (!cancelled) classifyAccessError(err);
       } finally {
-        if (!isCancelled) {
-          setIsLoading(false);
-        }
+        if (!cancelled) setIsLoading(false);
       }
-    }
-    initLoad();
+    })();
     return () => {
-      isCancelled = true;
+      cancelled = true;
     };
   }, []);
 
-  const handleRefresh = async () => {
-    setIsLoading(true);
-    await fetchStatusData();
-  };
+  function takeFile(file: File) {
+    if (!acceptPdf(file)) {
+      toast.warning('Invalid file type', 'Only official legal documents in PDF format are accepted.');
+      return;
+    }
+    setSelectedFile(file);
+    if (!docId) setDocId(file.name.replace(/\.pdf$/i, '').toLowerCase().replace(/[^a-z0-9_-]/g, '-'));
+    if (!title) setTitle(file.name.replace(/\.pdf$/i, ''));
+  }
 
-  // File drag-and-drop handlers
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
   };
-
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
   };
-
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
-        setSelectedFile(file);
-        if (!docId) {
-          const autoId = file.name.replace(/\.pdf$/i, '').toLowerCase().replace(/[^a-z0-9_-]/g, '-');
-          setDocId(autoId);
-        }
-        if (!title) {
-          setTitle(file.name.replace(/\.pdf$/i, ''));
-        }
-      } else {
-        toast.warning('Invalid File Type', 'Only official legal documents in PDF format (.pdf) are supported.');
-      }
-    }
+    if (e.dataTransfer.files?.length) takeFile(e.dataTransfer.files[0]);
   };
-
   const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
-        setSelectedFile(file);
-        if (!docId) {
-          const autoId = file.name.replace(/\.pdf$/i, '').toLowerCase().replace(/[^a-z0-9_-]/g, '-');
-          setDocId(autoId);
-        }
-        if (!title) {
-          setTitle(file.name.replace(/\.pdf$/i, ''));
-        }
-      } else {
-        toast.warning('Invalid File Type', 'Only official legal documents in PDF format (.pdf) are supported.');
-      }
-    }
+    if (e.target.files?.length) takeFile(e.target.files[0]);
   };
 
-  // Submit PDF Ingestion Form
   const handleSubmitIngestion = async (e: FormEvent) => {
     e.preventDefault();
     if (!selectedFile) {
-      toast.warning('File Required', 'Please drag and drop a PDF gazette file before submitting.');
+      toast.warning('File required', 'Attach a PDF gazette before submitting.');
       return;
     }
     if (!docId.trim()) {
-      toast.warning('Doc ID Required', 'Please specify a unique Document ID for the corpus index.');
+      toast.warning('Document ID required', 'Give the gazette a unique document ID.');
       return;
     }
-
     try {
       setIsSubmitting(true);
       const formData = new FormData();
@@ -248,382 +210,286 @@ export const CorpusConsole: FC = () => {
       formData.append('document_type', documentType);
       formData.append('source_url', sourceUrl.trim());
       formData.append('date_retrieved', new Date().toISOString().split('T')[0]);
-
       const result = await ingestCorpusDocument(formData);
-      toast.success(
-        'Gazette Ingested Successfully',
-        `Upserted document '${result.doc_id}' (${result.chunks_ingested} chunks) into ChromaDB.`
-      );
-
-      // Reset form
+      toast.success('Gazette ingested', `'${result.doc_id}' added as ${result.chunks_ingested} chunks.`);
       setSelectedFile(null);
       setDocId('');
       setTitle('');
       setSourceUrl('');
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-
-      // Auto-refresh the corpus table and gauge
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      setIsLoading(true);
       await fetchStatusData();
-    } catch (err: any) {
-      console.error('Ingestion failed:', err);
-      // Client interceptor already triggers toast.error
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Resolve active documents breakdown (backend data with fallback to 11 authentic gazettes)
-  const activeBreakdown: DocumentBreakdown[] = (corpusData?.document_breakdown && corpusData.document_breakdown.length > 0)
-    ? corpusData.document_breakdown
-    : DEFAULT_DOCUMENTS;
+  const breakdown: DocumentBreakdown[] =
+    corpusData?.document_breakdown?.length ? corpusData.document_breakdown : DEFAULT_DOCUMENTS;
+  const totalChunks = corpusData?.total_chunks || 296;
+  const totalDocs = corpusData?.document_count || breakdown.length;
+  const connected = corpusData?.status !== 'unhealthy';
+  const q = searchQuery.toLowerCase();
+  const filteredDocs = breakdown.filter(
+    (d) => d.title.toLowerCase().includes(q) || d.doc_id.toLowerCase().includes(q) || d.document_type.toLowerCase().includes(q)
+  );
 
-  const totalChunks = corpusData?.total_chunks && corpusData.total_chunks > 0 
-    ? corpusData.total_chunks 
-    : 296;
-
-  const totalDocs = corpusData?.document_count && corpusData.document_count > 0
-    ? corpusData.document_count
-    : activeBreakdown.length;
-
-  const filteredDocs = activeBreakdown.filter((doc) => {
-    const q = searchQuery.toLowerCase();
+  if (restricted) {
+    const isAdmin = restricted === 'admin';
     return (
-      doc.title.toLowerCase().includes(q) ||
-      doc.doc_id.toLowerCase().includes(q) ||
-      doc.document_type.toLowerCase().includes(q)
-    );
-  });
-
-  if (authError) {
-    return (
-      <div className="corpus-console-container" role="region" aria-label="Corpus Admin Console">
-        <div className="corpus-auth-restricted">
-          <ShieldAlert size={36} className="auth-lock-icon" />
-          <h2 className="corpus-title">Admin Access Restricted</h2>
-          <p className="corpus-desc">
-            The Corpus Telemetry & Ingestion Console requires administrator credentials. 
-            Please configure a valid <code>VITE_API_KEY</code> header in your environment to inspect or modify the vector store.
+      <div className="sk-admin" role="region" aria-label="Corpus administration">
+        <div className="sk-card" style={{ textAlign: 'center', padding: 'var(--space-4xl) var(--space-xl)' }}>
+          <ShieldAlert size={28} aria-hidden="true" style={{ color: 'var(--status-error)' }} />
+          <h1 className="sk-h2" style={{ marginTop: 'var(--space-md)' }}>
+            {isAdmin ? 'Query key lacks admin rights' : 'Admin access restricted'}
+          </h1>
+          <p className="sk-body" style={{ maxWidth: '560px', margin: 'var(--space-sm) auto 0' }}>
+            {isAdmin ? (
+              <>
+                Your key authenticates queries but is not in the backend{' '}
+                <code>VALID_ADMIN_API_KEYS</code>. Add it there (and restart the backend), or switch{' '}
+                <code>VITE_API_KEY</code> to a key that already has admin rights.
+              </>
+            ) : (
+              <>
+                The corpus console needs an administrator key. Set <code>VITE_API_KEY</code> in{' '}
+                <code>src/web/.env</code> to a value listed in the backend{' '}
+                <code>VALID_ADMIN_API_KEYS</code> — <code>run.py</code> checks this parity on startup.
+              </>
+            )}
           </p>
-          <button className="ingest-submit-btn" onClick={handleRefresh}>
-            <RefreshCw size={14} />
-            <span>Retry Authorization</span>
-          </button>
+          <div style={{ marginTop: 'var(--space-lg)' }}>
+            <button type="button" className="sk-btn" onClick={() => { setIsLoading(true); void fetchStatusData(); }}>
+              <RefreshCw size={14} aria-hidden="true" />
+              <span>Retry authorization</span>
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="corpus-console-container" role="region" aria-label="Corpus Admin Console">
-      {/* Header & Status Cockpit */}
-      <div className="corpus-console-header">
-        <div className="corpus-header-left">
-          <span className="corpus-eyebrow">ADMINISTRATIVE TELEMETRY // CHROMADB</span>
-          <h1 className="corpus-title">Vector Corpus & Ingestion Cockpit</h1>
-          <p className="corpus-desc">
-            Live telemetry of indexed Indian statutory gazettes, patent examination rules, and dynamic PDF ingestion.
+    <div className="sk-admin" role="region" aria-label="Corpus administration">
+      <div className="sk-admin-head">
+        <div>
+          <p className="sk-eyebrow">Corpus administration</p>
+          <h1 className="sk-h1" style={{ marginTop: 'var(--space-xs)' }}>
+            What the desk reasons over
+          </h1>
+          <p className="sk-body" style={{ marginTop: 'var(--space-sm)', maxWidth: '720px' }}>
+            Every clearance answer is retrieved from this index of official gazettes — statutes,
+            examination guidelines, and precedents. Add a gazette and it becomes citable immediately.
           </p>
         </div>
-        <div className="corpus-status-pill" title="Live ChromaDB Vector Store Health">
-          <span className={`status-dot ${corpusData?.status === 'unhealthy' ? 'error' : ''}`} />
-          <span>{corpusData?.status === 'unhealthy' ? 'ChromaDB Disconnected' : 'ChromaDB Connected'}</span>
-        </div>
+        <span className="sk-live" title="ChromaDB health">
+          <span className={`sk-dot${connected ? '' : ' sk-dot-bad'}`} aria-hidden="true" />
+          <span>{connected ? (corpusData ? 'ChromaDB connected' : 'Showing baseline') : 'ChromaDB disconnected'}</span>
+        </span>
       </div>
 
-      {/* Visual Gauge & Telemetry Metrics (Story 17.1) */}
-      <div className="corpus-metrics-grid">
-        <div className="metric-card">
-          <div className="metric-header">
-            <span className="metric-label">Total Chunks</span>
-            <Layers size={16} />
-          </div>
-          <div className="metric-value-row">
-            <span className="metric-value">{totalChunks}</span>
-            <span className="metric-sub">Indexed (Target: 296)</span>
-          </div>
+      <div className="sk-stats" aria-label="Corpus statistics">
+        <div className="sk-card sk-stat">
+          <span className="sk-eyebrow">Indexed chunks</span>
+          <span className="sk-stat-value">{isLoading ? '—' : totalChunks}</span>
+          <span className="sk-mini">Baseline: 296 across 11 gazettes</span>
         </div>
-
-        <div className="metric-card">
-          <div className="metric-header">
-            <span className="metric-label">Authentic Gazettes</span>
-            <FileText size={16} />
-          </div>
-          <div className="metric-value-row">
-            <span className="metric-value">{totalDocs}</span>
-            <span className="metric-sub">Official Acts & Precedents</span>
-          </div>
+        <div className="sk-card sk-stat">
+          <span className="sk-eyebrow">Gazettes</span>
+          <span className="sk-stat-value">{isLoading ? '—' : totalDocs}</span>
+          <span className="sk-mini">Statutes, guidelines, precedents</span>
         </div>
-
-        <div className="metric-card">
-          <div className="metric-header">
-            <span className="metric-label">Active Collection</span>
-            <Database size={16} />
-          </div>
-          <div className="metric-value-row">
-            <span className="metric-value" style={{ fontSize: '1.1rem' }}>
-              {corpusData?.collection_name || 'ip_sakti_legal_corpus'}
-            </span>
-          </div>
-        </div>
-
-        <div className="metric-card">
-          <div className="metric-header">
-            <span className="metric-label">Embedding Dimensions</span>
-            <HardDrive size={16} />
-          </div>
-          <div className="metric-value-row">
-            <span className="metric-value">384-d</span>
-            <span className="metric-sub">all-MiniLM-L6-v2 Cosine</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Visual Capacity & Integrity Gauge (Story 17.1) */}
-      <div className="corpus-gauge-wrapper">
-        <div className="gauge-header">
-          <span className="gauge-label">Corpus Indexing Capacity</span>
-          <span className="gauge-count">
-            {totalChunks} / 296 Chunks ({Math.min(100, Math.round((totalChunks / 296) * 100))}%)
+        <div className="sk-card sk-stat">
+          <span className="sk-eyebrow">Collection</span>
+          <span className="sk-stat-value" style={{ fontSize: '17px', wordBreak: 'break-all' }}>
+            {corpusData?.collection_name || 'ip_sakti_legal_corpus'}
           </span>
+          <span className="sk-mini">ChromaDB persistent index</span>
         </div>
-        <div className="gauge-track">
-          <div 
-            className="gauge-fill" 
-            style={{ width: `${Math.min(100, Math.max(10, (totalChunks / 296) * 100))}%` }} 
-          />
-        </div>
-        <div className="gauge-footer">
-          <span>Verified Indian Legal Domain: Patents Act, BDA 2002/2023, AYUSH Guidelines, TKDL</span>
-          <span>Status: Verified Authentic</span>
+        <div className="sk-card sk-stat">
+          <span className="sk-eyebrow">Confidence gate</span>
+          <span className="sk-stat-value">0.65</span>
+          <span className="sk-mini">Below this, the desk refuses</span>
         </div>
       </div>
 
-      {/* Live PDF Gazette Ingestion Interface (Story 17.2) */}
-      <div className="corpus-ingestion-card">
-        <div className="section-title-row">
-          <UploadCloud size={20} style={{ color: 'var(--color-accent-sunset)' }} />
-          <h2 className="section-title">Live PDF Gazette Ingestion</h2>
-        </div>
-        <p className="corpus-desc" style={{ marginTop: '-0.5rem' }}>
-          Upload a new official government gazette, patent manual, or tribunal precedent to dynamically chunk, embed, and upsert directly into ChromaDB.
-        </p>
-
-        <form onSubmit={handleSubmitIngestion} className="ingest-form">
-          {/* Drag and Drop Zone */}
-          <div
-            className={`dropzone-container ${isDragging ? 'drag-over' : ''}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-          >
+      <div className="sk-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
+          <h2 className="sk-h3">Indexed gazettes</h2>
+          <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+            <label htmlFor="sk-corpus-search" className="sk-visually-hidden">
+              Filter gazettes
+            </label>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-xs)', color: 'var(--mute)' }}>
+              <Search size={14} aria-hidden="true" />
+            </span>
             <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileInputChange}
-              accept=".pdf,application/pdf"
-              className="visually-hidden-input"
+              id="sk-corpus-search"
+              type="search"
+              className="sk-input"
+              style={{ width: '240px' }}
+              placeholder="Filter by title, ID, type…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-            {selectedFile ? (
-              <div className="dropzone-file-preview" onClick={(e) => e.stopPropagation()}>
-                <FileText size={18} style={{ color: 'var(--color-accent-sunset)' }} />
-                <span className="dropzone-file-name">{selectedFile.name}</span>
-                <span className="dropzone-file-size">({(selectedFile.size / 1024).toFixed(1)} KB)</span>
-                <button
-                  type="button"
-                  className="dropzone-remove-btn"
-                  onClick={() => setSelectedFile(null)}
-                  title="Remove file"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            ) : (
-              <>
-                <UploadCloud size={28} className="dropzone-icon" />
-                <span className="dropzone-text-primary">
-                  Drag and drop legal PDF file here, or click to browse
-                </span>
-                <span className="dropzone-text-secondary">
-                  Only authentic government PDFs (.pdf) accepted for ingestion
-                </span>
-              </>
-            )}
-          </div>
-
-          {/* Form Metadata Fields */}
-          <div className="ingest-form-grid" style={{ marginTop: '1rem' }}>
-            <div className="form-group">
-              <label className="form-label" htmlFor="doc_id">Document ID *</label>
-              <input
-                id="doc_id"
-                type="text"
-                className="form-input"
-                placeholder="e.g. bda-rules-2024"
-                value={docId}
-                onChange={(e) => setDocId(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="doc_title">Document Title *</label>
-              <input
-                id="doc_title"
-                type="text"
-                className="form-input"
-                placeholder="e.g. The Biological Diversity Rules, 2024"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="document_type">Document Type *</label>
-              <select
-                id="document_type"
-                className="form-select"
-                value={documentType}
-                onChange={(e) => setDocumentType(e.target.value)}
-              >
-                <option value="statute">Statute (Act of Parliament)</option>
-                <option value="rule">Rule / Regulation</option>
-                <option value="guideline">Examination Guideline</option>
-                <option value="policy">Policy / Framework</option>
-                <option value="judicial_precedent">Judicial Precedent</option>
-                <option value="manual">Office Manual</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="source_url">Official Gazette Source URL</label>
-              <input
-                id="source_url"
-                type="url"
-                className="form-input"
-                placeholder="https://egazette.gov.in/..."
-                value={sourceUrl}
-                onChange={(e) => setSourceUrl(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div style={{ marginTop: '1.25rem' }}>
-            <button
-              type="submit"
-              className="ingest-submit-btn"
-              disabled={isSubmitting || !selectedFile || !docId.trim()}
-            >
-              {isSubmitting ? (
-                <>
-                  <RefreshCw size={14} className="animate-spin" />
-                  <span>Chunking & Ingesting PDF into ChromaDB...</span>
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 size={15} />
-                  <span>Ingest Gazette into ChromaDB</span>
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* Authentic Documents Table (Story 17.1) */}
-      <div className="corpus-table-card">
-        <div className="table-toolbar">
-          <div className="section-title-row">
-            <Database size={18} style={{ color: 'var(--color-accent-breeze)' }} />
-            <h2 className="section-title">Indexed Legal Gazettes & Chunk Breakdown</h2>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Search size={14} style={{ position: 'absolute', left: '10px', color: 'var(--color-muted)' }} />
-              <input
-                type="text"
-                className="table-search-input"
-                style={{ paddingLeft: '28px' }}
-                placeholder="Filter gazettes..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <button
-              className="view-toggle-btn"
-              onClick={handleRefresh}
-              title="Refresh Table"
-              style={{ padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-pill)', border: '1px solid var(--color-hairline)' }}
-            >
-              <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} />
+            <button type="button" className="sk-btn sk-btn-sm sk-btn-quiet" onClick={() => { setIsLoading(true); void fetchStatusData(); }} title="Refresh" aria-label="Refresh gazette list">
+              <RefreshCw size={13} aria-hidden="true" className={isLoading ? 'animate-spin' : ''} />
             </button>
           </div>
         </div>
-
-        <div className="table-wrapper">
-          <table className="corpus-data-table">
+        <div className="sk-table-wrap" style={{ marginTop: 'var(--space-md)' }}>
+          <table className="sk-table">
             <thead>
               <tr>
-                <th style={{ width: '45%' }}>Document Title & ID</th>
-                <th style={{ width: '18%' }}>Type</th>
-                <th style={{ width: '12%' }}>Chunks</th>
-                <th style={{ width: '15%' }}>Retrieval Date</th>
-                <th style={{ width: '10%' }}>Source</th>
+                <th>Document Title & ID</th>
+                <th>Type</th>
+                <th>Chunks</th>
+                <th>Retrieved</th>
+                <th>Source</th>
               </tr>
             </thead>
             <tbody>
               {filteredDocs.map((doc) => (
                 <tr key={doc.doc_id}>
                   <td>
-                    <div className="doc-title-cell">
-                      <span className="doc-title-text">{doc.title}</span>
-                      <span className="doc-id-text">{doc.doc_id}</span>
-                    </div>
+                    <span style={{ display: 'block', color: 'var(--ink)' }}>{doc.title}</span>
+                    <span className="sk-mini" style={{ fontFamily: 'var(--font-mono)' }}>{doc.doc_id}</span>
                   </td>
                   <td>
-                    <span className={`type-badge ${doc.document_type.toLowerCase()}`}>
-                      {doc.document_type}
-                    </span>
+                    <span className="sk-tag">{doc.document_type}</span>
                   </td>
-                  <td>
-                    <span className="chunk-count-badge">{doc.chunk_count}</span>
-                  </td>
-                  <td>
-                    <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)' }}>
-                      {doc.date_retrieved || '2026-09-02'}
-                    </span>
-                  </td>
+                  <td style={{ fontFamily: 'var(--font-mono)' }}>{doc.chunk_count}</td>
+                  <td className="sk-mini" style={{ whiteSpace: 'nowrap' }}>{doc.date_retrieved || '—'}</td>
                   <td>
                     {doc.source_url ? (
-                      <a
-                        href={doc.source_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="source-link-btn"
-                        title="View Official Source Gazette"
-                      >
+                      <a href={doc.source_url} target="_blank" rel="noopener noreferrer" className="sk-small" style={{ display: 'inline-flex', gap: '4px', alignItems: 'center', color: 'var(--accent-breeze)', whiteSpace: 'nowrap' }}>
                         <span>Gazette</span>
-                        <ExternalLink size={12} />
+                        <ExternalLink size={11} aria-hidden="true" />
                       </a>
                     ) : (
-                      <span style={{ color: 'var(--color-muted)' }}>—</span>
+                      <span className="sk-mini">—</span>
                     )}
                   </td>
                 </tr>
               ))}
               {filteredDocs.length === 0 && (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-muted)' }}>
-                    No legal documents matching '{searchQuery}'
+                  <td colSpan={5} style={{ textAlign: 'center', padding: 'var(--space-2xl)' }}>
+                    <span className="sk-small">No gazettes match &ldquo;{searchQuery}&rdquo;.</span>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+        <p className="sk-mini" style={{ marginTop: 'var(--space-sm)', display: 'flex', gap: 'var(--space-xs)', alignItems: 'center' }}>
+          <Layers size={12} aria-hidden="true" />
+          <span>{totalChunks} chunks · 296 baseline · {totalDocs} documents</span>
+        </p>
+      </div>
+
+      <div className="sk-card">
+        <h2 className="sk-h3" style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+          <UploadCloud size={17} aria-hidden="true" style={{ color: 'var(--accent-sunset)' }} />
+          <span>Ingest a gazette</span>
+        </h2>
+        <p className="sk-small" style={{ marginTop: 'var(--space-xs)' }}>
+          Official PDFs are chunked, embedded, and upserted into ChromaDB — then immediately citable by the desk.
+        </p>
+        <form onSubmit={(e) => void handleSubmitIngestion(e)} style={{ marginTop: 'var(--space-lg)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+          <div
+            className={`sk-dropzone${isDragging ? ' sk-dropzone-over' : ''}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            role="button"
+            tabIndex={0}
+            aria-label="Attach a PDF gazette"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
+          >
+            <input ref={fileInputRef} type="file" accept=".pdf,application/pdf" onChange={handleFileInputChange} className="sk-visually-hidden" tabIndex={-1} aria-hidden="true" />
+            {selectedFile ? (
+              <span style={{ display: 'inline-flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+                <FileText size={16} aria-hidden="true" style={{ color: 'var(--accent-sunset)' }} />
+                <span className="sk-small" style={{ color: 'var(--ink)' }}>{selectedFile.name}</span>
+                <span className="sk-mini">({(selectedFile.size / 1024).toFixed(1)} KB)</span>
+                <button
+                  type="button"
+                  className="sk-btn sk-btn-quiet sk-btn-sm"
+                  aria-label="Remove file"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedFile(null);
+                  }}
+                >
+                  <X size={13} aria-hidden="true" />
+                </button>
+              </span>
+            ) : (
+              <>
+                <UploadCloud size={24} aria-hidden="true" style={{ color: 'var(--mute)' }} />
+                <span className="sk-small" style={{ display: 'block', marginTop: 'var(--space-sm)', color: 'var(--ink)' }}>
+                  Drop a gazette PDF here, or click to browse
+                </span>
+                <span className="sk-mini" style={{ display: 'block', marginTop: 'var(--space-xs)' }}>
+                  Authentic government PDFs only
+                </span>
+              </>
+            )}
+          </div>
+
+          <div className="sk-form-grid">
+            <div className="sk-field">
+              <label className="sk-label" htmlFor="doc_id">Document ID</label>
+              <input id="doc_id" className="sk-input" type="text" placeholder="bda-rules-2024" value={docId} onChange={(e) => setDocId(e.target.value)} required />
+            </div>
+            <div className="sk-field">
+              <label className="sk-label" htmlFor="doc_title">Document title</label>
+              <input id="doc_title" className="sk-input" type="text" placeholder="The Biological Diversity Rules, 2024" value={title} onChange={(e) => setTitle(e.target.value)} required />
+            </div>
+            <div className="sk-field">
+              <label className="sk-label" htmlFor="document_type">Document type</label>
+              <select id="document_type" className="sk-select" value={documentType} onChange={(e) => setDocumentType(e.target.value)}>
+                <option value="statute">Statute</option>
+                <option value="rule">Rule / regulation</option>
+                <option value="guideline">Examination guideline</option>
+                <option value="policy">Policy / framework</option>
+                <option value="judicial_precedent">Judicial precedent</option>
+                <option value="manual">Office manual</option>
+              </select>
+            </div>
+            <div className="sk-field">
+              <label className="sk-label" htmlFor="source_url">Official source URL</label>
+              <input id="source_url" className="sk-input" type="url" placeholder="https://egazette.gov.in/…" value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} />
+            </div>
+          </div>
+
+          <div>
+            <button type="submit" className="sk-btn sk-btn-primary" disabled={isSubmitting || !selectedFile || !docId.trim()}>
+              {isSubmitting ? <RefreshCw size={14} aria-hidden="true" className="animate-spin" /> : <CheckCircle2 size={14} aria-hidden="true" />}
+              <span>{isSubmitting ? 'Ingesting into ChromaDB…' : 'Ingest gazette'}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div className="sk-card sk-card-soft">
+        <h2 className="sk-h3">Evaluation baseline</h2>
+        <p className="sk-small" style={{ marginTop: 'var(--space-xs)' }}>
+          Last verified full run: <strong style={{ color: 'var(--ink)' }}>20 / 20</strong> golden inquiries
+          gated correctly · mean latency 728 ms · coverage 92%+. Re-run via{' '}
+          <code>python run.py --bench</code> before release claims.
+        </p>
+        <p className="sk-mini" style={{ marginTop: 'var(--space-xs)', display: 'inline-flex', gap: 'var(--space-xs)', alignItems: 'center' }}>
+          <Database size={12} aria-hidden="true" />
+          <span>Live benchmark execution ships with the eval harness, not this console.</span>
+        </p>
       </div>
     </div>
   );

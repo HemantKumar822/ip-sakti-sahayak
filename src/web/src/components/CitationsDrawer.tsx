@@ -1,79 +1,50 @@
 import { useState } from 'react';
-import { ChevronDown, FileText, ExternalLink, Calendar, Tag } from 'lucide-react';
+import { ChevronDown, FileText, ExternalLink } from 'lucide-react';
 import type { Citation } from '../api/client';
-import './CitationsDrawer.css';
 
 export const CitationsDrawer = ({ citations }: { citations: Citation[] }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
+  const [open, setOpen] = useState(false);
   if (!citations || citations.length === 0) return null;
 
   return (
-    <div className="citations-drawer animate-fade-in">
-      <button 
-        className="citations-toggle-btn"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
+    <div className="sk-card animate-fade-in" style={{ padding: 0, overflow: 'hidden' }}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-md) var(--space-lg)', color: 'var(--ink)', fontSize: '13px' }}
       >
-        <div className="toggle-left">
-          <FileText size={16} className="toggle-icon" />
-          <span className="toggle-label">
-            <strong>{citations.length}</strong> Statutory Citation{citations.length > 1 ? 's' : ''} & Legal Source{citations.length > 1 ? 's' : ''} Grounded
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+          <FileText size={15} aria-hidden="true" />
+          <span>
+            <strong>{citations.length}</strong> cited {citations.length === 1 ? 'authority' : 'authorities'}
           </span>
-        </div>
-        <ChevronDown 
-          size={16} 
-          className={`toggle-chevron ${isOpen ? 'rotated' : ''}`} 
-        />
+        </span>
+        <ChevronDown size={15} aria-hidden="true" style={{ transform: open ? 'rotate(180deg)' : undefined, color: 'var(--mute)' }} />
       </button>
-
-      {isOpen && (
-        <div className="citations-list">
-          {citations.map((cit, idx) => {
-            const title = cit.title || cit.doc_id || "Statutory Authority";
-            return (
-              <div key={idx} className="citation-detail-card">
-                <div className="citation-header-row">
-                  <span className="citation-index-badge">[{idx + 1}]</span>
-                  <span className="citation-doc-title">{title}</span>
-                  {cit.section && (
-                    <span className="citation-section-badge">Section {cit.section}</span>
-                  )}
-                </div>
-
-                {cit.snippet && (
-                  <blockquote className="citation-quote">
-                    "{cit.snippet}"
-                  </blockquote>
-                )}
-
-                <div className="citation-meta-row">
-                  <div className="citation-tags">
-                    <span className="meta-tag">
-                      <Tag size={12} />
-                      <span>{cit.doc_type || "Statutory Act"}</span>
-                    </span>
-                    <span className="meta-tag">
-                      <Calendar size={12} />
-                      <span>{cit.date_retrieved || "Verified 2026"}</span>
-                    </span>
-                  </div>
-
-                  {cit.source_url && (
-                    <a 
-                      href={cit.source_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="citation-source-link"
-                    >
-                      <span>Official Govt. Source</span>
-                      <ExternalLink size={12} />
-                    </a>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+      {open && (
+        <div style={{ borderTop: '1px solid var(--hairline)', padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+          {citations.map((c, i) => (
+            <div key={i}>
+              <p className="sk-mini" style={{ margin: '0 0 2px' }}>
+                [{i + 1}] · {c.doc_type || 'Authority'}{c.section ? ` · ${c.section}` : ''}
+              </p>
+              <p className="sk-small" style={{ margin: 0, color: 'var(--ink)' }}>
+                {c.title || c.doc_id}
+              </p>
+              {c.snippet && (
+                <blockquote className="sk-small" style={{ margin: 'var(--space-xs) 0 0', borderLeft: '2px solid var(--hairline-strong)', paddingLeft: 'var(--space-sm)' }}>
+                  &ldquo;{c.snippet}&rdquo;
+                </blockquote>
+              )}
+              {c.source_url && (
+                <a href={c.source_url} target="_blank" rel="noopener noreferrer" className="sk-small" style={{ display: 'inline-flex', gap: 'var(--space-xs)', alignItems: 'center', color: 'var(--accent-breeze)' }}>
+                  <span>Official source</span>
+                  <ExternalLink size={11} aria-hidden="true" />
+                </a>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>

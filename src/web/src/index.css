@@ -1,57 +1,8 @@
-@import './styles/design_tokens.css';
+/* =============================================================================
+   IP-SAKTI Sahayak Design System — Main Style Entrypoint
+   Next.js-style centralized token and production primitives architecture.
+   ============================================================================= */
 
-.app-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.topbar {
-  height: 48px;
-  background-color: var(--color-bg-primary);
-  border-bottom: 1px solid var(--color-border-light);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.jurisdiction-pill {
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-  font-weight: 500;
-}
-
-.main-content {
-  flex: 1;
-  background-color: var(--color-bg-secondary);
-}
-
-.footer-disclaimer {
-  text-align: center;
-  padding: 10px 20px;
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-  background-color: var(--color-bg-primary);
-  border-top: 1px solid var(--color-border-light);
-  font-style: italic;
-  line-height: 1.4;
-}
-
-@media (max-width: 768px) {
-  .topbar {
-    padding: 0 16px;
-  }
-  .footer-disclaimer {
-    font-size: 0.7rem;
-    padding: 8px 12px;
-  }
-}
+@import './styles/tokens.css';
+@import './styles/primitives.css';
+@import './styles/layout.css';

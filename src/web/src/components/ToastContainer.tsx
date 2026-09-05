@@ -4,7 +4,6 @@ import type { FC } from 'react';
 import { AlertTriangle, AlertCircle, Info, CheckCircle2, X } from 'lucide-react';
 import { subscribeToasts, toast } from '../utils/toast';
 import type { ToastItem } from '../utils/toast';
-import './Toast.css';
 
 export const ToastContainer: FC = () => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -87,12 +86,7 @@ export const ToastContainer: FC = () => {
   }
 
   return (
-    <div
-      className="toast-container"
-      role="region"
-      aria-label="Notifications"
-      aria-live="polite"
-    >
+    <div className="sk-toasts" role="region" aria-label="Notifications" aria-live="polite">
       {toasts.map((item) => {
         let IconComponent = Info;
         if (item.type === 'warning') IconComponent = AlertTriangle;
@@ -100,24 +94,19 @@ export const ToastContainer: FC = () => {
         else if (item.type === 'success') IconComponent = CheckCircle2;
 
         return (
-          <div
-            key={item.id}
-            className={`toast-item toast-${item.type}`}
-            role="status"
-          >
-            <div className="toast-icon">
-              <IconComponent size={18} />
-            </div>
-            <div className="toast-content">
-              <span className="toast-title">{item.title}</span>
-              <span className="toast-message">{item.message}</span>
+          <div key={item.id} className="sk-toast" role="status">
+            <IconComponent size={17} aria-hidden="true" style={{ flexShrink: 0, marginTop: '1px' }} />
+            <div style={{ flex: 1 }}>
+              <span className="sk-small" style={{ display: 'block', color: 'var(--ink)' }}>{item.title}</span>
+              <span className="sk-mini" style={{ display: 'block' }}>{item.message}</span>
             </div>
             <button
-              className="toast-close-btn"
+              className="sk-btn sk-btn-quiet sk-btn-sm"
+              style={{ padding: '2px' }}
               onClick={() => removeToast(item.id)}
               aria-label="Dismiss notification"
             >
-              <X size={14} />
+              <X size={13} aria-hidden="true" />
             </button>
           </div>
         );

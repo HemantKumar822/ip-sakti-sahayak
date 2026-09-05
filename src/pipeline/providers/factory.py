@@ -6,6 +6,7 @@ from typing import Any
 from src.config import config
 from src.pipeline.providers.base import BaseLLMClient
 from src.pipeline.providers.gemini import GeminiProvider
+from src.pipeline.providers.omniroute import OmniRouteProvider
 from src.pipeline.providers.openrouter import OpenRouterProvider
 
 logger = logging.getLogger("ip_sakti.pipeline.providers.factory")
@@ -18,7 +19,7 @@ def get_llm_client(
     """Instantiates and returns an LLM provider client conforming to BaseLLMClient.
 
     Args:
-        provider_name: Optional provider identifier ('gemini' or 'openrouter').
+        provider_name: Optional provider identifier ('gemini', 'openrouter', or 'omniroute').
                        Defaults to config.LLM_PROVIDER.
         **kwargs: Provider-specific configuration overrides (api_key, model_name, etc.).
 
@@ -37,7 +38,9 @@ def get_llm_client(
         return GeminiProvider(**kwargs)
     elif resolved_provider == "openrouter":
         return OpenRouterProvider(**kwargs)
+    elif resolved_provider == "omniroute":
+        return OmniRouteProvider(**kwargs)
     else:
         raise ValueError(
-            f"Unsupported LLM provider: '{resolved_provider}'. Supported providers are: 'gemini', 'openrouter'."
+            f"Unsupported LLM provider: '{resolved_provider}'. Supported providers are: 'gemini', 'openrouter', 'omniroute'."
         )

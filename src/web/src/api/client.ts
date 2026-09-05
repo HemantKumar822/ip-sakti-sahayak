@@ -79,9 +79,17 @@ async function handleResponseError(response: Response, defaultMessage: string): 
   if (response.status === 401) {
     toast.error(
       'Authentication Required (401)',
-      'API Key Required / Unauthorized: Please check your configuration in .env.'
+      'API Key Required / Unauthorized: match VITE_API_KEY with the backend VALID_API_KEYS.'
     );
     throw new Error('API Key Required / Unauthorized: Please check your configuration.');
+  }
+
+  if (response.status === 403) {
+    toast.error(
+      'Admin Access Required (403)',
+      'This key can query but not administer: add it to the backend VALID_ADMIN_API_KEYS.'
+    );
+    throw new Error('Admin privileges required: key is not in VALID_ADMIN_API_KEYS.');
   }
 
   const message = detail || defaultMessage;
