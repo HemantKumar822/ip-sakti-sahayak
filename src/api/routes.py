@@ -112,6 +112,30 @@ async def get_session_history(
     )
 
 
+@api_v1_router.delete(
+    "/sessions/{session_id}",
+    summary="Delete a session",
+    tags=["Session"],
+)
+async def delete_session(session_id: str, request: Request) -> dict[str, str]:
+    """Permanently delete a conversation session and all its turns."""
+    session_store = getattr(request.app.state, "session_store", None)
+    if session_store is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Session store service unavailable",
+        )
+
+    deleted = session_store.delete_session(session_id)
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Session '{session_id}' not found.",
+        )
+    return {"status": "success"}
+
+
+
 @api_v1_router.post(
     "/query",
     response_model=QueryResponse,

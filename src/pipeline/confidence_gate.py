@@ -21,7 +21,7 @@ class ConfidenceGateOutput(BaseModel):
     )
     chunks: list[dict[str, Any]] = Field(
         default_factory=list,
-        description="Retrieved chunks passed through if decision is 'generate', or empty list if 'abstain'.",
+        description="Retrieved chunks passed through for generating answers or smart abstentions.",
     )
 
 
@@ -100,7 +100,7 @@ class ConfidenceGate:
         return ConfidenceGateOutput(
             decision="abstain",
             max_score=max_score,
-            chunks=[],
+            chunks=chunks,
         )
 
 

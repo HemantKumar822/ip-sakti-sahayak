@@ -246,6 +246,55 @@ class AnswerGenerator:
                 "Ayurveda formulations, and Biological Diversity compliance. Please consult a specialist for this domain."
             )
 
+    def generate_smart_abstention(
+        self,
+        query: str,
+        chunks: list[dict[str, Any]],
+        abs_flag: bool = False,
+        conversation_history: list[dict[str, str]] | None = None,
+    ) -> GeneratorOutput:
+        """Generates a context-aware abstention explaining why retrieved documents are insufficient."""
+        context_text = self._format_context(chunks)
+        prompt = (
+            "You are IP-SAKTI Sahayak, an expert Intellectual Property legal assistant.\n"
+            f'The user asked: "{query}"\n\n'
+            f"Retrieved Legal Documents:\n{context_text}\n\n"
+            "The retrieved documents do not confidently or completely answer the user's question. "
+            "Write a brief (1-3 sentences) response explicitly stating that the retrieved information is insufficient to provide a complete legal answer. "
+            "Explain *why* based on what you *did* find in the documents (e.g., 'The documents mention X but do not cover Y'). "
+            "Formally abstain from giving legal advice on the missing parts."
+        )
+
+        try:
+            if conversation_history:
+                result = self.client.generate_chat(
+                    prompt=prompt,
+                    conversation_history=conversation_history,
+                    temperature=0.3,
+                    max_tokens=300,
+                    timeout=config.GEMINI_REQUEST_TIMEOUT,
+                )
+            else:
+                result = self.client.generate_text(
+                    prompt,
+                    temperature=0.3,
+                    max_tokens=300,
+                    timeout=config.GEMINI_REQUEST_TIMEOUT,
+                )
+            
+            # If the client returned text directly, format it.
+            answer_text = str(result).strip() if result else config.ABSTENTION_MESSAGE
+            
+            return GeneratorOutput(
+                answer=answer_text,
+                citations=[],
+                abs_flag=abs_flag,
+                disclaimer=config.DISCLAIMER_TEXT,
+            )
+        except Exception as e:
+            logger.warning("Could not generate smart abstention (%s); using standard refusal.", e)
+            return self._fallback_abstention(abs_flag=abs_flag)
+
     def generate(
         self,
         query: str,
@@ -320,13 +369,21 @@ class AnswerGenerator:
                 if cid:
                     allowed_doc_ids.add(cid)
 
+            valid_citations = []
             for citation in result.citations:
                 if allowed_doc_ids and citation.doc_id not in allowed_doc_ids:
-                    logger.error(
-                        "P0 Bug: Citation doc_id '%s' does not exist in manifest or retrieved chunks! Falling back to abstention.",
+                    logger.warning(
+                        "Citation doc_id '%s' does not exist in manifest or retrieved chunks! Dropping hallucinated citation.",
                         citation.doc_id,
                     )
-                    return self._fallback_abstention(abs_flag=abs_flag)
+                else:
+                    valid_citations.append(citation)
+            
+            result.citations = valid_citations
+            
+            if not result.citations:
+                logger.warning("All citations were hallucinated or missing. Falling back to abstention.")
+                return self._fallback_abstention(abs_flag=abs_flag)
 
             return result
 

@@ -2,7 +2,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { FC, DragEvent, ChangeEvent, FormEvent } from 'react';
 import {
-  Database,
   UploadCloud,
   FileText,
   CheckCircle2,
@@ -12,8 +11,9 @@ import {
   Layers,
   X,
   Search,
+  Cpu,
 } from 'lucide-react';
-import { fetchCorpusStatus, ingestCorpusDocument } from '../api/client';
+import { fetchCorpusStatus, ingestCorpusDocument, updateLlmConfig } from '../api/client';
 import type { CorpusStatusResponse, DocumentBreakdown } from '../api/client';
 import { toast } from '../utils/toast';
 
@@ -133,6 +133,13 @@ export const CorpusConsole: FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // LLM Config State
+  const [llmProvider, setLlmProvider] = useState('gemini');
+  const [llmApiKey, setLlmApiKey] = useState('');
+  const [llmModel, setLlmModel] = useState('');
+  const [llmBaseUrl, setLlmBaseUrl] = useState('');
+  const [isLlmSubmitting, setIsLlmSubmitting] = useState(false);
+
   const fetchStatusData = useCallback(async () => {
     try {
       setCorpusData(await fetchCorpusStatus());
@@ -224,6 +231,25 @@ export const CorpusConsole: FC = () => {
     }
   };
 
+  const handleSubmitLlmConfig = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsLlmSubmitting(true);
+      const res = await updateLlmConfig({
+        provider: llmProvider,
+        api_key: llmApiKey,
+        model_name: llmModel,
+        base_url: llmBaseUrl,
+      });
+      toast.success('LLM Updated', res.message);
+      // clear fields or leave them
+    } catch (err) {
+      toast.error('Config failed', 'Could not update LLM provider.');
+    } finally {
+      setIsLlmSubmitting(false);
+    }
+  };
+
   const breakdown: DocumentBreakdown[] =
     corpusData?.document_breakdown?.length ? corpusData.document_breakdown : DEFAULT_DOCUMENTS;
   const totalChunks = corpusData?.total_chunks || 296;
@@ -238,8 +264,8 @@ export const CorpusConsole: FC = () => {
     const isAdmin = restricted === 'admin';
     return (
       <div className="sk-admin" role="region" aria-label="Corpus administration">
-        <div className="sk-card" style={{ textAlign: 'center', padding: 'var(--space-4xl) var(--space-xl)' }}>
-          <ShieldAlert size={28} aria-hidden="true" style={{ color: 'var(--status-error)' }} />
+        <div className="sk-glass-card" style={{ textAlign: 'center', padding: 'var(--space-4xl) var(--space-xl)', maxWidth: '800px', margin: '100px auto' }}>
+          <ShieldAlert size={28} aria-hidden="true" style={{ color: 'var(--status-error)', margin: '0 auto' }} />
           <h1 className="sk-h2" style={{ marginTop: 'var(--space-md)' }}>
             {isAdmin ? 'Query key lacks admin rights' : 'Admin access restricted'}
           </h1>
@@ -270,50 +296,48 @@ export const CorpusConsole: FC = () => {
   }
 
   return (
-    <div className="sk-admin" role="region" aria-label="Corpus administration">
-      <div className="sk-admin-head">
+    <div className="sk-admin sk-portal" role="region" aria-label="Corpus administration">
+      <div className="sk-hero-glow"></div>
+      <div className="sk-hero" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 'var(--space-md)', paddingBottom: '0' }}>
         <div>
-          <p className="sk-eyebrow">Corpus administration</p>
-          <h1 className="sk-h1" style={{ marginTop: 'var(--space-xs)' }}>
+          <p className="sk-eyebrow sk-eyebrow-accent" style={{ letterSpacing: '2px', display: 'inline-block', padding: 'var(--space-xs) var(--space-md)', background: 'rgba(255, 122, 23, 0.1)', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(255, 122, 23, 0.2)' }}>
+            CORPUS ADMINISTRATION
+          </p>
+          <h1 className="sk-h1" style={{ marginTop: 'var(--space-sm)' }}>
             What the desk reasons over
           </h1>
-          <p className="sk-body" style={{ marginTop: 'var(--space-sm)', maxWidth: '720px' }}>
+          <p className="sk-body" style={{ marginTop: 'var(--space-sm)', maxWidth: '720px', margin: 'var(--space-sm) auto 0', color: 'var(--mute)' }}>
             Every clearance answer is retrieved from this index of official gazettes — statutes,
             examination guidelines, and precedents. Add a gazette and it becomes citable immediately.
           </p>
         </div>
-        <span className="sk-live" title="ChromaDB health">
+        <span className="sk-live" title="ChromaDB health" style={{ marginTop: 'var(--space-md)' }}>
           <span className={`sk-dot${connected ? '' : ' sk-dot-bad'}`} aria-hidden="true" />
           <span>{connected ? (corpusData ? 'ChromaDB connected' : 'Showing baseline') : 'ChromaDB disconnected'}</span>
         </span>
       </div>
 
-      <div className="sk-stats" aria-label="Corpus statistics">
-        <div className="sk-card sk-stat">
+      <div className="sk-premium-grid" aria-label="Corpus statistics" style={{ paddingBottom: 'var(--space-2xl)' }}>
+        <div className="sk-glass-card" style={{ textAlign: 'center', padding: 'var(--space-2xl) var(--space-xl)' }}>
           <span className="sk-eyebrow">Indexed chunks</span>
-          <span className="sk-stat-value">{isLoading ? '—' : totalChunks}</span>
-          <span className="sk-mini">Baseline: 296 across 11 gazettes</span>
+          <span className="sk-stat-value" style={{ margin: 'var(--space-sm) 0', fontSize: '32px' }}>{isLoading ? '—' : totalChunks}</span>
+          <span className="sk-mini" style={{ color: 'var(--mute)' }}>Baseline: 296 across 11 gazettes</span>
         </div>
-        <div className="sk-card sk-stat">
+        <div className="sk-glass-card" style={{ textAlign: 'center', padding: 'var(--space-2xl) var(--space-xl)' }}>
           <span className="sk-eyebrow">Gazettes</span>
-          <span className="sk-stat-value">{isLoading ? '—' : totalDocs}</span>
-          <span className="sk-mini">Statutes, guidelines, precedents</span>
+          <span className="sk-stat-value" style={{ margin: 'var(--space-sm) 0', fontSize: '32px' }}>{isLoading ? '—' : totalDocs}</span>
+          <span className="sk-mini" style={{ color: 'var(--mute)' }}>Statutes, guidelines, precedents</span>
         </div>
-        <div className="sk-card sk-stat">
+        <div className="sk-glass-card" style={{ textAlign: 'center', padding: 'var(--space-2xl) var(--space-xl)' }}>
           <span className="sk-eyebrow">Collection</span>
-          <span className="sk-stat-value" style={{ fontSize: '17px', wordBreak: 'break-all' }}>
+          <span className="sk-stat-value" style={{ fontSize: '17px', wordBreak: 'break-all', margin: 'var(--space-sm) 0' }}>
             {corpusData?.collection_name || 'ip_sakti_legal_corpus'}
           </span>
-          <span className="sk-mini">ChromaDB persistent index</span>
-        </div>
-        <div className="sk-card sk-stat">
-          <span className="sk-eyebrow">Confidence gate</span>
-          <span className="sk-stat-value">0.65</span>
-          <span className="sk-mini">Below this, the desk refuses</span>
+          <span className="sk-mini" style={{ color: 'var(--mute)' }}>ChromaDB persistent index</span>
         </div>
       </div>
 
-      <div className="sk-card">
+      <div className="sk-glass-card" style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
           <h2 className="sk-h3">Indexed gazettes</h2>
           <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
@@ -388,7 +412,7 @@ export const CorpusConsole: FC = () => {
         </p>
       </div>
 
-      <div className="sk-card">
+      <div className="sk-glass-card" style={{ maxWidth: '1200px', margin: 'var(--space-2xl) auto 0', width: '100%' }}>
         <h2 className="sk-h3" style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
           <UploadCloud size={17} aria-hidden="true" style={{ color: 'var(--accent-sunset)' }} />
           <span>Ingest a gazette</span>
@@ -479,18 +503,47 @@ export const CorpusConsole: FC = () => {
         </form>
       </div>
 
-      <div className="sk-card sk-card-soft">
-        <h2 className="sk-h3">Evaluation baseline</h2>
+      <div className="sk-glass-card" style={{ maxWidth: '1200px', margin: 'var(--space-2xl) auto 0', width: '100%' }}>
+        <h2 className="sk-h3" style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+          <Cpu size={17} aria-hidden="true" style={{ color: 'var(--accent-sunset)' }} />
+          <span>LLM Engine Configuration</span>
+        </h2>
         <p className="sk-small" style={{ marginTop: 'var(--space-xs)' }}>
-          Last verified full run: <strong style={{ color: 'var(--ink)' }}>20 / 20</strong> golden inquiries
-          gated correctly · mean latency 728 ms · coverage 92%+. Re-run via{' '}
-          <code>python run.py --bench</code> before release claims.
+          Dynamically switch the intelligence engine running IP-SAKTI Sahayak.
         </p>
-        <p className="sk-mini" style={{ marginTop: 'var(--space-xs)', display: 'inline-flex', gap: 'var(--space-xs)', alignItems: 'center' }}>
-          <Database size={12} aria-hidden="true" />
-          <span>Live benchmark execution ships with the eval harness, not this console.</span>
-        </p>
+        <form onSubmit={(e) => void handleSubmitLlmConfig(e)} style={{ marginTop: 'var(--space-lg)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+          <div className="sk-form-grid">
+            <div className="sk-field">
+              <label className="sk-label" htmlFor="llm_provider">Provider</label>
+              <select id="llm_provider" className="sk-select" value={llmProvider} onChange={(e) => setLlmProvider(e.target.value)}>
+                <option value="gemini">Gemini (Google)</option>
+                <option value="openrouter">OpenRouter</option>
+                <option value="omniroute">OmniRoute (Local/Ollama)</option>
+              </select>
+            </div>
+            <div className="sk-field">
+              <label className="sk-label" htmlFor="llm_api_key">API Key</label>
+              <input id="llm_api_key" className="sk-input" type="password" placeholder="Optional for local models" value={llmApiKey} onChange={(e) => setLlmApiKey(e.target.value)} />
+            </div>
+            <div className="sk-field">
+              <label className="sk-label" htmlFor="llm_model">Model Name</label>
+              <input id="llm_model" className="sk-input" type="text" placeholder="e.g. gemini-2.5-flash" value={llmModel} onChange={(e) => setLlmModel(e.target.value)} />
+            </div>
+            <div className="sk-field">
+              <label className="sk-label" htmlFor="llm_base_url">Base URL</label>
+              <input id="llm_base_url" className="sk-input" type="url" placeholder="e.g. http://localhost:11434/v1" value={llmBaseUrl} onChange={(e) => setLlmBaseUrl(e.target.value)} />
+            </div>
+          </div>
+          <div>
+            <button type="submit" className="sk-btn sk-btn-primary" disabled={isLlmSubmitting}>
+              {isLlmSubmitting ? <RefreshCw size={14} aria-hidden="true" className="animate-spin" /> : <CheckCircle2 size={14} aria-hidden="true" />}
+              <span>{isLlmSubmitting ? 'Updating Engine…' : 'Apply Configuration'}</span>
+            </button>
+          </div>
+        </form>
       </div>
+
+
     </div>
   );
 };

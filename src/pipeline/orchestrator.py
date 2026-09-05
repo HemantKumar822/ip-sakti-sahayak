@@ -261,10 +261,27 @@ class PipelineOrchestrator:
                 response_citations = []
                 grounding_score = 1.0
                 verification_status = "verified"
-                abstention_msg = await asyncio.to_thread(
-                    self.answer_generator.generate_refusal,
-                    query=cleaned_query,
-                )
+                
+                if category_out.category != "General Non-Legal" and gate_out.decision == "abstain":
+                    logger.info(
+                        "[CONF-GATE] [%s] Decision: ABSTAIN (score: %.3f < %.2f threshold) -> Smart Abstention",
+                        short_id,
+                        gate_out.max_score,
+                        self.confidence_gate.threshold,
+                    )
+                    gen_out = await asyncio.to_thread(
+                        self.answer_generator.generate_smart_abstention,
+                        query=cleaned_query,
+                        chunks=gate_out.chunks,
+                        abs_flag=abs_out.abs_flag,
+                        conversation_history=conversation_history,
+                    )
+                    abstention_msg = gen_out.answer
+                else:
+                    abstention_msg = await asyncio.to_thread(
+                        self.answer_generator.generate_refusal,
+                        query=cleaned_query,
+                    )
 
         # Extract retrieved document IDs for audit logging
         retrieved_doc_ids = []

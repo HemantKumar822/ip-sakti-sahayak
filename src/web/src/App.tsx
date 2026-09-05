@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { TriangleAlert, X, RotateCw } from 'lucide-react';
+
 import { fetchSession } from './api/client';
 import type { Message, QueryResponse, Citation } from './api/client';
 import { Sidebar } from './components/Sidebar';
@@ -12,6 +12,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastContainer } from './components/ToastContainer';
 import { CorpusConsole } from './components/CorpusConsole';
 import { LandingPage } from './components/LandingPage';
+import { ApiKeyModal } from './components/ApiKeyModal';
 
 const DISCLAIMER =
   'This information is provided for general awareness and does not constitute legal advice. Consult a qualified IP attorney for decisions specific to your situation.';
@@ -37,6 +38,8 @@ function App() {
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [pendingQuery, setPendingQuery] = useState<string | null>(null);
   const [noticeDismissed, setNoticeDismissed] = useState(false);
+  const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
 
   useEffect(() => {
     try {
@@ -104,40 +107,32 @@ function App() {
     setCitationOpen(true);
   }, []);
 
+  const handleSaveApiKey = useCallback((key: string) => {
+    localStorage.setItem('ip_sakti_api_key', key.trim());
+    setAuthError(false);
+    window.location.reload();
+  }, []);
+
   return (
     <ErrorBoundary onReset={handleReset}>
       <div className={`sk-shell${activeView === 'workbench' ? ' sk-shell-locked' : ''}`}>
         <ToastContainer />
-        {authError && !noticeDismissed && (
-          <div className="sk-notice" role="alert">
-            <TriangleAlert size={15} aria-hidden="true" style={{ flexShrink: 0, color: 'var(--accent-sunset)' }} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p className="sk-small" style={{ margin: 0, color: 'var(--ink)' }}>
-                The backend rejected this browser&apos;s API key — inquiries and corpus status are unavailable.
-              </p>
-              <p className="sk-mini" style={{ margin: '2px 0 0' }}>
-                Fix: set <code>VITE_API_KEY</code> in <code>src/web/.env</code> to match the backend{' '}
-                <code>VALID_API_KEYS</code>, then <strong>restart the frontend</strong> (Vite reads env only at
-                startup) and press Retry. <code>python run.py</code> checks this parity automatically.
-              </p>
-            </div>
-            <button type="button" className="sk-btn sk-btn-sm" onClick={() => window.location.reload()}>
-              <RotateCw size={13} aria-hidden="true" />
-              <span>Retry</span>
-            </button>
-            <button
-              type="button"
-              className="sk-btn sk-btn-quiet sk-btn-sm"
-              onClick={() => setNoticeDismissed(true)}
-              aria-label="Dismiss connection notice"
-              style={{ padding: '4px' }}
-            >
-              <X size={14} aria-hidden="true" />
-            </button>
-          </div>
-        )}
+        
+        <ApiKeyModal 
+          isOpen={authError && !noticeDismissed} 
+          onClose={() => setNoticeDismissed(true)} 
+          onSave={handleSaveApiKey} 
+        />
 
-        <Topbar activeView={activeView} onViewChange={setActiveView} onHome={() => setActiveView('landing')} />
+        <Topbar 
+          activeView={activeView} 
+          onViewChange={setActiveView} 
+          onHome={() => setActiveView('landing')} 
+          leftSidebarOpen={leftSidebarOpen}
+          onToggleLeftSidebar={() => setLeftSidebarOpen(!leftSidebarOpen)}
+          rightSidebarOpen={rightSidebarOpen}
+          onToggleRightSidebar={() => setRightSidebarOpen(!rightSidebarOpen)}
+        />
 
         {activeView === 'landing' && (
           <main className="sk-main">
@@ -147,15 +142,18 @@ function App() {
 
         {activeView === 'workbench' && (
           <main className="sk-main">
-            <div className="sk-wb">
-              <div className="sk-history">
-                <Sidebar
-                  onNewNote={handleReset}
-                  activeSessionId={sessionId}
-                  onSelectSession={setSessionId}
-                  refreshTrigger={messages.length}
-                />
-              </div>
+            <div className={`sk-wb ${!leftSidebarOpen ? 'sk-wb-no-left' : ''} ${!rightSidebarOpen ? 'sk-wb-no-right' : ''}`}>
+              {leftSidebarOpen && (
+                <div className="sk-history">
+                  <Sidebar
+                    onNewNote={handleReset}
+                    activeSessionId={sessionId}
+                    onSelectSession={setSessionId}
+                    refreshTrigger={messages.length}
+                    currentTurns={messages.length}
+                  />
+                </div>
+              )}
               <div className="sk-dock">
                   <ChatInterface
                     messages={messages}
@@ -174,9 +172,11 @@ function App() {
                     onConsumePending={() => setPendingQuery(null)}
                   />
               </div>
-              <div className="sk-evidence">
-                <TrustInspector response={lastResponse} />
-              </div>
+              {rightSidebarOpen && (
+                <div className="sk-evidence">
+                  <TrustInspector response={lastResponse} />
+                </div>
+              )}
             </div>
           </main>
         )}

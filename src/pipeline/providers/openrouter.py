@@ -23,7 +23,14 @@ def _extract_json_text(text: str) -> str:
         # Match ```json ... ``` or ``` ... ```
         match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", text, re.IGNORECASE)
         if match:
-            return match.group(1).strip()
+            text = match.group(1).strip()
+    
+    # Try to extract just the JSON object if there's trailing/leading fluff
+    start = text.find("{")
+    end = text.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        return text[start : end + 1]
+    
     return text
 
 
@@ -96,9 +103,12 @@ class OpenRouterProvider(BaseLLMClient):
             "Do not include any commentary, explanations, or text outside the valid JSON object."
         )
 
+        final_prompt = prompt
+        final_prompt += f"\n\nIMPORTANT: You MUST respond with a valid JSON object using EXACTLY these keys: {list(response_schema.model_fields.keys())}. Do not use any other keys like 'description'."
+
         messages = [
             {"role": "system", "content": system_instruction},
-            {"role": "user", "content": prompt},
+            {"role": "user", "content": final_prompt},
         ]
 
         response = self.client.chat.completions.create(
@@ -154,7 +164,11 @@ class OpenRouterProvider(BaseLLMClient):
                     content = " ".join(parts) if isinstance(parts, list) else str(parts)
                 messages.append({"role": role, "content": content})
 
-        messages.append({"role": "user", "content": prompt})
+        final_prompt = prompt
+        if response_schema is not None:
+            final_prompt += f"\n\nIMPORTANT: You MUST respond with a valid JSON object using EXACTLY these keys: {list(response_schema.model_fields.keys())}. Do not use any other keys like 'description'."
+
+        messages.append({"role": "user", "content": final_prompt})
 
         create_kwargs: dict[str, object] = {
             "model": self.model_name,

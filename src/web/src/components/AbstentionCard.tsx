@@ -35,7 +35,7 @@ export const AbstentionCard: React.FC<AbstentionCardProps> = ({ response, onSele
     (response.grounding_score !== undefined && response.grounding_score < 0.8);
 
   return (
-    <div className="sk-card animate-fade-in" role="alert" aria-label="No confident answer">
+    <div className="sk-glass-card animate-fade-in" role="alert" aria-label="No confident answer">
       <div style={{ display: 'flex', gap: 'var(--space-md)', alignItems: 'flex-start' }}>
         <span style={{ color: 'var(--status-error)', display: 'inline-flex', flexShrink: 0 }}>
           <ShieldAlert size={22} aria-hidden="true" />

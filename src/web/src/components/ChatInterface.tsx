@@ -8,6 +8,50 @@ import { AbstentionCard } from './AbstentionCard';
 import { PromptBar } from './PromptBar';
 import { FormulationDeconstructor } from './FormulationDeconstructor';
 
+const PHASES = [
+  { text: "Parsing formulation claims...", detail: "Extracting botanical names and preparation methods" },
+  { text: "Querying ChromaDB legal index...", detail: "Dense + lexical retrieval against 11 gazettes" },
+  { text: "Evaluating Section 3(p) prior art...", detail: "Applying 0.65 confidence gate for TKDL matches" },
+  { text: "Synthesizing legal memorandum...", detail: "Drafting compliance verdict and formatting citations" }
+];
+
+const PhasedLoading: React.FC = () => {
+  const [phaseIdx, setPhaseIdx] = useState(0);
+
+  useEffect(() => {
+    const intervals = [1500, 2500, 3000]; // milliseconds for each phase transition
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const advancePhase = (currentIdx: number) => {
+      if (currentIdx < PHASES.length - 1) {
+        timeoutId = setTimeout(() => {
+          setPhaseIdx(currentIdx + 1);
+          advancePhase(currentIdx + 1);
+        }, intervals[currentIdx] || 2000);
+      }
+    };
+
+    advancePhase(0);
+    return () => clearTimeout(timeoutId);
+  }, []);
+
+  return (
+    <div className="sk-glass-card animate-fade-in" role="status" aria-label="Checking">
+      <div className="sk-loading" style={{ display: 'flex', gap: 'var(--space-md)', alignItems: 'center' }}>
+        <Loader2 size={24} className="animate-spin" aria-hidden="true" style={{ color: 'var(--accent-sunset)', flexShrink: 0 }} />
+        <div style={{ flex: 1, minHeight: '42px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <p className="sk-eyebrow" style={{ color: 'var(--ink)' }}>
+            {PHASES[phaseIdx].text}
+          </p>
+          <p className="sk-mini animate-fade-in" style={{ margin: '4px 0 0', color: 'var(--mute)' }} key={phaseIdx}>
+            {PHASES[phaseIdx].detail}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface ChatInterfaceProps {
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
@@ -41,7 +85,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const isEmpty = messages.length === 0 && !loading;
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    if (messages.length > 0 || loading) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
   }, [messages, loading]);
 
   // Portal persona CTAs arrive as a pending query: send exactly once.
@@ -61,7 +107,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     setLoading(true);
     try {
       setMessages((prev) => [...prev, { role: 'user', content: query }]);
-      const history = [...messages, { role: 'user', content: query }];
+      const history: Message[] = [...messages, { role: 'user', content: query }];
       const response = await submitQuery({ query_text: query, session_id: sessionId, conversation_history: history });
       setLastResponse(response);
       setMessages((prev) => [
@@ -75,7 +121,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         return;
       }
       const fallback: QueryResponse = {
-        status: 'abstained',
+        status: 'error' as any,
         answer: null,
         abstention_message: msg,
         citations: [],
@@ -133,6 +179,27 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             }
             const r = msg.responseMetadata;
             if (!r) return null;
+            if (r.status === 'error' as any) {
+              return (
+                <div key={i} className="sk-glass-card animate-fade-in" role="alert" style={{ borderColor: 'var(--status-error)' }}>
+                  <div style={{ display: 'flex', gap: 'var(--space-md)', alignItems: 'flex-start' }}>
+                    <span style={{ color: 'var(--status-error)' }}>
+                      <RotateCcw size={22} aria-hidden="true" />
+                    </span>
+                    <div>
+                      <p className="sk-eyebrow" style={{ color: 'var(--status-error)' }}>System Error</p>
+                      <h3 className="sk-h3" style={{ marginTop: 'var(--space-xs)' }}>{r.abstention_message}</h3>
+                      <div style={{ marginTop: 'var(--space-md)' }}>
+                        <button type="button" className="sk-btn sk-btn-quiet sk-btn-sm" onClick={reset}>
+                          <RotateCcw size={13} aria-hidden="true" />
+                          <span>Start over</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
             return r.status === 'abstained' ? (
               <AbstentionCard key={i} response={r} onSelectSuggestion={(s) => void send(s)} onReset={reset} />
             ) : (
@@ -140,21 +207,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             );
           })}
 
-          {loading && (
-            <div className="sk-card animate-fade-in" role="status" aria-label="Checking">
-              <div className="sk-loading">
-                <Loader2 size={18} className="animate-spin" aria-hidden="true" style={{ color: 'var(--accent-sunset)' }} />
-                <div>
-                  <p className="sk-eyebrow" style={{ color: 'var(--ink)' }}>
-                    Checking gazettes and compliance flags
-                  </p>
-                  <p className="sk-mini" style={{ margin: '2px 0 0' }}>
-                    Dense + lexical retrieval, Section 3(p) / Section 6 screen, 0.65 gate…
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+          {loading && <PhasedLoading />}
 
           <div ref={bottomRef} />
         </div>
@@ -163,7 +216,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       <div className="sk-dock-inquiry">
         <div className="sk-dock-inquiry-inner">
           {limitReached ? (
-            <div className="sk-card sk-card-soft" style={{ padding: 'var(--space-md)' }}>
+            <div className="sk-glass-card sk-card-soft" style={{ padding: 'var(--space-md)' }}>
               <p className="sk-small" style={{ margin: 0 }}>
                 Six inquiries used — session memory is full. Start over for a fresh record.
               </p>
@@ -171,9 +224,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           ) : (
             <>
               <PromptBar onSubmitQuery={(t) => void send(t)} loading={loading} />
-              {!loading && messages.length < 3 && (
-                <FormulationDeconstructor onSubmitDeconstruction={(q) => void send(q)} isLoading={loading} />
-              )}
             </>
           )}
         </div>

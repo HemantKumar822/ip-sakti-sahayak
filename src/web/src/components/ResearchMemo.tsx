@@ -74,7 +74,7 @@ export const ResearchMemo: React.FC<ResearchMemoProps> = ({ response, onCitation
   }
 
   return (
-    <article className="sk-card sk-memo animate-fade-in" aria-label="Clearance memorandum">
+    <article className="sk-glass-card sk-memo animate-fade-in" aria-label="Clearance memorandum">
       <header className="sk-memo-head">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
           <p className="sk-eyebrow">Clearance memorandum</p>
@@ -173,7 +173,7 @@ export const ResearchMemo: React.FC<ResearchMemoProps> = ({ response, onCitation
           </p>
           <div className="sk-cites">
             {response.citations.map((c, i) => (
-              <div key={i} className="sk-card sk-card-soft sk-cite" id={`citation-${i + 1}`}>
+              <div key={i} className="sk-glass-card sk-card-soft sk-cite" id={`citation-${i + 1}`}>
                 <span className="sk-mini">[{i + 1}] · {c.doc_type || 'Authority'}</span>
                 <p className="sk-small" style={{ margin: 0, color: 'var(--ink)' }}>
                   {c.title || c.doc_id}

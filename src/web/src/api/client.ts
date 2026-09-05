@@ -2,8 +2,12 @@
 import { toast } from '../utils/toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://127.0.0.1:8000/api/v1' : '/api/v1');
-const API_KEY = import.meta.env.VITE_API_KEY || '';
-
+export function getApiKey(): string {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('ip_sakti_api_key') || import.meta.env.VITE_API_KEY || '';
+  }
+  return import.meta.env.VITE_API_KEY || '';
+}
 export interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -121,7 +125,7 @@ export async function submitQuery(request: QueryRequest): Promise<QueryResponse>
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': API_KEY,
+        'X-API-Key': getApiKey(),
       },
       body: JSON.stringify(safeRequest),
     });
@@ -159,7 +163,7 @@ export async function fetchSession(sessionId: string): Promise<SessionDetail> {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': API_KEY,
+        'X-API-Key': getApiKey(),
       },
     });
 
@@ -168,6 +172,24 @@ export async function fetchSession(sessionId: string): Promise<SessionDetail> {
     }
 
     return response.json();
+  } catch (err) {
+    return handleNetworkError(err);
+  }
+}
+
+export async function deleteSession(sessionId: string): Promise<void> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/sessions/${encodeURIComponent(sessionId)}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': getApiKey(),
+      },
+    });
+
+    if (!response.ok && response.status !== 404) {
+      return await handleResponseError(response, 'Failed to delete session');
+    }
   } catch (err) {
     return handleNetworkError(err);
   }
@@ -183,7 +205,7 @@ export async function fetchCorpusStats(): Promise<CorpusStats> {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'X-API-Key': API_KEY,
+      'X-API-Key': getApiKey(),
     },
   });
   
@@ -226,7 +248,7 @@ export async function fetchCorpusStatus(): Promise<CorpusStatusResponse> {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': API_KEY,
+        'X-API-Key': getApiKey(),
       },
     });
 
@@ -246,7 +268,7 @@ export async function ingestCorpusDocument(formData: FormData): Promise<IngestRe
     const response = await fetch(adminUrl, {
       method: 'POST',
       headers: {
-        'X-API-Key': API_KEY,
+        'X-API-Key': getApiKey(),
       },
       body: formData,
     });
@@ -260,6 +282,55 @@ export async function ingestCorpusDocument(formData: FormData): Promise<IngestRe
     return handleNetworkError(err);
   }
 }
+
+export async function ingestDocument(file: File, docId: string): Promise<{ status: string; doc_id: string; chunks_ingested: number }> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('doc_id', docId);
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/corpus/ingest`, {
+      method: 'POST',
+      headers: {
+        'X-API-Key': getApiKey(),
+      },
+      body: formData,
+    });
+    if (!res.ok) {
+      return await handleResponseError(res, 'Failed to ingest document');
+    }
+    return await res.json();
+  } catch (err) {
+    return handleNetworkError(err);
+  }
+}
+
+export interface LlmConfigPayload {
+  provider: string;
+  api_key?: string;
+  model_name?: string;
+  base_url?: string;
+}
+
+export async function updateLlmConfig(payload: LlmConfigPayload): Promise<{ status: string; message: string }> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/llm/config`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': getApiKey(),
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      return await handleResponseError(res, 'Failed to update LLM configuration');
+    }
+    return await res.json();
+  } catch (err) {
+    return handleNetworkError(err);
+  }
+}
+
 
 export interface SessionSummary {
   session_id: string;
@@ -275,7 +346,7 @@ export async function fetchSessions(limit: number = 50): Promise<SessionSummary[
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': API_KEY,
+        'X-API-Key': getApiKey(),
       },
     });
 

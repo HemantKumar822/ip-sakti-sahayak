@@ -123,5 +123,70 @@ class Config:
                 "CHROMA_COLLECTION_NAME is required but not set in configuration or environment variables."
             )
 
+    @classmethod
+    def update_llm_config(
+        cls, provider: str, api_key: str, model_name: str, base_url: str
+    ) -> None:
+        """Dynamically update LLM provider configuration in memory and in .env."""
+        provider = provider.strip().lower()
+        if provider not in ["gemini", "openrouter", "omniroute"]:
+            raise ValueError(f"Unsupported provider: {provider}")
+
+        cls.LLM_PROVIDER = provider
+        os.environ["LLM_PROVIDER"] = provider
+
+        if provider == "gemini":
+            if api_key:
+                cls.GEMINI_API_KEY = api_key
+                os.environ["GEMINI_API_KEY"] = api_key
+            if model_name:
+                cls.GEMINI_MODEL = model_name
+                os.environ["GEMINI_MODEL"] = model_name
+        elif provider == "openrouter":
+            if api_key:
+                cls.OPENROUTER_API_KEY = api_key
+                os.environ["OPENROUTER_API_KEY"] = api_key
+            if model_name:
+                cls.OPENROUTER_MODEL = model_name
+                os.environ["OPENROUTER_MODEL"] = model_name
+            if base_url:
+                cls.OPENROUTER_BASE_URL = base_url
+                os.environ["OPENROUTER_BASE_URL"] = base_url
+        elif provider == "omniroute":
+            if api_key:
+                cls.OMNIROUTE_API_KEY = api_key
+                os.environ["OMNIROUTE_API_KEY"] = api_key
+            if model_name:
+                cls.OMNIROUTE_MODEL = model_name
+                os.environ["OMNIROUTE_MODEL"] = model_name
+            if base_url:
+                cls.OMNIROUTE_BASE_URL = base_url
+                os.environ["OMNIROUTE_BASE_URL"] = base_url
+
+        try:
+            import dotenv
+            env_file = dotenv.find_dotenv()
+            if not env_file:
+                # If running locally, there might be a .env in the root dir
+                # The root dir is the parent of src
+                root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                env_file = os.path.join(root_dir, ".env")
+            
+            dotenv.set_key(env_file, "LLM_PROVIDER", provider)
+            if provider == "gemini":
+                if api_key: dotenv.set_key(env_file, "GEMINI_API_KEY", api_key)
+                if model_name: dotenv.set_key(env_file, "GEMINI_MODEL", model_name)
+            elif provider == "openrouter":
+                if api_key: dotenv.set_key(env_file, "OPENROUTER_API_KEY", api_key)
+                if model_name: dotenv.set_key(env_file, "OPENROUTER_MODEL", model_name)
+                if base_url: dotenv.set_key(env_file, "OPENROUTER_BASE_URL", base_url)
+            elif provider == "omniroute":
+                if api_key: dotenv.set_key(env_file, "OMNIROUTE_API_KEY", api_key)
+                if model_name: dotenv.set_key(env_file, "OMNIROUTE_MODEL", model_name)
+                if base_url: dotenv.set_key(env_file, "OMNIROUTE_BASE_URL", base_url)
+        except Exception as e:
+            # We don't want to crash if we can't save to .env
+            pass
+
 
 config = Config()

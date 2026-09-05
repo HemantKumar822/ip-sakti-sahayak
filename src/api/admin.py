@@ -16,6 +16,8 @@ from fastapi import (
 from ingestion.ingest import ingest_single_document
 from src.api.auth import require_admin
 from src.vector_store.chroma_store import ChromaStore
+from src.config import config
+from src.pipeline.orchestrator import PipelineOrchestrator
 
 logger = logging.getLogger("ip_sakti.api.admin")
 router = APIRouter(
@@ -137,3 +139,45 @@ async def ingest_corpus(
         "doc_id": doc_id,
         "chunks_ingested": chunks_ingested,
     }
+
+
+from pydantic import BaseModel
+
+class LLMConfigRequest(BaseModel):
+    provider: str
+    api_key: str = ""
+    model_name: str = ""
+    base_url: str = ""
+
+@router.post(
+    "/llm/config",
+    summary="Update LLM Provider Configuration",
+    description="Dynamically update the active LLM provider, API key, model, and base URL.",
+)
+async def update_llm_config(
+    payload: LLMConfigRequest, request: Request
+) -> dict[str, str]:
+    try:
+        config.update_llm_config(
+            provider=payload.provider,
+            api_key=payload.api_key,
+            model_name=payload.model_name,
+            base_url=payload.base_url,
+        )
+        
+        # Re-initialize the pipeline with the new provider client
+        request.app.state.pipeline = PipelineOrchestrator()
+        
+        return {"status": "success", "message": f"Successfully updated LLM provider to {payload.provider}."}
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except Exception as e:
+        logger.error("Failed to update LLM config: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update LLM configuration: {e!s}",
+        )
+

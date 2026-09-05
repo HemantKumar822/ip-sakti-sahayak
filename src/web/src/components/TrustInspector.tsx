@@ -19,7 +19,6 @@ interface TrustInspectorProps {
   onClose?: () => void;
 }
 
-const STAGES = ['PII scrubbed', 'Classified', 'Jurisdiction routed', 'Hybrid retrieval', 'Gate checked'];
 
 function downloadBrief(query: string, r: QueryResponse) {
   const pct = ((r.confidence_score || 0) * 100).toFixed(1);
@@ -56,14 +55,7 @@ export const TrustInspector: React.FC<TrustInspectorProps> = ({ response, onClos
         </div>
         <div className="sk-ev-block" style={{ marginTop: 'var(--space-lg)' }}>
           <p className="sk-eyebrow">Pipeline stages</p>
-          <ul className="sk-stage-list">
-            {STAGES.map((s) => (
-              <li key={s} className="sk-stage">
-                <span className="sk-stage-dot" style={{ background: 'var(--hairline-strong)' }} aria-hidden="true" />
-                <span>{s}</span>
-              </li>
-            ))}
-          </ul>
+          <p className="sk-small" style={{ color: 'var(--mute)' }}>Awaiting inquiry...</p>
         </div>
       </div>
     );
@@ -74,6 +66,14 @@ export const TrustInspector: React.FC<TrustInspectorProps> = ({ response, onClos
   const grounding = (response.grounding_score ?? (response.status === 'abstained' ? 0 : 1)) * 100;
   const cites = response.citations || [];
 
+  const dynamicStages = [
+    { label: 'PII scrubbed', value: 'Complete' },
+    { label: 'Classified', value: response.category || 'N/A' },
+    { label: 'Jurisdiction', value: response.jurisdiction || 'N/A' },
+    { label: 'Retrieval', value: `${cites.length} chunk${cites.length !== 1 ? 's' : ''}` },
+    { label: 'Confidence gate', value: `${pct.toFixed(1)}%` },
+  ];
+
   return (
     <div className="animate-fade-in" aria-label="Evidence and verification">
       <div className="sk-ev-row">
@@ -83,6 +83,21 @@ export const TrustInspector: React.FC<TrustInspectorProps> = ({ response, onClos
             <X size={14} aria-hidden="true" />
           </button>
         )}
+      </div>
+
+      <div className="sk-ev-block" style={{ marginTop: 'var(--space-md)' }}>
+        <p className="sk-eyebrow">Pipeline tracking</p>
+        <ul className="sk-stage-list">
+          {dynamicStages.map((s, idx) => (
+            <li key={idx} className="sk-stage" style={{ justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                <span className="sk-stage-dot" aria-hidden="true" />
+                <span>{s.label}</span>
+              </div>
+              <span className="sk-mini" style={{ color: 'var(--ink)', fontFamily: 'var(--font-mono)' }}>{s.value}</span>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div className="sk-ev-block" style={{ marginTop: 'var(--space-md)' }}>
